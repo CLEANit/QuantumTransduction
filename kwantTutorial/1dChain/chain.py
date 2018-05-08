@@ -20,22 +20,18 @@ def make_system(a=1, t=1.0, L=128):
     lead = kwant.Builder(kwant.TranslationalSymmetry((-a,)))
     lead[lat(0)] = 4 * t
     lead[lat.neighbors()] = -t
-    syst.attach_lead(lead)
-    syst.attach_lead(lead.reversed())
-    return syst
+    return lead
 
 
 def main():
     L = 64
     syst = make_system(L=L)
-    # Check that the system looks as intended.
-    kwant.plot(syst)
     # Finalize the system.
     syst = syst.finalized()
-    h = syst.hamiltonian_submatrix()
+    k = np.linspace(-np.pi, np.pi, 128)
+    kwant.plotter.bands(syst, momenta=k, show=False)
+    pyplot.plot(k, 0.5 - np.cos(k))
 
-    pyplot.plot(np.divide(2. * np.pi, range(L / 2)), eigs(h, which='SR', k=L/2)[0])
-    pyplot.plot(np.divide(2. * np.pi, range(L / 2, L)), eigs(h, which='LR', k=L/2)[0])
     pyplot.show()
 if __name__ == '__main__':
     main()
