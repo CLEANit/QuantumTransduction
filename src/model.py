@@ -2,9 +2,14 @@
 
 import kwant
 import scipy.sparse.linalg as sla
+import cmocean
+import numpy as np
+import matplotlib.pyplot as plt
+import time
 
 class Model:
-    def __init__(   self, 
+    def __init__(   self,
+                    logger, 
                     shape,
                     potential,
                     lead_shapes,
@@ -18,9 +23,12 @@ class Model:
                  ):
 
 
+        self.logger = logger
+        self.logger.info('Initializing model.')
+        start = time.clock()
         # type of lattice construction
         if lattice_type == 'graphene':
-            self.lattice = kwant.lattice.honeycomb(lattice_const)
+            self.lattice = kwant.lattice.honeycomb(lattice_const, norbs=1)
             self.a, self.b = self.lattice.sublattices
 
         # define the class parameters
@@ -44,6 +52,7 @@ class Model:
 
         # build the structure
         self.build()
+        self.logger.success('Model was initialized in %0.2f seconds.' % (time.clock() - start))
 
 
     def build(self):
@@ -61,6 +70,7 @@ class Model:
             self.leads.append(lead)
             self.symmetries.append(sym)
             self.system.attach_lead(lead)
+
 
     def getSystem(self):
         return self.system
@@ -98,3 +108,34 @@ class Model:
         bands = kwant.physics.Bands(lead)
         energies = [bands(k) for k in momenta]
         return energies
+
+    def getWaveFunction(self, lead_id, energy=0.):
+        return kwant.wave_function(self.system, energy)(lead_id)
+
+    # currently not working
+    def plotWaveFunction(self, lead_id, energy=0., cmap=cmocean.cm.dense):
+        return kwant.plotter.map(self.system, np.absolute(self.getWaveFunction(lead_id, energy)[0])**2, oversampling=10, cmap=cmap)
+
+    def plotCurrent(self, lead_id, energy=0.):
+        start = time.clock()
+        J = kwant.operator.Current(self.system)
+        current = np.sum(J(p) for p in self.getWaveFunction(lead_id, energy))
+        self.logger.info('Current calculation took %0.2f seconds.' % (time.clock() - start))
+        return kwant.plotter.current(self.system, current, cmap=cmocean.cm.dense)
+
+    def plotBands(self, momenta, lead_id=0):
+        energies = self.getBandStructure(self.system.leads[lead_id], momenta) 
+        plt.figure()
+        plt.xlabel("momentum [(lattice constant)^-1]")
+        plt.ylabel("energy [t]")
+        return plt.plot(momenta, energies)
+
+    def plotConductance(self, energies, start_lead_id=0, end_lead_id=1):
+        conductances = self.getConductance(energies, 0, 1)
+        plt.figure()
+        plt.xlabel("energy [t]")
+        plt.ylabel("conductance [$e^2/h$]")
+        return plt.plot(energies, conductances)
+
+    def getNSites(self):
+        return len(list(self.system.site_value_pairs()))
