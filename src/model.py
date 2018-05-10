@@ -137,14 +137,14 @@ class Model:
         energies = [bands(k) for k in momenta]
         return energies
 
-    def getWaveFunction(self, lead_id, energy=0.):
+    def getWaveFunction(self, lead_id, energy=-1):
         return kwant.wave_function(self.system, energy)(lead_id)
 
     # currently not working
     def plotWaveFunction(self, lead_id, energy=0., cmap=cmocean.cm.dense):
         return kwant.plotter.map(self.system, np.absolute(self.getWaveFunction(lead_id, energy)[0])**2, oversampling=10, cmap=cmap)
 
-    def plotCurrent(self, lead_id, energy=0.):
+    def plotCurrent(self, lead_id, energy=-1):
         start = time.clock()
         J = kwant.operator.Current(self.system)
         current = np.sum(J(p) for p in self.getWaveFunction(lead_id, energy))
@@ -167,3 +167,9 @@ class Model:
 
     def getNSites(self):
         return len(list(self.system.site_value_pairs()))
+
+    def getCurrentForVerticalCut(self, val):
+        cut = lambda site_to, site_from : site_from.pos[0] > val and site_to.pos[0] <= val
+        J = kwant.operator.Current(self.system, where=cut, sum=True)
+        return J(self.getWaveFunction(0)[0])
+
