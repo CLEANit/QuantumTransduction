@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
-# import matplotlib.pyplot as plt
-
+import matplotlib.pyplot as plt
 
 def sierpinskiMask(maxs, tags):
 
@@ -30,4 +29,30 @@ def sierpinskiMask(maxs, tags):
         img[i][j] = 0
     
     return img[tags[:,0], tags[:,1]]
+
+def randomBlockHoles(n, r, maxs, tags):
+    rx = np.random.randint(0, maxs[0] - r, n)
+    ry = np.random.randint(0, maxs[1] - r, n)
+
+    img = np.ones((maxs[0] + 1, maxs[1] + 1))
+
+    for x, y in zip(rx, ry):
+        img[x - r:x + r, y - r: y + r] = 0
+
+    return img[tags[:,0], tags[:,1]]
+
+def randomCircleHoles(n, r, maxs, tags):
+    rx = np.random.randint(0, maxs[0] - r, n)
+    ry = np.random.randint(0, maxs[1] - r, n)
+    x = np.arange(maxs[0] + 1)
+    y = np.arange(maxs[1] + 1)
+    Y, X = np.meshgrid(y, x)
+    img = np.ones((maxs[0] + 1, maxs[1] + 1))
+    for x, y in zip(rx, ry):
+        img[(X - x)**2 + (Y - y)**2 < r**2] = 0
+    return img[tags[:,0], tags[:,1]]
+
+def randomBlocksAndCirclesHoles(rbs, rcs, maxs, tags):
+    return np.logical_and(rbs(maxs, tags), rcs(maxs, tags))
+
     

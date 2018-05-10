@@ -10,6 +10,7 @@ import copy
 
 class Model:
     def __init__(   self,
+                    index,
                     logger, 
                     shape,
                     potential,
@@ -24,9 +25,9 @@ class Model:
                     t=1.0,
                  ):
 
-
+        self.index = index
         self.logger = logger
-        self.logger.info('Initializing model.')
+        self.logger.info('Initializing model: %i' % (self.index))
         start = time.clock()
         # type of lattice construction
         if lattice_type == 'graphene':
@@ -56,15 +57,30 @@ class Model:
 
         # build the structure
         self.build()
-        self.logger.success('Model was initialized in %0.2f seconds.' % (time.clock() - start))
+        self.logger.success('Model %i was initialized in %0.2f seconds.' % (self.index, time.clock() - start))
 
 
     def build(self):
         self.system[self.lattice.shape(self.shape, self.shape_offset)] = self.potential
+        self.hoppings = self.lattice.neighbors()
+        self.system[self.hoppings] = -self.t
+        
+        self.leads = []
+        self.symmetries = []
+        for lead_shape, lead_vector, lead_offset, lead_pot in zip(self.lead_shapes, self.lead_vectors, self.lead_offsets, self.lead_potentials):
+            sym = kwant.TranslationalSymmetry(self.lattice.vec(lead_vector))
+            lead = kwant.Builder(sym)
+            lead[self.lattice.shape(lead_shape, lead_offset)] = lead_pot
+            lead[self.hoppings] = -self.t
+            self.leads.append(lead)
+            self.symmetries.append(sym)
+            self.system.attach_lead(lead)
+
         if self.mask is not None:
             tags = []
             sites = []
             for s, v in self.system.site_value_pairs():
+                # if the site is in the body
                 tags.append(s.tag)
                 sites.append(s)
                 # print (s.tag)
@@ -79,21 +95,7 @@ class Model:
             removed_tags = removed_tags.reshape(removed_tags.shape[0]).astype(int)
             for elem in removed_tags:
                 del self.system[sites[int(elem)]]
-
-        self.hoppings = self.lattice.neighbors()
-        self.system[self.hoppings] = -self.t
-        
-        self.leads = []
-        self.symmetries = []
-        for lead_shape, lead_vector, lead_offset, lead_pot in zip(self.lead_shapes, self.lead_vectors, self.lead_offsets, self.lead_potentials):
-            sym = kwant.TranslationalSymmetry(self.lattice.vec(lead_vector))
-            lead = kwant.Builder(sym)
-            lead[self.lattice.shape(lead_shape, lead_offset)] = lead_pot
-            lead[self.hoppings] = -self.t
-            self.leads.append(lead)
-            self.symmetries.append(sym)
-            self.system.attach_lead(lead)
-        self.system.eradicate_dangling()
+        # self.system.eradicate_dangling()
 
     def getSystem(self):
         return self.system
