@@ -6,6 +6,7 @@ import cmocean
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+import copy
 
 class Model:
     def __init__(   self,
@@ -16,6 +17,7 @@ class Model:
                     lead_vectors,
                     lead_offsets,
                     lead_potentials,
+                    mask=None,
                     shape_offset=(0., 0.),
                     lattice_type='graphene',
                     lattice_const=1.0,
@@ -42,10 +44,12 @@ class Model:
         self.lead_offsets = lead_offsets
         self.lead_potentials = lead_potentials
 
+        self.mask = mask
         self.shape_offset = shape_offset
         self.lattice_type = lattice_type
         self.lc = lattice_const 
         self.t = t
+
 
         # initialize the builder
         self.system = kwant.Builder()
@@ -56,10 +60,29 @@ class Model:
 
 
     def build(self):
-        self.hoppings = self.lattice.neighbors()
         self.system[self.lattice.shape(self.shape, self.shape_offset)] = self.potential
-        self.system[self.hoppings] = -self.t
+        if self.mask is not None:
+            tags = []
+            sites = []
+            for s, v in self.system.site_value_pairs():
+                tags.append(s.tag)
+                sites.append(s)
+                # print (s.tag)
+            tags = np.array(tags)
+            min_sx = np.min(tags[:,0])
+            min_sy = np.min(tags[:,1])
+            length = np.max(tags[:,0]) - min_sx
+            width = np.max(tags[:,1]) - min_sy
+            tags[:,0] += np.abs(min_sx)
+            tags[:,1] += np.abs(min_sy)
+            removed_tags = np.argwhere(self.mask((length, width), tags) == 0).astype(int)
+            removed_tags = removed_tags.reshape(removed_tags.shape[0]).astype(int)
+            for elem in removed_tags:
+                del self.system[sites[int(elem)]]
 
+        self.hoppings = self.lattice.neighbors()
+        self.system[self.hoppings] = -self.t
+        
         self.leads = []
         self.symmetries = []
         for lead_shape, lead_vector, lead_offset, lead_pot in zip(self.lead_shapes, self.lead_vectors, self.lead_offsets, self.lead_potentials):
@@ -70,13 +93,16 @@ class Model:
             self.leads.append(lead)
             self.symmetries.append(sym)
             self.system.attach_lead(lead)
-
+        self.system.eradicate_dangling()
 
     def getSystem(self):
         return self.system
 
     def getLeads(self):
         return self.leads
+
+    def getPrimVecs(self):
+        return self.lattice.prim_vecs
 
     def family_colors(self, site):
         return 0 if site.family == self.a else 1

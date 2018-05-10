@@ -2,6 +2,7 @@
 
 from src.model import Model
 from src.shapes import *
+from src.masks import *
 import numpy as np
 from matplotlib import pyplot
 import kwant
@@ -14,6 +15,8 @@ coloredlogs.install(level='DEBUG')
 logger = verboselogs.VerboseLogger('QMtransport')
 
 pot = 0.1
+
+prim_vecs = [[1., 0.], [0.5, 0.8660254]]
 
 def potential(site):
     (x, y) = site.pos
@@ -31,6 +34,9 @@ def main():
     device = partial(rectDevice, body, lc, ruc, rlc)
 
     lead_shapes = [partial(rectangle, -50, 50, -w/4, w/4), partial(rectangle, -50, 50, w/4, 3 * w / 4), partial(rectangle, -50, 50, -3 * w / 4, -w/4)]
+
+
+
     m = Model(  
                 logger,
                 device,
@@ -39,6 +45,7 @@ def main():
                 [(-1,0), (1,0), (1, 0)], 
                 [(0,0), (0, w / 4), (0, -w/4)],
                 [-pot, pot, pot],
+                mask=sierpinskiMask,
                 shape_offset=(0, 0)
              )
 
@@ -46,8 +53,8 @@ def main():
 
     logger.info('Number of sites: %i' % (m.getNSites()))
     
-    m.finalize()
-    m.plotCurrent(0)
+    # m.finalize()
+    # m.plotCurrent(0)
 
 if __name__ == '__main__':
     main()

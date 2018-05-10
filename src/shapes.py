@@ -24,5 +24,17 @@ def ring(r1, r2, coord):
 def ellipse(a, b, r, coord):
     return (x / a)**2  + (y / b)**2 < r**2
 
-def rectDevice(body, lc, ruc, rlc, coord):
-    return body(coord) + lc(coord) + ruc(coord) + rlc(coord)
+def rectDevice(body, lc, ruc, rlc, coord, mask=None):
+    if mask is None:
+        return body(coord) + lc(coord) + ruc(coord) + rlc(coord)
+    else:
+        return body(coord) + lc(coord) + ruc(coord) + rlc(coord) + mask(coord)
+
+def sierpinskiCarpetMask(coord):
+    x, y = coord
+    while( x > 0. or y > 0.):
+        if int(x / 5.0) == 1 and int(y / 5.0) == 1:
+            return False
+        x /= 15.
+        y /= 15.
+    return True
