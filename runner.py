@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-from src.model import Model
+from src.model import Model, Generator
+from src.timer import Timer
 from src.shapes import *
 from src.masks import *
 import numpy as np
@@ -14,11 +15,10 @@ from multiprocessing.pool import ThreadPool as Pool
 # from pathos.multiprocessing import ProcessingPool as Pool
 
 import coloredlogs, verboselogs
-import time
-
+import copy
 
 # create logger
-coloredlogs.install(level='DEBUG')
+coloredlogs.install(level='INFO')
 logger = verboselogs.VerboseLogger('QMtransport')
 
 pot = 0.1
@@ -28,14 +28,21 @@ l = 100
 w = 50
 
 def potential(site):
+    '''
+        This function defines the potential on each site. This function is passed into the Model class.
+    '''
     (x, y) = site.pos
     d = y * cos_30 + x * sin_30
     return pot * np.tanh(d * 0.5)
 
-def gimmeAModel(index):
+def gimmeAModel(index, no_init):
+    '''
+        This is a function designed to return a finalized (see Kwant) Model class, which would then
+        be ready to perform calculations.
+    '''
 
+    # sometimes, the models generated throw errors when computing things, hence the while loop
     generate = True
-
     while generate:
 
         '''
@@ -50,6 +57,13 @@ def gimmeAModel(index):
 
         '''
         Define a two-channel device
+
+        body - main part of the device
+        lc - left channel of the device
+        rc - right channel of the device
+        device - puts the components together to form the full device
+        lead_shapers - the different leads that will be placed in the channels
+
         '''
         body = partial(rectangle, -l, l, -w, w)
         lc = partial(rectangle, -l - w/2, -l + 1, -w/4, w/4)
@@ -58,22 +72,25 @@ def gimmeAModel(index):
         lead_shapes = [partial(rectangle, -50, 50, -w/4, w/4), partial(rectangle, -50, 50, -w/4, w / 4)]
 
         # random blocks
-        rbs = partial(randomBlockHoles, 10, 5)
+        rbs = partial(randomBlockHoles, 5, 5)
 
         # random circles
-        rcs = partial(randomCircleHoles, 10, 5)
+        rcs = partial(randomCircleHoles, 5, 5)
 
         m = Model(  
                     index,
                     logger,
                     device,
+                    body, 
                     potential,
                     lead_shapes,
                     [(-1,0), (1,0)], 
                     [(0,0), (0, 0)],
                     [-pot, pot, pot],
                     mask=partial(randomBlocksAndCirclesHoles, rbs, rcs),
-                    shape_offset=(0, 0)
+                    # mask=partial(image, '/Users/b295319/Desktop/uottawa_hor_black.png', (125, 75)),
+                    shape_offset=(0, 0),
+                    no_init=no_init
                  )
         try:
             m.finalize()
@@ -88,23 +105,35 @@ def getCurrents(args):
 
 def main():
 
-    n_initial_parents = 4
+    n_initial_parents = 2
     n_cpus = multiprocessing.cpu_count()
-    total_start = time.clock()
+    total_timer = Timer()
+    total_timer.start()
+    short_timer = Timer()
+
+    generator = Generator(gimmeAModel)
 
     logger.success(' --- Welcome to the Quantum transmission device optimizer --- ')
     logger.info('Number of threads found: %i' % (n_cpus))
     pool = Pool(n_cpus)
 
     logger.info('Generating initial structures.')
-    start = time.clock()
-    models = pool.map(gimmeAModel, range(n_initial_parents))
-    logger.success('Initial structures were generated successfully. (Elasped time: %0.2f s)' % (time.clock() - start))
-    logger.info('Calculating currents.')
-    start = time.clock()
-    currents = pool.map(getCurrents, zip(models, [l + w/2] * n_initial_parents))
-    logger.success('Current calculations finished. (Elapsed time: %0.2f s)' % (time.clock() - start))
+    short_timer.start()
+    models = pool.map(generator.generate, [False] * n_initial_parents)
+    logger.success('Initial structures were generated successfully. (Elasped time: %s)' % (short_timer.stop()))
 
-    logger.success('Optimization process has completed. (Elapsed time: %0.2f min)' % ((time.clock() - total_start) / 60.))
+    logger.info('Calculating currents.')
+    short_timer.start()
+    currents = pool.map(getCurrents, zip(models, [l + w/4] * n_initial_parents))
+    logger.success('Current calculations finished. (Elapsed time: %s)' % (short_timer.stop()))
+
+    child = generator.generate(True)
+    child.birth(models, [lambda site: site[1] > 0, lambda site: site[1] <= 0])
+
+    # child.visualizeSystem()
+
+
+
+    logger.success('Optimization process has completed. (Elapsed time: %s)' % (total_timer.stop()))
 if __name__ == '__main__':
     main()

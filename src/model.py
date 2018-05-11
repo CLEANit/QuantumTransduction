@@ -8,11 +8,22 @@ import matplotlib.pyplot as plt
 import time
 import copy
 
+class Generator:
+    def __init__(self, generator):
+        self.generator = generator
+        self.n_generated = 0
+
+    def generate(self, no_init):
+        self.n_generated += 1
+        return self.generator(self.n_generated, no_init)
+
+
 class Model:
     def __init__(   self,
                     index,
                     logger, 
                     shape,
+                    body,
                     potential,
                     lead_shapes,
                     lead_vectors,
@@ -23,6 +34,7 @@ class Model:
                     lattice_type='graphene',
                     lattice_const=1.0,
                     t=1.0,
+                    no_init=False,
                  ):
 
         self.index = index
@@ -36,6 +48,7 @@ class Model:
 
         # define the class parameters
         self.shape = shape
+        self.body = body
         self.potential = potential
 
         assert len(lead_shapes) == len(lead_vectors) == len(lead_offsets)
@@ -56,7 +69,8 @@ class Model:
         self.system = kwant.Builder()
 
         # build the structure
-        self.build()
+        if not no_init:
+            self.build()
         self.logger.success('Model %i was initialized in %0.2f seconds.' % (self.index, time.clock() - start))
 
 
@@ -65,6 +79,41 @@ class Model:
         self.hoppings = self.lattice.neighbors()
         self.system[self.hoppings] = -self.t
         
+        if self.mask is not None:
+            tags = []
+            positions = []
+            sites = []
+            for s, v in self.system.site_value_pairs():
+                # if the site is in the body
+                if self.body(s.pos):
+                    tags.append(s.tag)
+                    positions.append(s.pos)
+                    sites.append(s)
+                # print (s.tag)
+            tags = np.array(tags)
+            positions = np.array(positions)
+            min_tag_sx = np.min(tags[:,0])
+            min_tag_sy = np.min(tags[:,1])
+            min_pos_sx = np.min(positions[:,0])
+            min_pos_sy = np.min(positions[:,1])
+            max_pos_sx = np.max(positions[:,0])
+            max_pos_sy = np.max(positions[:,1])
+
+            tag_length = np.max(tags[:,0]) - min_tag_sx
+            tag_width = np.max(tags[:,1]) - min_tag_sy
+
+            tags[:,0] += np.abs(min_tag_sx)
+            tags[:,1] += np.abs(min_tag_sy)
+            positions[:, 0] += np.abs(min_pos_sx)
+            positions[:, 1] += np.abs(min_pos_sy)
+
+            removed_tags = np.argwhere(self.mask((tag_length, tag_width), (min_pos_sx, min_pos_sy), (max_pos_sx, max_pos_sy), positions) == 0).astype(int)
+            removed_tags = removed_tags.reshape(removed_tags.shape[0]).astype(int)
+            for elem in removed_tags:
+                del self.system[sites[int(elem)]]
+        self.system.eradicate_dangling()
+
+
         self.leads = []
         self.symmetries = []
         for lead_shape, lead_vector, lead_offset, lead_pot in zip(self.lead_shapes, self.lead_vectors, self.lead_offsets, self.lead_potentials):
@@ -76,26 +125,10 @@ class Model:
             self.symmetries.append(sym)
             self.system.attach_lead(lead)
 
-        if self.mask is not None:
-            tags = []
-            sites = []
-            for s, v in self.system.site_value_pairs():
-                # if the site is in the body
-                tags.append(s.tag)
-                sites.append(s)
-                # print (s.tag)
-            tags = np.array(tags)
-            min_sx = np.min(tags[:,0])
-            min_sy = np.min(tags[:,1])
-            length = np.max(tags[:,0]) - min_sx
-            width = np.max(tags[:,1]) - min_sy
-            tags[:,0] += np.abs(min_sx)
-            tags[:,1] += np.abs(min_sy)
-            removed_tags = np.argwhere(self.mask((length, width), tags) == 0).astype(int)
-            removed_tags = removed_tags.reshape(removed_tags.shape[0]).astype(int)
-            for elem in removed_tags:
-                del self.system[sites[int(elem)]]
-        # self.system.eradicate_dangling()
+        self.pre_system = self.system
+
+    def getPreSystem(self):
+        return self.pre_system
 
     def getSystem(self):
         return self.system
@@ -110,7 +143,7 @@ class Model:
         return 0 if site.family == self.a else 1
 
     def visualizeSystem(self):
-        return kwant.plot(self.system, site_color=self.family_colors, site_lw=0.1, colorbar=False)
+        return kwant.plot(self.system, site_lw=0.1, colorbar=False)
 
     def finalize(self):
         self.system = self.system.finalized()
@@ -173,3 +206,19 @@ class Model:
         J = kwant.operator.Current(self.system, where=cut, sum=True)
         return J(self.getWaveFunction(0)[0])
 
+    def birth(self, parents, conditions):
+        self.system = kwant.Builder()
+        n_parents = len(parents)
+
+        for parent, condition in zip(parents, conditions):
+            syst = parent.getPreSystem()
+            sites = syst.sites()
+            sites_to_del = []
+            for s in sites:
+                if not condition(s.pos):
+                    sites_to_del.append(s)
+            for elem in sites_to_del:
+                del syst[elem]
+
+            self.system.update(syst)
+        self.finalize()
