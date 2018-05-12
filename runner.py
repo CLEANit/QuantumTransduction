@@ -7,6 +7,7 @@ from src.masks import *
 import numpy as np
 from matplotlib import pyplot
 import kwant
+import cmocean
 
 from functools import partial
 
@@ -24,8 +25,8 @@ logger = verboselogs.VerboseLogger('QMtransport')
 pot = 0.1
 
 prim_vecs = [[1., 0.], [0.5, 0.8660254]]
-l = 100
-w = 50
+l = 200
+w = 100
 
 def potential(site):
     '''
@@ -87,8 +88,8 @@ def gimmeAModel(index, no_init):
                     [(-1,0), (1,0)], 
                     [(0,0), (0, 0)],
                     [-pot, pot, pot],
-                    mask=partial(randomBlocksAndCirclesHoles, rbs, rcs),
-                    # mask=partial(image, '/Users/b295319/Desktop/uottawa_hor_black.png', (125, 75)),
+                    # mask=partial(randomBlocksAndCirclesHoles, rbs, rcs),
+                    mask=partial(image, '/Users/b295319/Desktop/logos.png', (500, 200)),
                     shape_offset=(0, 0),
                     no_init=no_init
                  )
@@ -105,7 +106,7 @@ def getCurrents(args):
 
 def main():
 
-    n_initial_parents = 2
+    n_initial_parents = 1
     n_cpus = multiprocessing.cpu_count()
     total_timer = Timer()
     total_timer.start()
@@ -122,13 +123,15 @@ def main():
     models = pool.map(generator.generate, [False] * n_initial_parents)
     logger.success('Initial structures were generated successfully. (Elasped time: %s)' % (short_timer.stop()))
 
-    logger.info('Calculating currents.')
-    short_timer.start()
-    currents = pool.map(getCurrents, zip(models, [l + w/4] * n_initial_parents))
-    logger.success('Current calculations finished. (Elapsed time: %s)' % (short_timer.stop()))
+    # logger.info('Calculating currents.')
+    # short_timer.start()
+    # currents = pool.map(getCurrents, zip(models, [l + w/4] * n_initial_parents))
+    # logger.success('Current calculations finished. (Elapsed time: %s)' % (short_timer.stop()))
 
-    child = generator.generate(True)
-    child.birth(models, [lambda site: site[1] > 0, lambda site: site[1] <= 0])
+    models[0].visualizeSystem(args={'file': 'structure.pdf', 'site_color': cmocean.cm.dense(1.0), 'site_edgecolor': cmocean.cm.dense(0.5), 'fig_size': (20,10)})
+    models[0].plotCurrent(0, args={'file': 'current.pdf', 'fig_size': (20,10)})
+    # child = generator.generate(True)
+    # child.birth(models, [lambda site: site[1] > 0, lambda site: site[1] <= 0])
 
     # child.visualizeSystem()
 

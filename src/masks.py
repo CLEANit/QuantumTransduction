@@ -92,9 +92,12 @@ def randomBlocksAndCirclesHoles(rbs, rcs, max_tag, min_pos, max_pos, pos):
     '''
     return np.logical_and(rbs(max_tag, min_pos, max_pos, pos), rcs(max_tag, min_pos, max_pos, pos))
 
-def image(name, shape, maxs, tag):
+def image(name, shape, max_tag, min_pos, max_pos, pos):
 
-    padding = np.subtract(np.add(maxs, 1), shape)
+    hx = (max_pos[0] - min_pos[0]) / max_tag[0]
+    hy = (max_pos[1] - min_pos[1]) / max_tag[1]
+
+    padding = np.subtract(np.add(max_tag, 1), shape)
 
     if padding[1] % 2 == 0:
         x_padl, x_padr = int(padding[1] / 2), int(padding[1] / 2)
@@ -113,5 +116,5 @@ def image(name, shape, maxs, tag):
     img = np.rot90(np.pad(np.round(np.divide(misc.imresize(misc.imread(name, mode='L'), (shape[1], shape[0])), 255.)).astype(int), padding, mode='constant', constant_values=1),k=3)
     # print(img.shape, shape, padding, maxs)
 
-    return img[tags[:,0], tags[:,1]]
+    return img[(pos[:,0] / hx).astype(int), (pos[:,1] / hy).astype(int)]
     

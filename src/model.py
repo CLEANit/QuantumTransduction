@@ -142,8 +142,8 @@ class Model:
     def family_colors(self, site):
         return 0 if site.family == self.a else 1
 
-    def visualizeSystem(self):
-        return kwant.plot(self.system, site_lw=0.1, colorbar=False)
+    def visualizeSystem(self, args={}):
+        return kwant.plot(self.system, site_lw=0.1, colorbar=False, **args)
 
     def finalize(self):
         self.system = self.system.finalized()
@@ -177,12 +177,12 @@ class Model:
     def plotWaveFunction(self, lead_id, energy=0., cmap=cmocean.cm.dense):
         return kwant.plotter.map(self.system, np.absolute(self.getWaveFunction(lead_id, energy)[0])**2, oversampling=10, cmap=cmap)
 
-    def plotCurrent(self, lead_id, energy=-1):
+    def plotCurrent(self, lead_id, energy=-1, args={}):
         start = time.clock()
         J = kwant.operator.Current(self.system)
         current = np.sum(J(p) for p in self.getWaveFunction(lead_id, energy))
         self.logger.info('Current calculation took %0.2f seconds.' % (time.clock() - start))
-        return kwant.plotter.current(self.system, current, cmap=cmocean.cm.dense)
+        return kwant.plotter.current(self.system, current, cmap=cmocean.cm.dense, **args)
 
     def plotBands(self, momenta, lead_id=0):
         energies = self.getBandStructure(self.system.leads[lead_id], momenta) 
