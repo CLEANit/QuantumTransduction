@@ -91,7 +91,8 @@ def gimmeAModel(index, no_init):
                     # mask=partial(randomBlocksAndCirclesHoles, rbs, rcs),
                     mask=partial(image, '/Users/b295319/Desktop/logos.png', (500, 200)),
                     shape_offset=(0, 0),
-                    no_init=no_init
+                    no_init=no_init,
+                    lattice_const=1.42
                  )
         try:
             m.finalize()
@@ -127,9 +128,10 @@ def main():
     # short_timer.start()
     # currents = pool.map(getCurrents, zip(models, [l + w/4] * n_initial_parents))
     # logger.success('Current calculations finished. (Elapsed time: %s)' % (short_timer.stop()))
-
-    models[0].visualizeSystem(args={'file': 'structure.pdf', 'site_color': cmocean.cm.dense(1.0), 'site_edgecolor': cmocean.cm.dense(0.5), 'fig_size': (20,10)})
-    models[0].plotCurrent(0, args={'file': 'current.pdf', 'fig_size': (20,10)})
+    fig, axes = plt.subplots((1,2), figsize=(20,10))
+    models[0].visualizeSystem(args={'ax': axes[0], 'site_color': cmocean.cm.dense(1.0), 'site_edgecolor': cmocean.cm.dense(0.5)})
+    models[0].plotCurrent(0, args={'ax': axes[1], 'colorbar': False})
+    plt.show()
     # child = generator.generate(True)
     # child.birth(models, [lambda site: site[1] > 0, lambda site: site[1] <= 0])
 
