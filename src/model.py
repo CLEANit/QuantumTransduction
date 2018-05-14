@@ -7,20 +7,29 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 import copy
+import multiprocessing
+import dill
 
 class Generator:
-    def __init__(self, generator):
-        self.generator = generator
+    def __init__(self, model):
+        self.model = model
+        self.dill_model = dill.dumps(model)
         self.n_generated = 0
 
-    def generate(self, no_init):
+    def generate(self, mask, init=True):
         self.n_generated += 1
-        return self.generator(self.n_generated, no_init)
+        m = copy.copy(dill.loads(self.dill_model))
+        if init:
+            m.applyMask(mask)
+            m.attachLeads()
+            m.finalize()
+        return m 
 
+    # def __reduce__(self):
+    #     return (self.__class__, (self.generator, self.n_generated))
 
 class Model:
     def __init__(   self,
-                    index,
                     logger, 
                     shape,
                     body,
@@ -29,17 +38,13 @@ class Model:
                     lead_vectors,
                     lead_offsets,
                     lead_potentials,
-                    mask=None,
                     shape_offset=(0., 0.),
                     lattice_type='graphene',
                     lattice_const=1.0,
-                    t=1.0,
-                    no_init=False,
+                    t=1.0
                  ):
 
-        self.index = index
         self.logger = logger
-        self.logger.info('Initializing model: %i' % (self.index))
         start = time.clock()
         # type of lattice construction
         if lattice_type == 'graphene':
@@ -58,62 +63,21 @@ class Model:
         self.lead_offsets = lead_offsets
         self.lead_potentials = lead_potentials
 
-        self.mask = mask
         self.shape_offset = shape_offset
         self.lattice_type = lattice_type
-        self.lc = lattice_const 
+        self.lattice_const = lattice_const 
         self.t = t
 
-
-        # initialize the builder
         self.system = kwant.Builder()
 
-        # build the structure
-        if not no_init:
-            self.build()
-        self.logger.success('Model %i was initialized in %0.2f seconds.' % (self.index, time.clock() - start))
-
+        self.build()
 
     def build(self):
         self.system[self.lattice.shape(self.shape, self.shape_offset)] = self.potential
         self.hoppings = self.lattice.neighbors()
         self.system[self.hoppings] = -self.t
-        
-        if self.mask is not None:
-            tags = []
-            positions = []
-            sites = []
-            for s, v in self.system.site_value_pairs():
-                # if the site is in the body
-                if self.body(s.pos):
-                    tags.append(s.tag)
-                    positions.append(s.pos)
-                    sites.append(s)
-                # print (s.tag)
-            tags = np.array(tags)
-            positions = np.array(positions)
-            min_tag_sx = np.min(tags[:,0])
-            min_tag_sy = np.min(tags[:,1])
-            min_pos_sx = np.min(positions[:,0])
-            min_pos_sy = np.min(positions[:,1])
-            max_pos_sx = np.max(positions[:,0])
-            max_pos_sy = np.max(positions[:,1])
 
-            tag_length = np.max(tags[:,0]) - min_tag_sx
-            tag_width = np.max(tags[:,1]) - min_tag_sy
-
-            tags[:,0] += np.abs(min_tag_sx)
-            tags[:,1] += np.abs(min_tag_sy)
-            positions[:, 0] += np.abs(min_pos_sx)
-            positions[:, 1] += np.abs(min_pos_sy)
-
-            removed_tags = np.argwhere(self.mask((tag_length, tag_width), (min_pos_sx, min_pos_sy), (max_pos_sx, max_pos_sy), positions) == 0).astype(int)
-            removed_tags = removed_tags.reshape(removed_tags.shape[0]).astype(int)
-            for elem in removed_tags:
-                del self.system[sites[int(elem)]]
-        self.system.eradicate_dangling()
-
-
+    def attachLeads(self):
         self.leads = []
         self.symmetries = []
         for lead_shape, lead_vector, lead_offset, lead_pot in zip(self.lead_shapes, self.lead_vectors, self.lead_offsets, self.lead_potentials):
@@ -125,7 +89,43 @@ class Model:
             self.symmetries.append(sym)
             self.system.attach_lead(lead)
 
+    def applyMask(self, mask):
+        tags = []
+        positions = []
+        sites = []
+        for s, v in self.system.site_value_pairs():
+            # if the site is in the body
+            if self.body(s.pos):
+                tags.append(s.tag)
+                positions.append(s.pos)
+                sites.append(s)
+            # print (s.tag)
+        tags = np.array(tags)
+        positions = np.array(positions)
+        min_tag_sx = np.min(tags[:,0])
+        min_tag_sy = np.min(tags[:,1])
+        min_pos_sx = np.min(positions[:,0])
+        min_pos_sy = np.min(positions[:,1])
+        max_pos_sx = np.max(positions[:,0])
+        max_pos_sy = np.max(positions[:,1])
+
+        tag_length = np.max(tags[:,0]) - min_tag_sx
+        tag_width = np.max(tags[:,1]) - min_tag_sy
+
+        tags[:,0] += np.abs(min_tag_sx)
+        tags[:,1] += np.abs(min_tag_sy)
+        positions[:, 0] += np.abs(min_pos_sx)
+        positions[:, 1] += np.abs(min_pos_sy)
+
+        removed_tags = np.argwhere(mask((tag_length, tag_width), (min_pos_sx, min_pos_sy), (max_pos_sx, max_pos_sy), positions) == 0).astype(int)
+        removed_tags = removed_tags.reshape(removed_tags.shape[0]).astype(int)
+        for elem in removed_tags:
+            del self.system[sites[int(elem)]]
+        self.system.eradicate_dangling()
+
+    def finalize(self):
         self.pre_system = self.system
+        self.system = self.system.finalized()
 
     def getPreSystem(self):
         return self.pre_system
@@ -144,9 +144,6 @@ class Model:
 
     def visualizeSystem(self, args={}):
         return kwant.plot(self.system, site_lw=0.1, colorbar=False, **args)
-
-    def finalize(self):
-        self.system = self.system.finalized()
 
     '''
     TODO: pass args to the eigensolver
@@ -199,7 +196,7 @@ class Model:
         return plt.plot(energies, conductances)
 
     def getNSites(self):
-        return len(list(self.system.site_value_pairs()))
+        return len(list(self.pre_system.site_value_pairs()))
 
     def getCurrentForVerticalCut(self, val):
         cut = lambda site_to, site_from : site_from.pos[0] > val and site_to.pos[0] <= val
@@ -222,3 +219,22 @@ class Model:
 
             self.system.update(syst)
         self.finalize()
+
+    # def __reduce__(self):
+    #     return (self.__class__, (
+    #                 self.index,
+    #                 self.logger,
+    #                 self.shape,
+    #                 self.body,
+    #                 self.potential,
+    #                 self.lead_shapes,
+    #                 self.lead_vectors,
+    #                 self.lead_offsets,
+    #                 self.lead_potentials,
+    #                 self.mask,
+    #                 self.shape_offset,
+    #                 self.lattice_type,
+    #                 self.lattice_const,
+    #                 self.t,
+    #                 )
+    #             )
