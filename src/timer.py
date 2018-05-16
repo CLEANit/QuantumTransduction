@@ -12,12 +12,12 @@ class Timer:
     def start(self):
         self.start_time = time.clock()
 
-    def stop(self, tformat='auto'):
+    def stop(self, n_threads=1, tformat='auto'):
         if tformat == 'auto':
             diff = time.clock() - self.start_time
             for u, d, m in zip(self.units, self.divs, self.maxs):
                 if diff < m:
-                    return '{:1.2f}'.format((time.clock() - self.start_time) / d) + ' ' + u
+                    return '{:1.2f}'.format((time.clock() - self.start_time) / d / n_threads) + ' ' + u
                 else:
                     diff /= m
 
@@ -25,8 +25,8 @@ class Timer:
         elif tformat == 's':
             return '{:1.2f} s'.format(time.clock() - self.start_time)
         elif tformat == 'min':
-            return '{:1.2f} s'.format((time.clock() - self.start_time) / 60.)
+            return '{:1.2f} s'.format((time.clock() - self.start_time) / 60. / n_threads)
         elif tformat == 'hrs':
-            return '{:1.2f} s'.format((time.clock() - self.start_time) / 3600.)
+            return '{:1.2f} s'.format((time.clock() - self.start_time) / 3600. / n_threads)
         elif tformat == 'days':
-            return '{:1.2f} s'.format((time.clock() - self.start_time) / 3600. / 24.)
+            return '{:1.2f} s'.format((time.clock() - self.start_time) / 3600. / 24. / n_threads)

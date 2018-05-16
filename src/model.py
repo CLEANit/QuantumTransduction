@@ -16,11 +16,13 @@ class Generator:
         self.dill_model = dill.dumps(model)
         self.n_generated = 0
 
-    def generate(self, mask, init=True):
+    def generate(self, mask=None, init=True):
         self.n_generated += 1
         m = copy.copy(dill.loads(self.dill_model))
+        m.index = self.n_generated
         if init:
-            m.applyMask(mask)
+            if mask is not None:
+                m.applyMask(mask)
             m.attachLeads()
             m.finalize()
         return m 
@@ -55,6 +57,7 @@ class Model:
         self.shape = shape
         self.body = body
         self.potential = potential
+        self.index = None
 
         assert len(lead_shapes) == len(lead_vectors) == len(lead_offsets)
         
@@ -174,11 +177,9 @@ class Model:
     def plotWaveFunction(self, lead_id, energy=0., cmap=cmocean.cm.dense):
         return kwant.plotter.map(self.system, np.absolute(self.getWaveFunction(lead_id, energy)[0])**2, oversampling=10, cmap=cmap)
 
-    def plotCurrent(self, lead_id, energy=-1, args={}):
-        start = time.clock()
+    def plotCurrent(self, lead_id, energy=0., args={}):
         J = kwant.operator.Current(self.system)
         current = np.sum(J(p) for p in self.getWaveFunction(lead_id, energy))
-        self.logger.info('Current calculation took %0.2f seconds.' % (time.clock() - start))
         return kwant.plotter.current(self.system, current, cmap=cmocean.cm.dense, **args)
 
     def plotBands(self, momenta, lead_id=0):
@@ -199,16 +200,16 @@ class Model:
         return len(list(self.pre_system.site_value_pairs()))
 
     def getCurrentForVerticalCut(self, val):
-        cut = lambda site_to, site_from : site_from.pos[0] > val and site_to.pos[0] <= val
-        J = kwant.operator.Current(self.system, where=cut, sum=True)
+        cut = lambda site_to, site_from : site_from.pos[0] >= val and site_to.pos[0] < val 
+        J = kwant.operator.Current(self.system, where=cut)
         return J(self.getWaveFunction(0)[0])
 
     def birth(self, parents, conditions):
         self.system = kwant.Builder()
         n_parents = len(parents)
-
+        # print(parents)
         for parent, condition in zip(parents, conditions):
-            syst = parent.getPreSystem()
+            syst = copy.deepcopy(parent.getPreSystem())
             sites = syst.sites()
             sites_to_del = []
             for s in sites:
@@ -216,8 +217,11 @@ class Model:
                     sites_to_del.append(s)
             for elem in sites_to_del:
                 del syst[elem]
-
+            # print (sites_to_del)
+            # for s in sites_to_add:
             self.system.update(syst)
+            # self.visualizeSystem()
+            # self.attachLeads()
         self.finalize()
 
     # def __reduce__(self):
