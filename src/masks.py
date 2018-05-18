@@ -41,7 +41,7 @@ def sierpinskiMask(maxs, tags):
         j = int(x[1] * (maxs[1] + 1))
         img[i][j] = 0
     
-    return img[tags[:,0], tags[:,1]]
+    return img[tags[:,0], tags[:,1]], None
 
 def randomBlockHoles(n, r, max_tag, min_pos, max_pos, pos):
     '''
@@ -65,7 +65,7 @@ def randomBlockHoles(n, r, max_tag, min_pos, max_pos, pos):
             for yi in yinds:
                 img[xi, yi] = 0
 
-    return img[(pos[:,0] / hx).astype(int), (pos[:,1] / hy).astype(int)]
+    return img[(pos[:,0] / hx).astype(int), (pos[:,1] / hy).astype(int)], None
 
 def randomCircleHoles(n, r, max_tag, min_pos, max_pos, pos):
     '''
@@ -83,14 +83,14 @@ def randomCircleHoles(n, r, max_tag, min_pos, max_pos, pos):
     img = np.ones((max_tag[0] + 1, max_tag[1] + 1))
     for x, y in zip(rx, ry):
         img[(X - x)**2 + (Y - y)**2 < r**2] = 0
-    return img[(pos[:,0] / hx).astype(int), (pos[:,1] / hy).astype(int)]
+    return img[(pos[:,0] / hx).astype(int), (pos[:,1] / hy).astype(int)], None
 
 def randomBlocksAndCirclesHoles(rbs, rcs, max_tag, min_pos, max_pos, pos):
     '''
         This is a function that recieves the partials of the two functions above.
         This allows for circles and holes to be placed in the lattice.
     '''
-    return np.logical_and(rbs(max_tag, min_pos, max_pos, pos), rcs(max_tag, min_pos, max_pos, pos))
+    return np.logical_and(rbs(max_tag, min_pos, max_pos, pos)[0], rcs(max_tag, min_pos, max_pos, pos)[0]), None
 
 def image(name, shape, max_tag, min_pos, max_pos, pos):
 
@@ -116,5 +116,5 @@ def image(name, shape, max_tag, min_pos, max_pos, pos):
     img = np.rot90(np.pad(np.round(np.divide(misc.imresize(misc.imread(name, mode='L'), (shape[1], shape[0])), 255.)).astype(int), padding, mode='constant', constant_values=1),k=3)
     # print(img.shape, shape, padding, maxs)
 
-    return img[(pos[:,0] / hx).astype(int), (pos[:,1] / hy).astype(int)]
+    return img[(pos[:,0] / hx).astype(int), (pos[:,1] / hy).astype(int)], None
     

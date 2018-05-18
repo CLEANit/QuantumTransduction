@@ -1,0 +1,16 @@
+############
+#### Input file for runner!!
+############
+
+Model:
+  Junction:
+    # the main body
+    - {shape: 'rectangle', xcoords: [-64, 64], ycoords: [-32, 32]}
+    # Left channel
+    - {shape: 'rectangle', xcoords: [-64, 64], ycoords: [-32, 32]}
+    # Right upper channel
+    - {shape: 'rectangle', xcoords: [-64, 64], ycoords: [-32, 32]}
+    # Right lower channel
+    - {shape: 'rectangle', xcoords: [-64, 64], ycoords: [-32, 32]}
+
+  Leads:

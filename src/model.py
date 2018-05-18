@@ -33,45 +33,18 @@ class Generator:
 class Model:
     def __init__(   self,
                     logger, 
-                    shape,
-                    body,
                     potential,
                     lead_shapes,
-                    lead_vectors,
-                    lead_offsets,
-                    lead_potentials,
-                    shape_offset=(0., 0.),
-                    lattice_type='graphene',
-                    lattice_const=1.0,
                     t=1.0
                  ):
 
         self.logger = logger
         start = time.clock()
-        # type of lattice construction
-        if lattice_type == 'graphene':
-            self.lattice = kwant.lattice.honeycomb(lattice_const, norbs=1)
-            self.a, self.b = self.lattice.sublattices
-
-        # define the class parameters
-        self.shape = shape
-        self.body = body
-        self.potential = potential
-        self.index = None
-
-        assert len(lead_shapes) == len(lead_vectors) == len(lead_offsets)
         
-        self.lead_shapes = lead_shapes
-        self.lead_vectors = lead_vectors
-        self.lead_offsets = lead_offsets
-        self.lead_potentials = lead_potentials
-
-        self.shape_offset = shape_offset
-        self.lattice_type = lattice_type
-        self.lattice_const = lattice_const 
+        # define the class parameters
+        self.potential = potential
+        self.index = None        
         self.t = t
-
-        self.system = kwant.Builder()
 
         self.build()
 
@@ -80,10 +53,10 @@ class Model:
         self.hoppings = self.lattice.neighbors()
         self.system[self.hoppings] = -self.t
 
-    def attachLeads(self):
+    def attachLeads(self, lead_shapes, lead_vectors, lead_offsets, lead_potentials):
         self.leads = []
         self.symmetries = []
-        for lead_shape, lead_vector, lead_offset, lead_pot in zip(self.lead_shapes, self.lead_vectors, self.lead_offsets, self.lead_potentials):
+        for lead_shape, lead_vector, lead_offset, lead_pot in zip(lead_shapes, lead_vectors, lead_offsets, lead_potentials):
             sym = kwant.TranslationalSymmetry(self.lattice.vec(lead_vector))
             lead = kwant.Builder(sym)
             lead[self.lattice.shape(lead_shape, lead_offset)] = lead_pot
@@ -91,40 +64,6 @@ class Model:
             self.leads.append(lead)
             self.symmetries.append(sym)
             self.system.attach_lead(lead)
-
-    def applyMask(self, mask):
-        tags = []
-        positions = []
-        sites = []
-        for s, v in self.system.site_value_pairs():
-            # if the site is in the body
-            if self.body(s.pos):
-                tags.append(s.tag)
-                positions.append(s.pos)
-                sites.append(s)
-            # print (s.tag)
-        tags = np.array(tags)
-        positions = np.array(positions)
-        min_tag_sx = np.min(tags[:,0])
-        min_tag_sy = np.min(tags[:,1])
-        min_pos_sx = np.min(positions[:,0])
-        min_pos_sy = np.min(positions[:,1])
-        max_pos_sx = np.max(positions[:,0])
-        max_pos_sy = np.max(positions[:,1])
-
-        tag_length = np.max(tags[:,0]) - min_tag_sx
-        tag_width = np.max(tags[:,1]) - min_tag_sy
-
-        tags[:,0] += np.abs(min_tag_sx)
-        tags[:,1] += np.abs(min_tag_sy)
-        positions[:, 0] += np.abs(min_pos_sx)
-        positions[:, 1] += np.abs(min_pos_sy)
-
-        removed_tags = np.argwhere(mask((tag_length, tag_width), (min_pos_sx, min_pos_sy), (max_pos_sx, max_pos_sy), positions) == 0).astype(int)
-        removed_tags = removed_tags.reshape(removed_tags.shape[0]).astype(int)
-        for elem in removed_tags:
-            del self.system[sites[int(elem)]]
-        self.system.eradicate_dangling()
 
     def finalize(self):
         self.pre_system = self.system
