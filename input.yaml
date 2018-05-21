@@ -2,15 +2,18 @@
 #### Input file for runner!!
 ############
 
+
 Model:
   Junction:
     # the main body
-    - {shape: 'rectangle', xcoords: [-64, 64], ycoords: [-32, 32]}
+    - {shape: 'rectangle', args: {xcoords: [-64, 64], ycoords: [-32, 32]}, id: 'body' }
     # Left channel
-    - {shape: 'rectangle', xcoords: [-64, 64], ycoords: [-32, 32]}
+    - {shape: 'rectangle', args: {xcoords: [-80, -64], ycoords: [-8, 8]} }
     # Right upper channel
-    - {shape: 'rectangle', xcoords: [-64, 64], ycoords: [-32, 32]}
+    - {shape: 'rectangle', args: {xcoords: [64, 80], ycoords: [8, 24]} }
     # Right lower channel
-    - {shape: 'rectangle', xcoords: [-64, 64], ycoords: [-32, 32]}
+    - {shape: 'rectangle', args: {xcoords: [64, 80], ycoords: [-24, -8]} }
 
-  Leads:
+
+GA:
+    n_structures: 10

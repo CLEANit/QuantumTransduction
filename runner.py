@@ -1,29 +1,28 @@
 #!/usr/bin/env python
 
-# from src.model import Model, Generator
-# from src.ga import GA
-# from src.serialize import Serializer
 from src.timer import Timer
-from src.shapes import *
-from src.masks import *
-import numpy as np
+from src.builder import parentStructure, applyMask
+from src.parser import Parser
 
-from functools import partial
+import numpy as np
+from mpi4py import MPI
+import kwant
+
 import multiprocessing
 from pathos.multiprocessing import ProcessingPool as Pool
 
 import coloredlogs, verboselogs
 import copy
-
+import matplotlib.pyplot as plt
 # create logger
 coloredlogs.install(level='INFO')
-logger = verboselogs.VerboseLogger('QMtransport')
+logger = verboselogs.VerboseLogger(' QMT - runner ')
 
 pot = 0.1
 
-prim_vecs = [[1., 0.], [0.5, 0.8660254]]
-l = 256
-w = 128
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
+n_procs = comm.Get_size()
 
 
 def potential(site):
@@ -43,31 +42,8 @@ def gimmeAModel():
         be ready to perform calculations.
     '''
 
-
-    '''
-    Define a three-channel device
-    '''
-    body = partial(rectangle, -l, l, -w, w)
-    lc = partial(rectangle, -l - w/2, -l + 1, -w/4, w/4)
-    ruc = partial(rectangle, l - 1, l + w/2, w/4, 3 * w / 4)
-    rlc = partial(rectangle, l - 1, l + w/2, -3 * w / 4, -w/4)
-    device = partial(rectDeviceThreeChannel, body, lc, ruc, rlc)
     lead_shapes = [partial(rectangle, -50, 50, -w/4, w/4), partial(rectangle, -50, 50, w/4, 3 * w / 4), partial(rectangle, -50, 50, -3 * w / 4, -w/4)]
 
-    '''
-    Define a two-channel device
-
-    body - main part of the device
-    lc - left channel of the device
-    rc - right channel of the device
-    device - puts the components together to form the full device
-    lead_shapers - the different leads that will be placed in the channels
-
-    '''
-    # body = partial(rectangle, -l, l, -w, w)
-    # lc = partial(rectangle, -l - w/2, -l + 1, -w/4, w/4)
-    # rc = partial(rectangle, l - 1, l + w/2, -w/4, w / 4)
-    # device = partial(rectDeviceTwoChannel, body, lc, rc)
     # lead_shapes = [partial(rectangle, -50, 50, -w/4, w/4), partial(rectangle, -50, 50, -w/4, w / 4)]
 
 
@@ -95,35 +71,71 @@ def getCurrents(args):
     else:
         return np.sum(current[:length]), np.sum(current[length:])
 
+
+def generateStructures(comm, body, device, pool, n_structures_here, potential=1.):
+    if rank == 0:
+        total_structures = [None] * n_procs
+        if (n_structures_here % n_procs) != 0:
+            total_structures.append(pool.map(parentStructure, zip([body] * (n_structures_here % n_procs), [device] * (n_structures_here % n_procs), [potential] * (n_structures_here % n_procs), [1.0] * (n_structures_here % n_procs), [1] * (n_structures_here % n_procs))))
+        
+    total_structures = comm.scatter(total_structures, root=0)
+
+    structures  = pool.map(parentStructure, zip([body] * n_structures_here, [device] * n_structures_here, [potential] * n_structures_here, [1.0] * n_structures_here, [1] * n_structures_here))
+    return structures
+
+
+
 def main():
 
+    if rank == 0:
+        total_timer = Timer()
+        short_timer = Timer()
+        total_timer.start()
 
-    from src.builder import parentStructure, applyMask
-    import timeit
-    body = partial(rectangle, -l, l, -w, w)
-    lc = partial(rectangle, -l - w/2, -l + 1, -w/4, w/4)
-    ruc = partial(rectangle, l - 1, l + w/2, w/4, 3 * w / 4)
-    rlc = partial(rectangle, l - 1, l + w/2, -3 * w / 4, -w/4)
-    device = partial(rectDeviceThreeChannel, body, lc, ruc, rlc)
-    short_timer = Timer()
-    n_threads = multiprocessing.cpu_count()
-    pool = Pool(n_threads)
+    if rank == 0:
+        logger.info('We found %i MPI processes.' % (n_procs))
+
+    n_threads_per_node = multiprocessing.cpu_count()
+    pool = Pool(n_threads_per_node)
+
+    logger.info('Node %i found %i openMP threads.' % (rank, n_threads_per_node))
+
+    if rank == 0:
+        parser = Parser()
+    else:
+        parser = None
+
+    comm.bcast(parser, root=0)
+
+    body, device = parser.getDevice()
+    total_structures = parser.getNStructures()
+
+    n_structures_per_node =  total_structures // n_procs
+    if rank == 0:
+        logger.info('Each MPI process will handle %i structures.' % (n_structures_per_node))
+    
+    if rank == 0:
+        short_timer.start()    
+        logger.info('Generating the initial structures.')
+
+    structures = generateStructures(comm, body, device, pool, n_structures_per_node)
+    all_structures = comm.gather(structures, root=0)
+
+    if rank == 0:
+        all_structures = [structure for group in all_structures for structure in group]
+        logger.success('Generation of initial structures complete. (Time elapsed: %s)' % (short_timer.stop()))
+    
+
+    # # # random blocks
+    # # rbs = partial(randomBlockHoles, 1, 5)
+
+    # # # random circles
+    # # rcs = partial(randomCircleHoles, 1, 5)
+
+    # # copies = [applyMask(copy.copy(parent), body, partial(randomBlocksAndCirclesHoles, rbs, rcs)) for i in range(10)]
 
 
-    short_timer.start()
-
-    parents  = list(map(parentStructure, zip([body] * 10, [device] * 10, [potential] * 10, [1.0] * 10, [1] * 10)))
-
-    # # random blocks
-    # rbs = partial(randomBlockHoles, 1, 5)
-
-    # # random circles
-    # rcs = partial(randomCircleHoles, 1, 5)
-
-    # copies = [applyMask(copy.copy(parent), body, partial(randomBlocksAndCirclesHoles, rbs, rcs)) for i in range(10)]
-
-
-    print(short_timer.stop())
+    # print(short_timer.stop())
 
 
 #     logger.success(' --- Welcome to the Quantum transmission device optimizer --- ')
@@ -235,6 +247,6 @@ def main():
 
 
 
-#     logger.success('Optimization process has completed. (Elapsed time: %s)' % (total_timer.stop()))
+    logger.success('Optimization process has completed. (Elapsed time: %s)' % (total_timer.stop()))
 if __name__ == '__main__':
     main()

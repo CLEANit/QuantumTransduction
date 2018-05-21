@@ -5,13 +5,9 @@ import numpy as np
 sin_30, cos_30 = (1 / 2., np.sqrt(3) / 2.)
 
 
-def square(l, coord):
+def rectangle(coord, xcoords=None, ycoords=None):
     x, y = coord
-    return -l < x < l and -l < y < l
-
-def rectangle(ls, le, ws, we, coord):
-    x, y = coord
-    return ls < x < le and ws < y < we
+    return xcoords[0] <= x <= xcoords[1] and ycoords[0] <= y <= ycoords[1]
 
 def circle(r, coord):
     x, y = coord
@@ -24,8 +20,18 @@ def ring(r1, r2, coord):
 def ellipse(a, b, r, coord):
     return (x / a)**2  + (y / b)**2 < r**2
 
-def rectDeviceThreeChannel(body, lc, ruc, rlc, coord):
-    return body(coord) + lc(coord) + ruc(coord) + rlc(coord)
+def nBodyDevice(components, coord):
+    firstComp = components[0](coord)
+    for i in range(1, len(components)):
+        firstComp += components[i](coord)
+    return firstComp
 
-def rectDeviceTwoChannel(body, lc, rc, coord):
-    return body(coord) + lc(coord) + rc(coord)
+shape_dict = {
+    'rectangle': rectangle,
+    'circle': circle,
+    'ring': ring,
+    'ellipse': ellipse
+}
+
+def whatShape(name):
+    return shape_dict[name]

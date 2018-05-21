@@ -32,13 +32,11 @@ class Generator:
 
 class Model:
     def __init__(   self,
-                    logger, 
                     potential,
                     lead_shapes,
                     t=1.0
                  ):
 
-        self.logger = logger
         start = time.clock()
         
         # define the class parameters
