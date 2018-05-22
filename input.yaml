@@ -4,16 +4,32 @@
 
 
 Model:
+
+  lattice_constant: 1.42
+
   Junction:
     # the main body
-    - {shape: 'rectangle', args: {xcoords: [-64, 64], ycoords: [-32, 32]}, id: 'body' }
+    # the main body needs an id so we know where to apply the mask
+    - {shape: 'rectangle', args: {xcoords: [-64, 64], ycoords: [-32, 32]}, id: 'body', hopping: -1., offset: [0, 0]}
     # Left channel
-    - {shape: 'rectangle', args: {xcoords: [-80, -64], ycoords: [-8, 8]} }
+    - {shape: 'rectangle', args: {xcoords: [-80, -64], ycoords: [-8, 8]}, hopping: -1., offset: [-64, 0]}
     # Right upper channel
-    - {shape: 'rectangle', args: {xcoords: [64, 80], ycoords: [8, 24]} }
+    - {shape: 'rectangle', args: {xcoords: [64, 80], ycoords: [8, 24]}, hopping: -1., offset: [64, 8]}
     # Right lower channel
-    - {shape: 'rectangle', args: {xcoords: [64, 80], ycoords: [-24, -8]} }
+    - {shape: 'rectangle', args: {xcoords: [64, 80], ycoords: [-24, -8]}, hopping: -1., offset: [64, -8]}
 
+  Masks:
+      # Let's place a random circle
+    - {name: 'randomCircles', args: {number: 1, radius: 5}}
 
+  Leads:
+    - {shape: 'rectangle', shape_args: {xcoords: [-80, 80], ycoords: [-8, 8]}, symmetry: [-1, 0], offset: [-80, 0], potential: -1.0, hopping: -1. }
+    - {shape: 'rectangle', shape_args: {xcoords: [-80, 80], ycoords: [8, 24]}, symmetry: [1, 0], offset: [80, 8], potential: 1.0, hopping: -1. }
+    - {shape: 'rectangle', shape_args: {xcoords: [-80, 80], ycoords: [-24, -8]}, symmetry: [1, 0], offset: [80, -8], potential: 1.0, hopping: -1. }
+
+# Genetic algorithm
 GA:
-    n_structures: 10
+    # number of structures in the GA
+    n_structures: 2
+    # number of iterations to perform
+    n_iterations: 10

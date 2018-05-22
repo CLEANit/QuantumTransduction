@@ -2,16 +2,23 @@
 
 import kwant
 import numpy as np
+import random
 
 def parentStructure(args):
-    body, shape, potential, lattice_const, norbs = args
+    body, device, potential, lattice_const, norbs = args
     lattice = kwant.lattice.honeycomb(lattice_const, norbs=norbs)
     system = kwant.Builder()
-    system[lattice.shape(shape, (0,0))] = potential
+    for shape, hopping, offset in zip(device['shapes'], device['hoppings'], device['offsets']):
+        system[lattice.shape(shape, offset)] = potential
+        neighbors = lattice.neighbors()
+        system[neighbors] = hopping
+    system.neighbors = lattice.neighbors()
+    system.lattice = lattice
     return system
 
 
-def applyMask(system, body, mask):
+def applyMask(args):
+    system, body, mask = args
     tags = []
     positions = []
     sites = []
@@ -39,9 +46,21 @@ def applyMask(system, body, mask):
     positions[:, 0] += np.abs(min_pos_sx)
     positions[:, 1] += np.abs(min_pos_sy)
 
-    removed_tags = np.argwhere(mask((tag_length, tag_width), (min_pos_sx, min_pos_sy), (max_pos_sx, max_pos_sy), positions) == 0).astype(int)
+    masc, info = mask((tag_length, tag_width), (min_pos_sx, min_pos_sy), (max_pos_sx, max_pos_sy), positions)
+    removed_tags = np.argwhere(masc == 0).astype(int)
     removed_tags = removed_tags.reshape(removed_tags.shape[0]).astype(int)
     for elem in removed_tags:
         del system[sites[int(elem)]]
+    system.mask_info = info
+    return system
+
+def attachLead(args):
+    system, leads = args
+    for l in leads:
+        sym = kwant.TranslationalSymmetry(system.lattice.vec(l['symmetry']))
+        lead = kwant.Builder(sym)
+        lead[system.lattice.shape(l['shape'], l['offset'])] = l['potential']
+        lead[system.neighbors] = l['hopping']
+        system.attach_lead(lead)
     system.eradicate_dangling()
     return system

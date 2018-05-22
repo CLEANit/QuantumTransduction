@@ -30,7 +30,7 @@ class Generator:
     # def __reduce__(self):
     #     return (self.__class__, (self.generator, self.n_generated))
 
-class Model:
+class Structure:
     def __init__(   self,
                     potential,
                     lead_shapes,
