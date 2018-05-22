@@ -150,7 +150,7 @@ def main():
     main loop
     '''
 
-    generations = 10
+    generations = 12
     fig, axes = plt.subplots(10,10, figsize=(20,20))
     for i in range(generations):
     # for model in models:
