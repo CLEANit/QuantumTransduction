@@ -2,30 +2,41 @@
 
 import numpy as np
 
-sin_30, cos_30 = (1 / 2., np.sqrt(3) / 2.)
+def rotation(theta):
+    return np.array([ [np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)] ])
 
-
-def square(l, coord):
+def rectangle(coord, angle=0., xcoords=None, ycoords=None):
+    xshift = xcoords[0] + 0.5 * (xcoords[1] - xcoords[0])
+    yshift = ycoords[0] + 0.5 * (ycoords[1] - ycoords[0])
     x, y = coord
-    return -l < x < l and -l < y < l
+    valx = x - xshift
+    valy = y -  yshift
+    new_val = rotation(angle).dot((valx, valy))
+    return xcoords[0] <= new_val[0] + xshift <= xcoords[1] and ycoords[0] <= new_val[1] + yshift <= ycoords[1]
 
-def rectangle(ls, le, ws, we, coord):
+def circle(coord, radius=None):
     x, y = coord
-    return ls < x < le and ws < y < we
+    return x**2 + y**2 <= radius**2
 
-def circle(r, coord):
+def ring(coord, inner_radius=None, outer_radius=None):
     x, y = coord
-    return x**2 + y**2 < r**2
+    return x**2 + y**2 >= inner_radius and x**2 + y**2 <= outer_radius
 
-def ring(r1, r2, coord):
-    x, y = coord
-    return x**2 + y**2 > r1 and x**2 + y**2 < r2
+def ellipse(coord, a=None, b=None, radius=None):
+    return (x / a)**2  + (y / b)**2 <= radius**2
 
-def ellipse(a, b, r, coord):
-    return (x / a)**2  + (y / b)**2 < r**2
+def nBodyDevice(components, coord):
+    firstComp = components[0](coord)
+    for i in range(1, len(components)):
+        firstComp += components[i](coord)
+    return firstComp
 
-def rectDeviceThreeChannel(body, lc, ruc, rlc, coord):
-    return body(coord) + lc(coord) + ruc(coord) + rlc(coord)
+shape_dict = {
+    'rectangle': rectangle,
+    'circle': circle,
+    'ring': ring,
+    'ellipse': ellipse
+}
 
-def rectDeviceTwoChannel(body, lc, rc, coord):
-    return body(coord) + lc(coord) + rc(coord)
+def whatShape(name):
+    return shape_dict[name]

@@ -9,6 +9,16 @@ import time
 import copy
 import multiprocessing
 import dill
+from functools import partial
+from .shapes import *
+from .masks import *
+
+import coloredlogs, verboselogs
+import copy
+
+# create logger
+coloredlogs.install(level='INFO')
+logger = verboselogs.VerboseLogger(' <-- QMT: model --> ')
 
 class Generator:
     def __init__(self, model):
@@ -32,64 +42,52 @@ class Generator:
 
 class Model:
     def __init__(   self,
-                    logger, 
-                    shape,
-                    body,
-                    potential,
-                    lead_shapes,
-                    lead_vectors,
-                    lead_offsets,
-                    lead_potentials,
+                    device,
+                    leads,
                     shape_offset=(0., 0.),
                     lattice_type='graphene',
                     lattice_const=1.0,
-                    t=1.0
                  ):
 
-        self.logger = logger
         start = time.clock()
         # type of lattice construction
         if lattice_type == 'graphene':
-            self.lattice = kwant.lattice.honeycomb(lattice_const, norbs=1)
-            self.a, self.b = self.lattice.sublattices
+            self.lattice = kwant.lattice.general([[np.sqrt(3.) * lattice_const, 0],[0, lattice_const]], basis=[(0,lattice_const/2.), (lattice_const / (2*np.sqrt(3.)), 0), (np.sqrt(3)*lattice_const/2, 0), (2*lattice_const/np.sqrt(3), lattice_const/2)], norbs=1)
 
         # define the class parameters
-        self.shape = shape
-        self.body = body
-        self.potential = potential
+        self.device = device
+        self.leads = leads
+        self.body = self.device['body']
         self.index = None
-
-        assert len(lead_shapes) == len(lead_vectors) == len(lead_offsets)
-        
-        self.lead_shapes = lead_shapes
-        self.lead_vectors = lead_vectors
-        self.lead_offsets = lead_offsets
-        self.lead_potentials = lead_potentials
+    
 
         self.shape_offset = shape_offset
         self.lattice_type = lattice_type
         self.lattice_const = lattice_const 
-        self.t = t
 
         self.system = kwant.Builder()
 
         self.build()
 
     def build(self):
-        self.system[self.lattice.shape(self.shape, self.shape_offset)] = self.potential
-        self.hoppings = self.lattice.neighbors()
-        self.system[self.hoppings] = -self.t
+        for shape, offset, hopping, potential in zip(self.device['shapes'], self.device['offsets'], self.device['hoppings'], self.device['potentials']):
+            self.system[self.lattice.shape(shape, offset)] = potential
+            self.neighbors = self.lattice.neighbors()
+            self.system[self.neighbors] = hopping
 
     def attachLeads(self):
-        self.leads = []
-        self.symmetries = []
-        for lead_shape, lead_vector, lead_offset, lead_pot in zip(self.lead_shapes, self.lead_vectors, self.lead_offsets, self.lead_potentials):
+        self.system_leads = []
+        for l in self.leads:
+            lead_shape = l['shape']
+            lead_vector = l['symmetry']
+            lead_offset = l['offset']
+            lead_pot = l['potential']
+            lead_hopping = l['hopping']
             sym = kwant.TranslationalSymmetry(self.lattice.vec(lead_vector))
             lead = kwant.Builder(sym)
             lead[self.lattice.shape(lead_shape, lead_offset)] = lead_pot
-            lead[self.hoppings] = -self.t
-            self.leads.append(lead)
-            self.symmetries.append(sym)
+            lead[self.neighbors] = lead_hopping
+            self.system_leads.append(lead)
             self.system.attach_lead(lead)
 
     def applyMask(self, mask):
@@ -119,8 +117,9 @@ class Model:
         tags[:,1] += np.abs(min_tag_sy)
         positions[:, 0] += np.abs(min_pos_sx)
         positions[:, 1] += np.abs(min_pos_sy)
-
-        removed_tags = np.argwhere(mask((tag_length, tag_width), (min_pos_sx, min_pos_sy), (max_pos_sx, max_pos_sy), positions) == 0).astype(int)
+        masc, info = mask((tag_length, tag_width), (min_pos_sx, min_pos_sy), (max_pos_sx, max_pos_sy), positions)
+        self.mask_info = info
+        removed_tags = np.argwhere(masc == 0).astype(int)
         removed_tags = removed_tags.reshape(removed_tags.shape[0]).astype(int)
         for elem in removed_tags:
             del self.system[sites[int(elem)]]
@@ -165,8 +164,8 @@ class Model:
             data.append(smatrix.transmission(start_lead_id, end_lead_id))
         return data
 
-    def getBandStructure(self, lead, momenta):
-        bands = kwant.physics.Bands(lead)
+    def getBandStructure(self, leadid, momenta):
+        bands = kwant.physics.Bands(self.system_leads[leadid].finalized())
         energies = [bands(k) for k in momenta]
         return energies
 
@@ -182,15 +181,11 @@ class Model:
         current = np.sum(J(p) for p in self.getWaveFunction(lead_id, energy))
         return kwant.plotter.current(self.system, current, cmap=cmocean.cm.dense, **args)
 
-    def plotBands(self, momenta, lead_id=0):
-        energies = self.getBandStructure(self.system.leads[lead_id], momenta) 
-        plt.figure()
-        plt.xlabel("momentum [(lattice constant)^-1]")
-        plt.ylabel("energy [t]")
-        return plt.plot(momenta, energies)
+    def plotBands(self, momenta, leadid=0):
+        kwant.plotter.bands(self.system_leads[leadid].finalized())
 
     def plotConductance(self, energies, start_lead_id=0, end_lead_id=1):
-        conductances = self.getConductance(energies, 0, 1)
+        conductances = self.getConductance(energies, start_lead_id, end_lead_id)
         plt.figure()
         plt.xlabel("energy [t]")
         plt.ylabel("conductance [$e^2/h$]")
@@ -199,30 +194,68 @@ class Model:
     def getNSites(self):
         return len(list(self.pre_system.site_value_pairs()))
 
-    def getCurrentForVerticalCut(self, val):
-        cut = lambda site_to, site_from : site_from.pos[0] >= val and site_to.pos[0] < val 
-        J = kwant.operator.Current(self.system, where=cut)
-        return J(self.getWaveFunction(0)[0])
+    def getDOS(self):
+        return kwant.kpm.SpectralDensity(self.system)()
 
-    def birth(self, parents, conditions):
+    def getCurrentForCut(self, xvals, yvals, energy=-1):
+        cut = lambda site_to, site_from : site_from.pos[1] >= yvals[0] and site_to.pos[1] <= yvals[1] and site_from.pos[0] >= xvals[0] and site_to.pos[0] <= xvals[1]
+        J = kwant.operator.Current(self.system, where=cut, sum=True)
+        wfs = self.getWaveFunction(0, energy=energy)
+        if wfs.shape[0] > 0:
+            return np.sum(J(wf) for  wf in self.getWaveFunction(0, energy=energy))
+        else:
+            return 0.
+
+    def birth(self, parents, how, conditions=None):
         self.system = kwant.Builder()
+        self.build()
         n_parents = len(parents)
         # print(parents)
-        for parent, condition in zip(parents, conditions):
-            syst = copy.deepcopy(parent.getPreSystem())
-            sites = syst.sites()
-            sites_to_del = []
-            for s in sites:
-                if not condition(s.pos):
-                    sites_to_del.append(s)
-            for elem in sites_to_del:
-                del syst[elem]
-            # print (sites_to_del)
-            # for s in sites_to_add:
-            self.system.update(syst)
-            # self.visualizeSystem()
-            # self.attachLeads()
-        self.finalize()
+
+        if how == 'stack':
+            for parent, condition in zip(parents, conditions):
+                syst = copy.deepcopy(parent.getPreSystem())
+                sites = syst.sites()
+                sites_to_del = []
+                for s in sites:
+                    if not condition(s.pos):
+                        sites_to_del.append(s)
+                for elem in sites_to_del:
+                    del syst[elem]
+                # print (sites_to_del)
+                # for s in sites_to_add:
+                self.system.update(syst)
+                # self.visualizeSystem()
+                # self.attachLeads()
+            self.finalize()
+
+        elif how == 'averageNanopores':
+            mask_infos = []
+            for i, mask_info in enumerate(parents[0].mask_info):
+                data = {}
+                for parent in parents:
+                    for key, val in mask_info.items():
+                        if key not in data:
+                            data[key] = [parent.mask_info[i][key]]
+                        else:
+                            data[key].append(parent.mask_info[i][key])
+                mask_infos.append(data)
+            # print(mask_infos)
+            averages = []
+            for mask_info in mask_infos:
+                average = {}
+                for key, val in mask_info.items():
+                    # print(np.array(val))
+                    average[key] = np.mean(np.array(val))
+                averages.append(average)
+            print(averages)
+            masks = []
+            for i in range(len(averages)):
+                masks.append(partial(whatMask('circle'), **averages[i]))
+            self.applyMask(partial(multiMasks, masks))
+            self.attachLeads()
+            self.finalize()
+
 
     # def __reduce__(self):
     #     return (self.__class__, (
