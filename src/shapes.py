@@ -5,7 +5,7 @@ import numpy as np
 def rotation(theta):
     return np.array([ [np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)] ])
 
-def rectangle(coord, angle=0., xcoords=None, ycoords=None):
+def rectangle(coord, angle=0., xcoords=None, ycoords=None, shift=[0.0, 0.0]):
     xshift = xcoords[0] + 0.5 * (xcoords[1] - xcoords[0])
     yshift = ycoords[0] + 0.5 * (ycoords[1] - ycoords[0])
     x, y = coord

@@ -141,7 +141,7 @@
     \def\gt{>}
     \def\lt{<}
     % Document parameters
-    \title{1D ladder}
+    \title{Graphene structure}
     
     
     
@@ -280,92 +280,101 @@
     
 
     
-    \section{1D ladder, some theory and
-practice}\label{d-ladder-some-theory-and-practice}
-
-In this tutorial, we take the 1D chain one step further and investigate
-a 1D ladder. We now think about \(M\) layers with \(N\) sites, where the
-wavefunction for layer \(m\) is given by \[
-\psi^{(m)}(y) = \sum_{i=1}^{N} c_i^m \phi_i^m(y)
-\] Similar to the 1D chain, we have 3 regions we must piece together:
-left lead, nanojunction, and right lead. In the left lead, we have the
-Schrödinger equation \[
-\left\{-\frac{\hbar^2}{2m}\partial_y^2 + V(y)\right\}\psi^{(m)} = E\psi^{(m)}
-\] which after being discretized becomes \[
--\frac{\hbar^2}{2m\Delta^2}(\psi_{n+1}^{(m)} - 2 \psi_{n}^{(m)} + \psi_{n-1}^{(m)}) + v_n\psi_n^{(m)} = E\psi_n^{(m)}
-\] which is exactly the same as the 1D chain, except we now have \(M\)
-layers to solve for. We then end up with an infinite matrix that looks
-like
-
-\begin{equation}
-\begin{pmatrix}
-\ddots & \ddots         & \ddots       & 0         & 0      & 0       & 0 \\
-0 & B_{(m-1)}^{\dagger} & H_{(m)}          & B_{(m)}        & 0       & 0      & 0 \\
-0 & 0        & B_{(m)}^{\dagger} & H_{(m+1)}          & B_{(m+1)} & 0      & 0 \\
-0 & 0        & 0       & B_{(m+1)}^{\dagger} & H_{(m+2)}          & B_{(m+2)} & 0\\
-0 & 0         & 0       & 0          & \ddots       & \ddots       & \ddots 
-\end{pmatrix}
-\begin{pmatrix}
-\vdots\\
-{\bf c}^{(m)}\\
-{\bf c}^{(m+1)}\\
-{\bf c}^{(m+2)}\\
-\vdots
-\end{pmatrix}
-=
-E{\bf I}
-\begin{pmatrix}
-\vdots\\
-{\bf c}^{(m)}\\
-{\bf c}^{(m+1)}\\
-{\bf c}^{(m+2)}\\
-\vdots
-\end{pmatrix}
-\end{equation}
-
-when we only consider nearest neighbour interactions. We must then solve
-the equations
-
-\begin{eqnarray}
--B_{(m-1)}^{\dagger} {\bf c}^{(m-1)} + (E{\bf I} - H^{(m)}) {\bf c}^{(m)} - B^{(m+1)}{\bf c}^{(m+1)} = E{\bf c}^{(m)}
-\end{eqnarray}
-
-Again, we exploit the
-
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}5}]:} \PY{k+kn}{import} \PY{n+nn}{kwant} 
-        \PY{c+c1}{\PYZsh{} For plotting}
-        \PY{k+kn}{from} \PY{n+nn}{matplotlib} \PY{k}{import} \PY{n}{pyplot}
-        \PY{k+kn}{import} \PY{n+nn}{numpy} \PY{k}{as} \PY{n+nn}{np}
-        \PY{o}{\PYZpc{}}\PY{k}{matplotlib} inline
-\end{Verbatim}
-
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}86}]:} \PY{k}{def} \PY{n+nf}{make\PYZus{}system}\PY{p}{(}\PY{n}{a}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{,} \PY{n}{t}\PY{o}{=}\PY{l+m+mf}{1.0}\PY{p}{,} \PY{n}{W}\PY{o}{=}\PY{l+m+mi}{16}\PY{p}{,} \PY{n}{L}\PY{o}{=}\PY{l+m+mi}{16}\PY{p}{)}\PY{p}{:}
-             \PY{c+c1}{\PYZsh{} Start with an empty tight\PYZhy{}binding system and a single square lattice. }
-             \PY{c+c1}{\PYZsh{} `a` is the lattice constant (by default set to 1 for simplicity.}
-             \PY{n}{lat} \PY{o}{=} \PY{n}{kwant}\PY{o}{.}\PY{n}{lattice}\PY{o}{.}\PY{n}{square}\PY{p}{(}\PY{n}{a}\PY{p}{,} \PY{n}{norbs}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}11}]:} \PY{k+kn}{from} \PY{n+nn}{math} \PY{k}{import} \PY{n}{pi}\PY{p}{,} \PY{n}{sqrt}\PY{p}{,} \PY{n}{tanh}
+         \PY{k+kn}{import} \PY{n+nn}{kwant}
+         \PY{k+kn}{from} \PY{n+nn}{matplotlib} \PY{k}{import} \PY{n}{pyplot}
+         \PY{k+kn}{import} \PY{n+nn}{numpy} \PY{k}{as} \PY{n+nn}{np}
+         \PY{o}{\PYZpc{}}\PY{k}{matplotlib} inline
+         
+         \PY{c+c1}{\PYZsh{} Define the graphene lattice}
+         \PY{n}{sin\PYZus{}30}\PY{p}{,} \PY{n}{cos\PYZus{}30} \PY{o}{=} \PY{p}{(}\PY{l+m+mi}{1} \PY{o}{/} \PY{l+m+mi}{2}\PY{p}{,} \PY{n}{sqrt}\PY{p}{(}\PY{l+m+mi}{3}\PY{p}{)} \PY{o}{/} \PY{l+m+mi}{2}\PY{p}{)}
+         \PY{c+c1}{\PYZsh{} graphene = kwant.lattice.general([(1, 0), (sin\PYZus{}30, cos\PYZus{}30)],}
+                                          \PY{c+c1}{\PYZsh{} [(0, 0), (0, 1 / sqrt(3))])}
+         \PY{n}{graphene} \PY{o}{=} \PY{n}{kwant}\PY{o}{.}\PY{n}{lattice}\PY{o}{.}\PY{n}{honeycomb}\PY{p}{(}\PY{n}{norbs}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)}
+         \PY{n}{a}\PY{p}{,} \PY{n}{b} \PY{o}{=} \PY{n}{graphene}\PY{o}{.}\PY{n}{sublattices}
+         
+         
+         \PY{k}{def} \PY{n+nf}{make\PYZus{}system}\PY{p}{(}\PY{n}{r}\PY{o}{=}\PY{l+m+mi}{10}\PY{p}{,} \PY{n}{w}\PY{o}{=}\PY{l+m+mf}{2.0}\PY{p}{,} \PY{n}{pot}\PY{o}{=}\PY{l+m+mf}{0.1}\PY{p}{)}\PY{p}{:}
+         
+             \PY{c+c1}{\PYZsh{}\PYZsh{}\PYZsh{}\PYZsh{} Define the scattering region. \PYZsh{}\PYZsh{}\PYZsh{}\PYZsh{}}
+             \PY{c+c1}{\PYZsh{} circular scattering region}
+             \PY{k}{def} \PY{n+nf}{square}\PY{p}{(}\PY{n}{pos}\PY{p}{)}\PY{p}{:}
+                 \PY{n}{x}\PY{p}{,} \PY{n}{y} \PY{o}{=} \PY{n}{pos}
+                 \PY{k}{return} \PY{o}{\PYZhy{}}\PY{l+m+mi}{8} \PY{o}{\PYZlt{}} \PY{n}{x} \PY{o}{\PYZlt{}} \PY{l+m+mi}{8} \PY{o+ow}{and} \PY{o}{\PYZhy{}}\PY{l+m+mi}{4} \PY{o}{\PYZlt{}} \PY{n}{y} \PY{o}{\PYZlt{}} \PY{l+m+mi}{4}
          
              \PY{n}{syst} \PY{o}{=} \PY{n}{kwant}\PY{o}{.}\PY{n}{Builder}\PY{p}{(}\PY{p}{)}
          
-             \PY{n}{syst}\PY{p}{[}\PY{p}{(}\PY{n}{lat}\PY{p}{(}\PY{n}{x}\PY{p}{,} \PY{n}{y}\PY{p}{)} \PY{k}{for} \PY{n}{x} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{n}{L}\PY{p}{)} \PY{k}{for} \PY{n}{y} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{n}{W}\PY{p}{)}\PY{p}{)}\PY{p}{]} \PY{o}{=} \PY{l+m+mi}{4} \PY{o}{*} \PY{n}{t}
+             \PY{n}{syst}\PY{p}{[}\PY{n}{graphene}\PY{o}{.}\PY{n}{shape}\PY{p}{(}\PY{n}{square}\PY{p}{,} \PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{)}\PY{p}{)}\PY{p}{]} \PY{o}{=} \PY{l+m+mf}{4.} \PY{o}{*} \PY{l+m+mf}{2.7}
          
-             \PY{n}{syst}\PY{p}{[}\PY{n}{lat}\PY{o}{.}\PY{n}{neighbors}\PY{p}{(}\PY{p}{)}\PY{p}{]} \PY{o}{=} \PY{o}{\PYZhy{}}\PY{n}{t}
+             \PY{c+c1}{\PYZsh{} specify the hoppings of the graphene lattice in the}
+             \PY{c+c1}{\PYZsh{} format expected by builder.HoppingKind}
+             \PY{n}{hoppings} \PY{o}{=} \PY{p}{(}\PY{p}{(}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,} \PY{n}{a}\PY{p}{,} \PY{n}{b}\PY{p}{)}\PY{p}{,} \PY{p}{(}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{,} \PY{n}{a}\PY{p}{,} \PY{n}{b}\PY{p}{)}\PY{p}{,} \PY{p}{(}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{,} \PY{n}{a}\PY{p}{,} \PY{n}{b}\PY{p}{)}\PY{p}{)}
+             \PY{n}{syst}\PY{p}{[}\PY{p}{[}\PY{n}{kwant}\PY{o}{.}\PY{n}{builder}\PY{o}{.}\PY{n}{HoppingKind}\PY{p}{(}\PY{o}{*}\PY{n}{hopping}\PY{p}{)} \PY{k}{for} \PY{n}{hopping} \PY{o+ow}{in} \PY{n}{hoppings}\PY{p}{]}\PY{p}{]} \PY{o}{=} \PY{o}{\PYZhy{}}\PY{l+m+mf}{2.7}
          
-             \PY{n}{lead} \PY{o}{=} \PY{n}{kwant}\PY{o}{.}\PY{n}{Builder}\PY{p}{(}\PY{n}{kwant}\PY{o}{.}\PY{n}{TranslationalSymmetry}\PY{p}{(}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{n}{a}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{)}\PY{p}{)}\PY{p}{)}
-             \PY{n}{lead}\PY{p}{[}\PY{p}{(}\PY{n}{lat}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,} \PY{n}{j}\PY{p}{)} \PY{k}{for} \PY{n}{j} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{n}{W}\PY{p}{)}\PY{p}{)}\PY{p}{]} \PY{o}{=} \PY{l+m+mi}{4} \PY{o}{*} \PY{n}{t}
-             \PY{n}{lead}\PY{p}{[}\PY{n}{lat}\PY{o}{.}\PY{n}{neighbors}\PY{p}{(}\PY{p}{)}\PY{p}{]} \PY{o}{=} \PY{o}{\PYZhy{}}\PY{n}{t}
-             \PY{n}{syst}\PY{o}{.}\PY{n}{attach\PYZus{}lead}\PY{p}{(}\PY{n}{lead}\PY{p}{)}
-             \PY{n}{syst}\PY{o}{.}\PY{n}{attach\PYZus{}lead}\PY{p}{(}\PY{n}{lead}\PY{o}{.}\PY{n}{reversed}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+             \PY{c+c1}{\PYZsh{}\PYZsh{}\PYZsh{}\PYZsh{} Define the leads. \PYZsh{}\PYZsh{}\PYZsh{}\PYZsh{}}
+             \PY{c+c1}{\PYZsh{} left lead}
+             \PY{n}{sym0} \PY{o}{=} \PY{n}{kwant}\PY{o}{.}\PY{n}{TranslationalSymmetry}\PY{p}{(}\PY{n}{graphene}\PY{o}{.}\PY{n}{vec}\PY{p}{(}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{)}\PY{p}{)}\PY{p}{)}
+         
+             \PY{k}{def} \PY{n+nf}{lead0\PYZus{}shape}\PY{p}{(}\PY{n}{pos}\PY{p}{)}\PY{p}{:}
+                 \PY{n}{x}\PY{p}{,} \PY{n}{y} \PY{o}{=} \PY{n}{pos}
+                 \PY{k}{return} \PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{2} \PY{o}{\PYZlt{}} \PY{n}{y} \PY{o}{\PYZlt{}} \PY{l+m+mi}{2}\PY{p}{)}
+         
+             \PY{n}{lead0} \PY{o}{=} \PY{n}{kwant}\PY{o}{.}\PY{n}{Builder}\PY{p}{(}\PY{n}{sym0}\PY{p}{)}
+             \PY{n}{lead0}\PY{p}{[}\PY{n}{graphene}\PY{o}{.}\PY{n}{shape}\PY{p}{(}\PY{n}{lead0\PYZus{}shape}\PY{p}{,} \PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{)}\PY{p}{)}\PY{p}{]} \PY{o}{=} \PY{l+m+mf}{4.} \PY{o}{*} \PY{l+m+mf}{2.7}
+             \PY{n}{lead0}\PY{p}{[}\PY{p}{[}\PY{n}{kwant}\PY{o}{.}\PY{n}{builder}\PY{o}{.}\PY{n}{HoppingKind}\PY{p}{(}\PY{o}{*}\PY{n}{hopping}\PY{p}{)} \PY{k}{for} \PY{n}{hopping} \PY{o+ow}{in} \PY{n}{hoppings}\PY{p}{]}\PY{p}{]} \PY{o}{=} \PY{o}{\PYZhy{}}\PY{l+m+mf}{2.7}
+         
+             \PY{n}{syst}\PY{o}{.}\PY{n}{attach\PYZus{}lead}\PY{p}{(}\PY{n}{lead0}\PY{p}{)}
+             \PY{n}{syst}\PY{o}{.}\PY{n}{attach\PYZus{}lead}\PY{p}{(}\PY{n}{lead0}\PY{o}{.}\PY{n}{reversed}\PY{p}{(}\PY{p}{)}\PY{p}{)}
+             
              \PY{k}{return} \PY{n}{syst}
-\end{Verbatim}
-
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}87}]:} \PY{n}{syst} \PY{o}{=} \PY{n}{make\PYZus{}system}\PY{p}{(}\PY{p}{)}
-         \PY{c+c1}{\PYZsh{} Check that the system looks as intended.}
-         \PY{n}{kwant}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{syst}\PY{p}{)}
+         
+         
+         \PY{k}{def} \PY{n+nf}{compute\PYZus{}evs}\PY{p}{(}\PY{n}{syst}\PY{p}{)}\PY{p}{:}
+             \PY{c+c1}{\PYZsh{} Compute some eigenvalues of the closed system}
+             \PY{n}{sparse\PYZus{}mat} \PY{o}{=} \PY{n}{syst}\PY{o}{.}\PY{n}{hamiltonian\PYZus{}submatrix}\PY{p}{(}\PY{n}{sparse}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+         
+             \PY{n}{evs} \PY{o}{=} \PY{n}{sla}\PY{o}{.}\PY{n}{eigs}\PY{p}{(}\PY{n}{sparse\PYZus{}mat}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{)}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}
+             \PY{n+nb}{print}\PY{p}{(}\PY{n}{evs}\PY{o}{.}\PY{n}{real}\PY{p}{)}
+         
+         
+         \PY{k}{def} \PY{n+nf}{plot\PYZus{}conductance}\PY{p}{(}\PY{n}{syst}\PY{p}{,} \PY{n}{energies}\PY{p}{)}\PY{p}{:}
+             \PY{c+c1}{\PYZsh{} Compute transmission as a function of energy}
+             \PY{n}{data} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+             \PY{k}{for} \PY{n}{energy} \PY{o+ow}{in} \PY{n}{energies}\PY{p}{:}
+                 \PY{n}{smatrix} \PY{o}{=} \PY{n}{kwant}\PY{o}{.}\PY{n}{smatrix}\PY{p}{(}\PY{n}{syst}\PY{p}{,} \PY{n}{energy}\PY{p}{)}
+                 \PY{n}{data}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{smatrix}\PY{o}{.}\PY{n}{transmission}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{)}
+         
+             \PY{n}{pyplot}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+             \PY{n}{pyplot}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{energies}\PY{p}{,} \PY{n}{data}\PY{p}{)}
+             \PY{n}{pyplot}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{energy [t]}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+             \PY{n}{pyplot}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{conductance [2e\PYZca{}2/h]}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+             \PY{n}{pyplot}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+         
+         
+         \PY{k}{def} \PY{n+nf}{plot\PYZus{}bandstructure}\PY{p}{(}\PY{n}{flead}\PY{p}{,} \PY{n}{momenta}\PY{p}{)}\PY{p}{:}
+             \PY{n}{bands} \PY{o}{=} \PY{n}{kwant}\PY{o}{.}\PY{n}{physics}\PY{o}{.}\PY{n}{Bands}\PY{p}{(}\PY{n}{flead}\PY{p}{)}
+             \PY{n}{energies} \PY{o}{=} \PY{p}{[}\PY{n}{bands}\PY{p}{(}\PY{n}{k}\PY{p}{)} \PY{k}{for} \PY{n}{k} \PY{o+ow}{in} \PY{n}{momenta}\PY{p}{]}
+         
+             \PY{n}{pyplot}\PY{o}{.}\PY{n}{figure}\PY{p}{(}\PY{p}{)}
+             \PY{n}{pyplot}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{momenta}\PY{p}{,} \PY{n}{energies}\PY{p}{)}
+             \PY{n}{pyplot}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{momentum [(lattice constant)\PYZca{}\PYZhy{}1]}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+             \PY{n}{pyplot}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{energy [t]}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+             \PY{n}{pyplot}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+         
+         
+         \PY{n}{pot} \PY{o}{=} \PY{l+m+mf}{0.1}
+         \PY{n}{syst} \PY{o}{=} \PY{n}{make\PYZus{}system}\PY{p}{(}\PY{n}{pot}\PY{o}{=}\PY{n}{pot}\PY{p}{)}
+         
+         \PY{c+c1}{\PYZsh{} To highlight the two sublattices of graphene, we plot one with}
+         \PY{c+c1}{\PYZsh{} a filled, and the other one with an open circle:}
+         \PY{k}{def} \PY{n+nf}{family\PYZus{}colors}\PY{p}{(}\PY{n}{site}\PY{p}{)}\PY{p}{:}
+             \PY{k}{return} \PY{l+m+mi}{0} \PY{k}{if} \PY{n}{site}\PY{o}{.}\PY{n}{family} \PY{o}{==} \PY{n}{a} \PY{k}{else} \PY{l+m+mi}{1}
+         
+         \PY{c+c1}{\PYZsh{} Then, plot the system with leads.}
+         \PY{n}{kwant}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{syst}\PY{p}{,} \PY{n}{site\PYZus{}color}\PY{o}{=}\PY{n}{family\PYZus{}colors}\PY{p}{,} \PY{n}{site\PYZus{}lw}\PY{o}{=}\PY{l+m+mf}{0.1}\PY{p}{,}
+                    \PY{n}{lead\PYZus{}site\PYZus{}lw}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{,} \PY{n}{colorbar}\PY{o}{=}\PY{k+kc}{False}\PY{p}{)}
+         
          \PY{c+c1}{\PYZsh{} Finalize the system.}
          \PY{n}{syst} \PY{o}{=} \PY{n}{syst}\PY{o}{.}\PY{n}{finalized}\PY{p}{(}\PY{p}{)}
 \end{Verbatim}
@@ -382,12 +391,12 @@ To use the future default and silence this warning we advise to pass `rcond=None
     \end{Verbatim}
 
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_3_1.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_0_1.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}88}]:} \PY{k}{def} \PY{n+nf}{conductance}\PY{p}{(}\PY{n}{syst}\PY{p}{,} \PY{n}{energies}\PY{p}{)}\PY{p}{:}
+{\color{incolor}In [{\color{incolor}12}]:} \PY{k}{def} \PY{n+nf}{conductance}\PY{p}{(}\PY{n}{syst}\PY{p}{,} \PY{n}{energies}\PY{p}{)}\PY{p}{:}
              \PY{n}{data} \PY{o}{=} \PY{p}{[}\PY{p}{]}
              \PY{k}{for} \PY{n}{energy} \PY{o+ow}{in} \PY{n}{energies}\PY{p}{:}
                  \PY{n}{smatrix} \PY{o}{=} \PY{n}{kwant}\PY{o}{.}\PY{n}{smatrix}\PY{p}{(}\PY{n}{syst}\PY{p}{,} \PY{n}{energy}\PY{p}{)}
@@ -398,7 +407,7 @@ To use the future default and silence this warning we advise to pass `rcond=None
          \PY{n}{density} \PY{o}{=} \PY{n}{kwant}\PY{o}{.}\PY{n}{operator}\PY{o}{.}\PY{n}{Density}\PY{p}{(}\PY{n}{syst}\PY{p}{)}
          
          \PY{n}{energies}\PY{p}{,} \PY{n}{doss} \PY{o}{=} \PY{p}{[}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{p}{]}
-         \PY{k}{for} \PY{n}{e} \PY{o+ow}{in} \PY{n}{np}\PY{o}{.}\PY{n}{linspace}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mf}{10.0}\PY{p}{,} \PY{l+m+mf}{10.0}\PY{p}{,} \PY{l+m+mi}{256}\PY{p}{)}\PY{p}{:}
+         \PY{k}{for} \PY{n}{e} \PY{o+ow}{in} \PY{n}{np}\PY{o}{.}\PY{n}{linspace}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mf}{30.0}\PY{p}{,} \PY{l+m+mf}{30.0}\PY{p}{,} \PY{l+m+mi}{256}\PY{p}{)}\PY{p}{:}
              \PY{k}{try}\PY{p}{:}
                  \PY{n}{wf} \PY{o}{=} \PY{n}{kwant}\PY{o}{.}\PY{n}{wave\PYZus{}function}\PY{p}{(}\PY{n}{syst}\PY{p}{,} \PY{n}{energy}\PY{o}{=}\PY{n}{e}\PY{p}{)}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{)}
                  \PY{n}{dos} \PY{o}{=} \PY{n}{density}\PY{p}{(}\PY{n}{wf}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}
@@ -409,7 +418,7 @@ To use the future default and silence this warning we advise to pass `rcond=None
              \PY{k}{except}\PY{p}{:}
                  \PY{k}{pass}
          
-         \PY{n}{e} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{linspace}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{10}\PY{p}{,}\PY{l+m+mi}{10}\PY{p}{,}\PY{l+m+mi}{256}\PY{p}{)}
+         \PY{n}{e} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{linspace}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{30}\PY{p}{,}\PY{l+m+mi}{30}\PY{p}{,}\PY{l+m+mi}{256}\PY{p}{)}
          \PY{n}{cond} \PY{o}{=} \PY{n}{conductance}\PY{p}{(}\PY{n}{syst}\PY{p}{,} \PY{n}{energies}\PY{o}{=}\PY{n}{e}\PY{p}{)}
          \PY{n}{fig}\PY{p}{,} \PY{n}{axes} \PY{o}{=} \PY{n}{pyplot}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{3}\PY{p}{,} \PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{15}\PY{p}{,}\PY{l+m+mi}{5}\PY{p}{)}\PY{p}{,} \PY{n}{sharey}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{row}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
          
@@ -417,10 +426,10 @@ To use the future default and silence this warning we advise to pass `rcond=None
          \PY{n}{axes}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{cond}\PY{p}{,} \PY{n}{e}\PY{p}{)}
          \PY{n}{axes}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{doss}\PY{p}{,} \PY{n}{energies}\PY{p}{)}
          
-         \PY{n}{e\PYZus{}fermi} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{ones}\PY{p}{(}\PY{l+m+mi}{256}\PY{p}{)} \PY{o}{*} \PY{l+m+mf}{4.}
+         \PY{n}{e\PYZus{}fermi} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{ones}\PY{p}{(}\PY{l+m+mi}{256}\PY{p}{)} \PY{o}{*} \PY{l+m+mf}{4.} \PY{o}{*} \PY{l+m+mf}{2.7}
          \PY{n}{axes}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{linspace}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{n}{np}\PY{o}{.}\PY{n}{pi}\PY{p}{,}  \PY{n}{np}\PY{o}{.}\PY{n}{pi}\PY{p}{,} \PY{l+m+mi}{256}\PY{p}{)}\PY{p}{,} \PY{n}{e\PYZus{}fermi}\PY{p}{,} \PY{n}{color}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{k}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
          \PY{n}{axes}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{cond}\PY{p}{,} \PY{n}{e\PYZus{}fermi}\PY{p}{,} \PY{n}{color}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{k}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-         \PY{n}{axes}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{doss}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{ones\PYZus{}like}\PY{p}{(}\PY{n}{energies}\PY{p}{)} \PY{o}{*} \PY{l+m+mf}{4.0}\PY{p}{,} \PY{n}{color}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{k}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+         \PY{n}{axes}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{doss}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{ones\PYZus{}like}\PY{p}{(}\PY{n}{energies}\PY{p}{)} \PY{o}{*} \PY{l+m+mf}{4.0} \PY{o}{*} \PY{l+m+mf}{2.7}\PY{p}{,} \PY{n}{color}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{k}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
          
          \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Total number of states:}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{n}{doss}\PY{p}{)}\PY{p}{)}
          
@@ -428,7 +437,7 @@ To use the future default and silence this warning we advise to pass `rcond=None
          \PY{n}{axes}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{o}{.}\PY{n}{set\PYZus{}ylim}\PY{p}{(}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{min}\PY{p}{(}\PY{n}{energies}\PY{p}{)} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{max}\PY{p}{(}\PY{n}{energies}\PY{p}{)} \PY{o}{+} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{)}
          \PY{n}{axes}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{o}{.}\PY{n}{set\PYZus{}ylim}\PY{p}{(}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{min}\PY{p}{(}\PY{n}{energies}\PY{p}{)} \PY{o}{\PYZhy{}}\PY{l+m+mi}{1}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{max}\PY{p}{(}\PY{n}{energies}\PY{p}{)} \PY{o}{+} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{)}
          \PY{n}{axes}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{.}\PY{n}{set\PYZus{}xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{k}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-         \PY{n}{axes}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{.}\PY{n}{set\PYZus{}ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Energy [t]}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+         \PY{n}{axes}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{o}{.}\PY{n}{set\PYZus{}ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Energy [eV]}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
          \PY{n}{pyplot}\PY{o}{.}\PY{n}{sca}\PY{p}{(}\PY{n}{axes}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}
          \PY{n}{pyplot}\PY{o}{.}\PY{n}{xticks}\PY{p}{(}\PY{n+nb}{range}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{3}\PY{p}{,}\PY{l+m+mi}{4}\PY{p}{)}\PY{p}{,} \PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}\PYZdl{}}\PY{l+s+s1}{\PYZbs{}}\PY{l+s+s1}{pi / a\PYZdl{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZdl{}}\PY{l+s+s1}{\PYZbs{}}\PY{l+s+s1}{pi / a\PYZdl{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
          
@@ -438,28 +447,27 @@ To use the future default and silence this warning we advise to pass `rcond=None
 
 
     \begin{Verbatim}[commandchars=\\\{\}]
-Total number of states: 2260.13201080527
+Total number of states: 1256.1483476587787
 
     \end{Verbatim}
 
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}88}]:} Text(0.5,0,'Density of states [Arbitrary units]')
+{\color{outcolor}Out[{\color{outcolor}12}]:} Text(0.5,0,'Density of states [Arbitrary units]')
 \end{Verbatim}
             
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_4_2.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_1_2.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}85}]:} \PY{n}{kB} \PY{o}{=} \PY{l+m+mf}{1.0}
-         \PY{n}{T} \PY{o}{=} \PY{l+m+mf}{0.001}
+{\color{incolor}In [{\color{incolor}16}]:} \PY{n}{kB\PYZus{}T} \PY{o}{=} \PY{l+m+mi}{100} \PY{o}{*} \PY{l+m+mf}{2.7}
          \PY{k}{def} \PY{n+nf}{fermi}\PY{p}{(}\PY{n}{E}\PY{p}{,} \PY{n}{mu}\PY{p}{)}\PY{p}{:}
-             \PY{k}{return} \PY{l+m+mf}{1.} \PY{o}{/} \PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{exp}\PY{p}{(}\PY{p}{(}\PY{n}{E} \PY{o}{\PYZhy{}} \PY{n}{mu}\PY{p}{)} \PY{o}{/} \PY{p}{(}\PY{n}{kB} \PY{o}{*} \PY{n}{T}\PY{p}{)}\PY{p}{)} \PY{o}{+} \PY{l+m+mf}{1.}\PY{p}{)}
+             \PY{k}{return} \PY{l+m+mf}{1.} \PY{o}{/} \PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{exp}\PY{p}{(}\PY{p}{(}\PY{n}{E} \PY{o}{\PYZhy{}} \PY{n}{mu}\PY{p}{)} \PY{o}{/} \PY{p}{(}\PY{n}{kB\PYZus{}T}\PY{p}{)}\PY{p}{)} \PY{o}{+} \PY{l+m+mf}{1.}\PY{p}{)}
          
          \PY{n}{vec\PYZus{}fermi} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{vectorize}\PY{p}{(}\PY{n}{fermi}\PY{p}{)}
          
-         \PY{n}{bias} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{linspace}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mf}{10.0}\PY{p}{,} \PY{l+m+mf}{10.0}\PY{p}{,} \PY{l+m+mi}{256}\PY{p}{)}
+         \PY{n}{bias} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{linspace}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mf}{5000.0}\PY{p}{,} \PY{l+m+mf}{5000.0}\PY{p}{,} \PY{l+m+mi}{256}\PY{p}{)}
          \PY{n}{V}\PY{p}{,} \PY{n}{I} \PY{o}{=} \PY{p}{[}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{p}{]}
          \PY{k}{for} \PY{n}{i}\PY{p}{,} \PY{n}{val} \PY{o+ow}{in} \PY{n+nb}{enumerate}\PY{p}{(}\PY{n}{bias}\PY{p}{)}\PY{p}{:}
              \PY{n}{mu\PYZus{}left} \PY{o}{=} \PY{n}{val} \PY{o}{/} \PY{l+m+mf}{2.0} \PY{o}{+} \PY{l+m+mf}{2.} 
@@ -469,80 +477,22 @@ Total number of states: 2260.13201080527
              \PY{n}{I}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{current}\PY{p}{)}
              
          \PY{n}{pyplot}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{bias}\PY{p}{,} \PY{n}{I}\PY{p}{)}
-         \PY{n}{pyplot}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bias [t / e]}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+         \PY{n}{pyplot}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bias [eV / e]}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
          \PY{n}{pyplot}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Current [2e / h]}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
 \end{Verbatim}
 
 
 \begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}85}]:} Text(0,0.5,'Current [2e / h]')
+{\color{outcolor}Out[{\color{outcolor}16}]:} Text(0,0.5,'Current [2e / h]')
 \end{Verbatim}
             
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_5_1.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_2_1.png}
     \end{center}
     { \hspace*{\fill} \\}
     
     \begin{Verbatim}[commandchars=\\\{\}]
 {\color{incolor}In [{\color{incolor} }]:} 
-\end{Verbatim}
-
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor} }]:} 
-\end{Verbatim}
-
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor} }]:} 
-\end{Verbatim}
-
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor} }]:} \PY{k+kn}{import} \PY{n+nn}{numpy} \PY{k}{as} \PY{n+nn}{np}
-        \PY{k+kn}{import} \PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{pyplot} \PY{k}{as} \PY{n+nn}{plt}
-        \PY{k+kn}{from} \PY{n+nn}{scipy}\PY{n+nn}{.}\PY{n+nn}{linalg} \PY{k}{import} \PY{n}{eig}
-        \PY{o}{\PYZpc{}}\PY{k}{matplotlib} inline
-        
-        \PY{n}{E} \PY{o}{=} \PY{l+m+mf}{0.}
-        \PY{n}{n\PYZus{}modes} \PY{o}{=} \PY{l+m+mi}{5}
-        \PY{k}{for} \PY{n}{E} \PY{o+ow}{in} \PY{n}{np}\PY{o}{.}\PY{n}{linspace}\PY{p}{(}\PY{l+m+mf}{0.}\PY{p}{,} \PY{l+m+mf}{10.}\PY{p}{,} \PY{l+m+mi}{32}\PY{p}{)}\PY{p}{:}
-            \PY{n}{H} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{matrix}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{eye}\PY{p}{(}\PY{n}{n\PYZus{}modes}\PY{p}{)} \PY{o}{*} \PY{l+m+mf}{2.}\PY{p}{)}
-            \PY{n}{V} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{matrix}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{eye}\PY{p}{(}\PY{n}{n\PYZus{}modes}\PY{p}{)} \PY{o}{*} \PY{o}{\PYZhy{}}\PY{l+m+mf}{1.}\PY{p}{)}
-            \PY{n}{zs} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{zeros}\PY{p}{(}\PY{p}{(}\PY{n}{n\PYZus{}modes}\PY{p}{,} \PY{n}{n\PYZus{}modes}\PY{p}{)}\PY{p}{)}
-            \PY{n}{os} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{eye}\PY{p}{(}\PY{n}{n\PYZus{}modes}\PY{p}{)}
-            \PY{n}{top} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{hstack}\PY{p}{(}\PY{p}{(}\PY{n}{zs}\PY{p}{,} \PY{n}{os}\PY{p}{)}\PY{p}{)}
-            \PY{n}{bottom} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{hstack}\PY{p}{(}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{n}{V}\PY{p}{,} \PY{n}{os}\PY{o}{*} \PY{n}{E} \PY{o}{\PYZhy{}} \PY{n}{H}\PY{p}{)}\PY{p}{)}
-            \PY{n}{p1} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{vstack}\PY{p}{(}\PY{p}{(}\PY{n}{top}\PY{p}{,} \PY{n}{bottom}\PY{p}{)}\PY{p}{)}
-            \PY{n}{p2} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{vstack}\PY{p}{(}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{hstack}\PY{p}{(}\PY{p}{(}\PY{n}{os}\PY{p}{,} \PY{n}{zs}\PY{p}{)}\PY{p}{)}\PY{p}{,} \PY{n}{np}\PY{o}{.}\PY{n}{hstack}\PY{p}{(}\PY{p}{(}\PY{n}{zs}\PY{p}{,} \PY{n}{V}\PY{o}{.}\PY{n}{H}\PY{p}{)}\PY{p}{)}\PY{p}{)}\PY{p}{)}
-            \PY{n}{eigs}\PY{p}{,} \PY{n}{vecs} \PY{o}{=} \PY{n}{eig}\PY{p}{(}\PY{n}{p1}\PY{p}{,} \PY{n}{p2}\PY{p}{)}
-            \PY{n}{counts} \PY{o}{=} \PY{p}{\PYZob{}}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{imag\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{imag+}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{real\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{0}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{real+}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{0}\PY{p}{\PYZcb{}}
-            \PY{k}{for} \PY{n}{k} \PY{o+ow}{in} \PY{n}{np}\PY{o}{.}\PY{n}{log}\PY{p}{(}\PY{n}{eigs}\PY{p}{)}\PY{p}{:}
-                \PY{k}{if} \PY{n}{np}\PY{o}{.}\PY{n}{imag}\PY{p}{(}\PY{n}{k}\PY{p}{)} \PY{o}{==} \PY{l+m+mf}{0.}\PY{p}{:}
-                    \PY{k}{if} \PY{n}{np}\PY{o}{.}\PY{n}{real}\PY{p}{(}\PY{n}{k}\PY{p}{)} \PY{o}{\PYZgt{}} \PY{l+m+mf}{0.}\PY{p}{:}
-                        \PY{n}{counts}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{real+}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{+}\PY{o}{=} \PY{l+m+mi}{1}
-                    \PY{k}{elif} \PY{n}{np}\PY{o}{.}\PY{n}{real}\PY{p}{(}\PY{n}{k}\PY{p}{)} \PY{o}{\PYZlt{}} \PY{l+m+mf}{0.}\PY{p}{:}
-                        \PY{n}{counts}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{real\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{+}\PY{o}{=} \PY{l+m+mi}{1}
-                \PY{k}{else}\PY{p}{:}
-                    \PY{k}{if} \PY{n}{np}\PY{o}{.}\PY{n}{imag}\PY{p}{(}\PY{n}{k}\PY{p}{)} \PY{o}{\PYZgt{}} \PY{l+m+mf}{0.}\PY{p}{:}
-                        \PY{n}{counts}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{imag+}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{+}\PY{o}{=} \PY{l+m+mi}{1}
-                    \PY{k}{elif} \PY{n}{np}\PY{o}{.}\PY{n}{imag}\PY{p}{(}\PY{n}{k}\PY{p}{)} \PY{o}{\PYZlt{}} \PY{l+m+mf}{0.}\PY{p}{:}
-                        \PY{n}{counts}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{imag\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{+}\PY{o}{=} \PY{l+m+mi}{1}
-        
-            \PY{n+nb}{print}\PY{p}{(}\PY{n}{E}\PY{p}{,} \PY{n}{counts}\PY{p}{)}
-        \PY{c+c1}{\PYZsh{}     wfs = []}
-        \PY{c+c1}{\PYZsh{}     for i in range(n\PYZus{}modes):}
-        \PY{c+c1}{\PYZsh{}         wfs.append(vecs[:n\PYZus{}modes, i])}
-        \PY{c+c1}{\PYZsh{}     a = []}
-        \PY{c+c1}{\PYZsh{}     for wf1 in wfs:}
-        \PY{c+c1}{\PYZsh{}         b = []}
-        \PY{c+c1}{\PYZsh{}         for wf2 in wfs: }
-        \PY{c+c1}{\PYZsh{}             b.append(np.vdot(wf1, wf2))}
-        \PY{c+c1}{\PYZsh{}         a.append(b)}
-        
-            \PY{c+c1}{\PYZsh{} print(np.real(np.array(a)))}
-        \PY{c+c1}{\PYZsh{}     plt.imshow(np.real(np.array(a)))}
-        \PY{c+c1}{\PYZsh{}     plt.colorbar()}
 \end{Verbatim}
 
 
