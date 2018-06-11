@@ -2,23 +2,29 @@
 
 import numpy as np
 
-sin_30, cos_30 = (1 / 2., np.sqrt(3) / 2.)
+def rotation(theta):
+    return np.array([ [np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)] ])
 
 
-def rectangle(coord, xcoords=None, ycoords=None):
+def rectangle(coord, angle=0., xcoords=None, ycoords=None, shift=[0.0, 0.0]):
+    xshift = xcoords[0] + 0.5 * (xcoords[1] - xcoords[0])
+    yshift = ycoords[0] + 0.5 * (ycoords[1] - ycoords[0])
     x, y = coord
-    return xcoords[0] <= x <= xcoords[1] and ycoords[0] <= y <= ycoords[1]
+    valx = x - xshift
+    valy = y -  yshift
+    new_val = rotation(angle).dot((valx, valy))
+    return xcoords[0] <= new_val[0] + xshift <= xcoords[1] and ycoords[0] <= new_val[1] + yshift <= ycoords[1]
 
-def circle(r, coord):
+def circle(coord, radius=None):
     x, y = coord
-    return x**2 + y**2 < r**2
+    return x**2 + y**2 <= radius**2
 
-def ring(r1, r2, coord):
+def ring(coord, inner_radius=None, outer_radius=None):
     x, y = coord
-    return x**2 + y**2 > r1 and x**2 + y**2 < r2
+    return x**2 + y**2 >= inner_radius and x**2 + y**2 <= outer_radius
 
-def ellipse(a, b, r, coord):
-    return (x / a)**2  + (y / b)**2 < r**2
+def ellipse(coord, a=None, b=None, radius=None):
+    return (x / a)**2  + (y / b)**2 <= radius**2
 
 def nBodyDevice(components, coord):
     firstComp = components[0](coord)

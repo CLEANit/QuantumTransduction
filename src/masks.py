@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 
 import numpy as np
@@ -8,7 +9,6 @@ from scipy import misc
     The functions here can be thought of as masks that 
     go overtop of the crystal lattice. Once you apply a
     mask, the atoms in certain regions are then removed.
-
     All of the functions have to recieve the args: maxs, tags.
 '''
 
@@ -74,15 +74,31 @@ def randomCircles(max_tag, min_pos, max_pos, pos, number=None, radius=None):
     hx = (max_pos[0] - min_pos[0]) / max_tag[0]
     hy = (max_pos[1] - min_pos[1]) / max_tag[1]
 
-    rx = np.random.uniform(min_pos[0] + radius, max_pos[0] - radius, number)
-    ry = np.random.uniform(min_pos[1] + radius, max_pos[1] - radius, number)
+
+    rx = np.random.uniform(min_pos[0] + 2*radius, max_pos[0] - 2*radius, number)
+    ry = np.random.uniform(min_pos[1] + 2*radius, max_pos[1] - 2*radius, number)
     x = np.linspace(min_pos[0], max_pos[0], max_tag[0] + 1)
     y = np.linspace(min_pos[1], max_pos[1], max_tag[1] + 1)
     Y, X = np.meshgrid(y, x)
     img = np.ones((max_tag[0] + 1, max_tag[1] + 1))
     for x, y in zip(rx, ry):
         img[(X - x)**2 + (Y - y)**2 < radius**2] = 0
-    return img[(pos[:,0] / hx).astype(int), (pos[:,1] / hy).astype(int)], {'xpos': rx, 'ypos': ry}
+
+    return img[(pos[:,0] / hx).astype(int), (pos[:,1] / hy).astype(int)], {'xpos': rx, 'ypos': ry, 'radius': radius}
+
+def circle(max_tag, min_pos, max_pos, pos, xpos=None, ypos=None, radius=None):
+    '''
+        This places n random circles of size r by r randomly in the lattice.
+    '''
+    hx = (max_pos[0] - min_pos[0]) / max_tag[0]
+    hy = (max_pos[1] - min_pos[1]) / max_tag[1]
+
+    x = np.linspace(min_pos[0], max_pos[0], max_tag[0] + 1)
+    y = np.linspace(min_pos[1], max_pos[1], max_tag[1] + 1)
+    Y, X = np.meshgrid(y, x)
+    img = np.ones((max_tag[0] + 1, max_tag[1] + 1))
+    img[(X - xpos)**2 + (Y - ypos)**2 < radius**2] = 0
+    return img[(pos[:,0] / hx).astype(int), (pos[:,1] / hy).astype(int)], {'xpos': xpos, 'ypos': ypos, 'radius': radius}
 
 def randomBlocksAndCirclesHoles(rbs, rcs, max_tag, min_pos, max_pos, pos):
     '''
@@ -134,7 +150,8 @@ def image(name, shape, max_tag, min_pos, max_pos, pos):
 
 mask_dict = {
     'randomCircles': randomCircles,
-    'randomSquares': randomSquares
+    'randomSquares': randomSquares,
+    'circle': circle
 }
 
 def whatMask(name):

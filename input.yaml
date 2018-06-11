@@ -10,6 +10,7 @@ Model:
   Junction:
     # the main body
     # the main body needs an id so we know where to apply the mask
+<<<<<<< HEAD
     - {shape: 'rectangle', args: {xcoords: [-64, 64], ycoords: [-32, 32]}, id: 'body', hopping: -1., offset: [0, 0]}
     # Left channel
     - {shape: 'rectangle', args: {xcoords: [-80, -64], ycoords: [-8, 8]}, hopping: -1., offset: [-64, 0]}
@@ -33,3 +34,43 @@ GA:
     n_structures: 2
     # number of iterations to perform
     n_iterations: 10
+=======
+    - {
+        shape: 'circle', 
+        
+        args: {
+          radius: 4
+        },
+          
+        id: 'body',
+        
+        potential: 1.0,
+        
+        hopping: -2.7,
+        
+        offset: [0, 0]
+      }
+    # Left channel
+    - {shape: 'rectangle', args: {xcoords: [-6, -4], ycoords: [-2, 2]}, potential: 1.0, hopping: -2.7, offset: [-4, 0]}
+    # Right upper channel
+    - {shape: 'rectangle', args: {xcoords: [2, 7], ycoords: [2, 6], angle: -1.0471975511965976}, potential: 1.0, hopping: -2.7, offset: [4, 3]}
+    # Right lower channel
+    - {shape: 'rectangle', args: {xcoords: [2, 7], ycoords: [-6, -2], angle: 1.0471975511965976}, potential: 1.0, hopping: -2.7, offset: [4, -3]}
+
+  Masks:
+      # Let's place a random circle
+    - {name: 'circle', args: {xpos: 0.0, ypos: 0.0, radius: 1.0}}
+
+  Leads:
+    - {shape: 'rectangle', shape_args: {xcoords: [-20, 20], ycoords: [-2, 2]}, symmetry: [-1, 0], offset: [-20, 0], potential: -0.1, hopping: -2.7 }
+    - {shape: 'rectangle', shape_args: {xcoords: [-3, 3], ycoords: [-2, 2], angle: -1.0471975511965976}, symmetry: [1,1], offset: [0, 0], potential: 0.1, hopping: -2.7 }
+    - {shape: 'rectangle', shape_args: {xcoords: [-3, 3], ycoords: [-2, 2], angle: 1.0471975511965976}, symmetry: [1,-1], offset: [0, 0], potential: 0.1, hopping: -2.7 }
+
+
+# Genetic algorithm
+GA:
+  # number of structures in the GA
+  n_structures: 16
+  # number of iterations to perform
+  n_iterations: 10
+>>>>>>> 0c5d745b21877ba95d9645126f83196d1eb98b02

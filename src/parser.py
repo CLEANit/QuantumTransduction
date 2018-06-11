@@ -40,17 +40,26 @@ class Parser:
             shapes = []
             hoppings = []
             offsets = []
+
+            pots = []
             for js in junction_shapes:
                 if 'id' in js and js['id'] == 'body':
                     self.body = partial(whatShape(js['shape']), **js['args'])
                 shapes.append(partial(whatShape(js['shape']), **js['args']))
                 hoppings.append(js['hopping'])
                 offsets.append(js['offset'])
+                pots.append(js['potential'])
 
-            self.device = {'shapes': shapes, 'hoppings': hoppings, 'offsets': offsets}
+            self.device =   {
+                                'shapes': shapes,
+                                'hoppings': hoppings,
+                                'offsets': offsets,
+                                'potentials': pots,
+                                'body': self.body
+                            }
 
         junction_masks = self.config['Model']['Masks']
-        if len(junction_masks) > 0:
+        if junction_masks is not None:
             masks = []
             for jm in junction_masks:
                 masks.append(partial(whatMask(jm['name']), **jm['args']))
@@ -80,8 +89,11 @@ class Parser:
     def getNStructures(self):
         return self.n_structures
 
+    def getNIterations(self):
+        return self.n_iterations
+
     def getDevice(self):
-        return self.body, self.device
+        return self.device
 
     def getMaskFunction(self):
         return self.mask
