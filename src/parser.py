@@ -16,7 +16,7 @@ class Parser:
         try:
             self.config = yaml.load(open('input.yaml', 'r'))
         except:
-            logger.error('Could not parser configuration file: "input.yaml".')
+            logger.error('Could not parse the configuration file: "input.yaml".')
 
         # all of the variables set in self.parseModel
         self.body = None
@@ -100,3 +100,19 @@ class Parser:
 
     def getLeads(self):
         return self.leads
+
+    def getLatticeType(self):
+        return self.config['System']['lattice_type']
+
+    def getLatticeConstant(self):
+        return self.config['System']['lattice_constant']
+
+    def getLatticeVectors(self):
+        return self.config['System']['lattice_vectors']
+
+    def getLatticeBasis(self):
+        return self.config['System']['lattice_basis']
+
+    def getNumOrbitals(self):
+        return self.config['System']['n_orbitals']
+

@@ -5,15 +5,15 @@ import numpy as np
 def rotation(theta):
     return np.array([ [np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)] ])
 
+def hexagon(coord, xcoords=None, ycoords=None, shift=[0.0, 0.0]):
+    x, y = coord
+    m = np.sin(np.pi / 6) / np.cos(np.pi / 6)
+    return xcoords[0] <= x <= xcoords[1] and ycoords[0] <= x * m + y <= ycoords[1] and ycoords[0] <= -x * m  + y  <= ycoords[1]
 
 def rectangle(coord, angle=0., xcoords=None, ycoords=None, shift=[0.0, 0.0]):
-    xshift = xcoords[0] + 0.5 * (xcoords[1] - xcoords[0])
-    yshift = ycoords[0] + 0.5 * (ycoords[1] - ycoords[0])
     x, y = coord
-    valx = x - xshift
-    valy = y -  yshift
-    new_val = rotation(angle).dot((valx, valy))
-    return xcoords[0] <= new_val[0] + xshift <= xcoords[1] and ycoords[0] <= new_val[1] + yshift <= ycoords[1]
+    new_val = rotation(-angle).dot((valx, valy))
+    return xcoords[0] <= new_val[0] - xshift <= xcoords[1] and ycoords[0] <= new_val[1] - yshift <= ycoords[1]
 
 def circle(coord, radius=None):
     x, y = coord
@@ -36,7 +36,8 @@ shape_dict = {
     'rectangle': rectangle,
     'circle': circle,
     'ring': ring,
-    'ellipse': ellipse
+    'ellipse': ellipse,
+    'hexagon': hexagon
 }
 
 def whatShape(name):

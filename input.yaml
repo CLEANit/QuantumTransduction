@@ -2,49 +2,33 @@
 #### Input file for runner!!
 ############
 
+System:
 
-Model:
+  # right now only general
+  lattice_type: 'general'
 
+  # lattice constant for the crystal
   lattice_constant: 1.42
+
+  # zig-zag leads
+  lattice_vectors: [[1.22975607, 2.13], [-1.22975607, 2.13]]
+  lattice_basis: [[0.0, 0.0], [0.0, -1.42]]
+
+  # number of orbitals
+  n_orbitals: 1
+
 
   Junction:
     # the main body
     # the main body needs an id so we know where to apply the mask
-<<<<<<< HEAD
-    - {shape: 'rectangle', args: {xcoords: [-64, 64], ycoords: [-32, 32]}, id: 'body', hopping: -1., offset: [0, 0]}
-    # Left channel
-    - {shape: 'rectangle', args: {xcoords: [-80, -64], ycoords: [-8, 8]}, hopping: -1., offset: [-64, 0]}
-    # Right upper channel
-    - {shape: 'rectangle', args: {xcoords: [64, 80], ycoords: [8, 24]}, hopping: -1., offset: [64, 8]}
-    # Right lower channel
-    - {shape: 'rectangle', args: {xcoords: [64, 80], ycoords: [-24, -8]}, hopping: -1., offset: [64, -8]}
-
-  Masks:
-      # Let's place a random circle
-    - {name: 'randomCircles', args: {number: 1, radius: 5}}
-
-  Leads:
-    - {shape: 'rectangle', shape_args: {xcoords: [-80, 80], ycoords: [-8, 8]}, symmetry: [-1, 0], offset: [-80, 0], potential: -1.0, hopping: -1. }
-    - {shape: 'rectangle', shape_args: {xcoords: [-80, 80], ycoords: [8, 24]}, symmetry: [1, 0], offset: [80, 8], potential: 1.0, hopping: -1. }
-    - {shape: 'rectangle', shape_args: {xcoords: [-80, 80], ycoords: [-24, -8]}, symmetry: [1, 0], offset: [80, -8], potential: 1.0, hopping: -1. }
-
-# Genetic algorithm
-GA:
-    # number of structures in the GA
-    n_structures: 2
-    # number of iterations to perform
-    n_iterations: 10
-=======
     - {
-        shape: 'circle', 
+        shape: 'rectangle', 
         
-        args: {
-          radius: 4
-        },
+        args: {xcoords: [-10, 10], ycoords: [-10, 10]},
           
         id: 'body',
         
-        potential: 1.0,
+        potential: 0.0,
         
         hopping: -2.7,
         
@@ -73,4 +57,3 @@ GA:
   n_structures: 16
   # number of iterations to perform
   n_iterations: 10
->>>>>>> 0c5d745b21877ba95d9645126f83196d1eb98b02
