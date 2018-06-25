@@ -9,15 +9,15 @@ class Timer:
         self.divs = [1., 60., 3600., 3600. * 24.]
         self.maxs = [60., 3600., 3600. * 24, 1000.]
 
-    def start(self, val):
-        self.start_time = val
+    def start(self):
+        self.start_time = time.clock()
 
-    def stop(self, val, tformat='auto'):
+    def stop(self, tformat='auto'):
         if tformat == 'auto':
-            diff = val - self.start_time
+            diff = time.clock() - self.start_time
             for u, d, m in zip(self.units, self.divs, self.maxs):
                 if diff < m:
-                    return '{:1.2f}'.format((val - self.start_time) / d) + ' ' + u
+                    return '{:1.2f}'.format(diff / d) + ' ' + u
                 else:
                     diff /= m
 

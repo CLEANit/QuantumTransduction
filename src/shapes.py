@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
+from .helper import rot
 import numpy as np
 
-def rotation(theta):
-    return np.array([ [np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)] ])
 
 def hexagon(coord, xcoords=None, ycoords=None, shift=[0.0, 0.0]):
     x, y = coord
@@ -12,7 +11,7 @@ def hexagon(coord, xcoords=None, ycoords=None, shift=[0.0, 0.0]):
 
 def rectangle(coord, angle=0., xcoords=None, ycoords=None, shift=[0.0, 0.0]):
     x, y = coord
-    new_val = rotation(-angle).dot((valx, valy))
+    new_val = rot(angle).dot((valx, valy))
     return xcoords[0] <= new_val[0] - xshift <= xcoords[1] and ycoords[0] <= new_val[1] - yshift <= ycoords[1]
 
 def circle(coord, radius=None):

@@ -17,38 +17,47 @@ System:
   # number of orbitals
   n_orbitals: 1
 
+  spin_dependent: false
+
 
   Junction:
     # the main body
     # the main body needs an id so we know where to apply the mask
     - {
+        # shape of the junction
         shape: 'rectangle', 
         
+        # args passed to the shape function
         args: {xcoords: [-10, 10], ycoords: [-10, 10]},
-          
+
+        # we need to id the body to know where to apply a mask  
         id: 'body',
-        
+
+        # on-site energy
         potential: 0.0,
         
+        # hopping energy
         hopping: -2.7,
-        
+
+        # magnetic flux strength
+        phi: 0.0,
+
+        # offset when kwant uses the food-fill algorithm
         offset: [0, 0]
       }
     # Left channel
-    - {shape: 'rectangle', args: {xcoords: [-6, -4], ycoords: [-2, 2]}, potential: 1.0, hopping: -2.7, offset: [-4, 0]}
-    # Right upper channel
-    - {shape: 'rectangle', args: {xcoords: [2, 7], ycoords: [2, 6], angle: -1.0471975511965976}, potential: 1.0, hopping: -2.7, offset: [4, 3]}
-    # Right lower channel
-    - {shape: 'rectangle', args: {xcoords: [2, 7], ycoords: [-6, -2], angle: 1.0471975511965976}, potential: 1.0, hopping: -2.7, offset: [4, -3]}
+    # - {shape: 'rectangle', args: {xcoords: [-6, -4], ycoords: [-2, 2]}, potential: 1.0, hopping: -2.7, phi: 0.0, offset: [-4, 0]}
+    # # Right upper channel
+    # - {shape: 'rectangle', args: {xcoords: [2, 7], ycoords: [2, 6], angle: -1.0471975511965976}, potential: 1.0, hopping: -2.7, phi: 0.0, offset: [4, 3]}
+    # # Right lower channel
+    # - {shape: 'rectangle', args: {xcoords: [2, 7], ycoords: [-6, -2], angle: 1.0471975511965976}, potential: 1.0, hopping: -2.7, phi: 0.0, offset: [4, -3]}
 
   Masks:
       # Let's place a random circle
     - {name: 'circle', args: {xpos: 0.0, ypos: 0.0, radius: 1.0}}
 
   Leads:
-    - {shape: 'rectangle', shape_args: {xcoords: [-20, 20], ycoords: [-2, 2]}, symmetry: [-1, 0], offset: [-20, 0], potential: -0.1, hopping: -2.7 }
-    - {shape: 'rectangle', shape_args: {xcoords: [-3, 3], ycoords: [-2, 2], angle: -1.0471975511965976}, symmetry: [1,1], offset: [0, 0], potential: 0.1, hopping: -2.7 }
-    - {shape: 'rectangle', shape_args: {xcoords: [-3, 3], ycoords: [-2, 2], angle: 1.0471975511965976}, symmetry: [1,-1], offset: [0, 0], potential: 0.1, hopping: -2.7 }
+    - {width: 20, symmetry: [-1, 0], offset: [0, 0], potential: 0.0, hopping: -2.7, phi: 0.0, reverse: True}
 
 
 # Genetic algorithm

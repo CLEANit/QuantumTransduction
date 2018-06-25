@@ -12,6 +12,7 @@ import dill
 from functools import partial
 from .shapes import *
 from .masks import *
+from .helper import *
 
 import coloredlogs, verboselogs
 import copy
@@ -49,8 +50,19 @@ class Structure:
         self.device = parser.getDevice()
         self.leads = parser.getLeads()
         self.body = self.device['body']
+        self.spin_dep = parser.spinDependent()
 
         self.build()
+
+    def hoppingFunction(t, phi, site1, site2):
+        B = phi / (lattice_vectors[0][0] * lattice_vectors[1][1] - lattice_vectors[0][1] * lattice_vectors[1][0])
+        p1 = site1.pos
+        p2 = site2.pos
+        return t * np.exp(1j * np.pi * (p2[0] - p1[0]) * (p2[1] + p1[1]) * B)
+
+    def onSiteFunction(pot, spin, phi, site):
+        B = phi / (lattice_vectors[0][0] * lattice_vectors[1][1] - lattice_vectors[0][1] * lattice_vectors[1][0])
+        return pot + spin * B
 
     def build(self):
         # first construct the lattice
@@ -67,26 +79,73 @@ class Structure:
             exit(-1)
 
 
-        for shape, offset, hopping, potential in zip(self.device['shapes'], self.device['offsets'], self.device['hoppings'], self.device['potentials']):
-            self.system[self.lattice.shape(shape, offset)] = potential
-            self.neighbors = self.lattice.neighbors()
-            self.system[self.neighbors] = hopping
+        for shape, offset, hopping, potential, phi in zip(self.device['shapes'], self.device['offsets'], self.device['hoppings'], self.device['potentials']):
+            
+            # if we want to consider spin dependent transport
+            if self.spin_dep:
+                self.system_up[self.lattice.shape(shape, offset)] = partial(onSiteFunction, potential, 1/2, phi)
+                self.system_down[self.lattice.shape(shape, offset)] = partial(onSiteFunction, potential, -1/2, phi)
+                
+                self.neighbors = self.lattice.neighbors()
+                
+                self.system_up[self.neighbors] = partial(self.hoppingFunction, hopping, phi)
+                self.system_down[self.neighbors] = partial(self.hoppingFunction, hopping, phi)
+
+            else:
+                self.system[self.lattice.shape(shape, offset)] = potential
+                self.neighbors = self.lattice.neighbors()
+                self.system[self.neighbors] = partial(self.hoppingFunction, hopping, phi)
 
     def attachLeads(self):
-        self.system_leads = []
-        for l in self.leads:
-            lead_shape = l['shape']
-            lead_vector = l['symmetry']
-            lead_offset = l['offset']
-            lead_pot = l['potential']
-            lead_hopping = l['hopping']
-            sym = kwant.TranslationalSymmetry(self.lattice.vec(lead_vector))
-            lead = kwant.Builder(sym)
-            lead[self.lattice.shape(lead_shape, lead_offset)] = lead_pot
-            lead[self.neighbors] = lead_hopping
-            lead.eradicate_dangling()
-            self.system_leads.append(lead)
-            self.system.attach_lead(lead)
+        if self.spin_dep:
+            for l in self.leads:
+                lead_width = l['width']
+                lead_vector = l['symmetry']
+                lead_offset = l['offset']
+                lead_pot = l['potential']
+                lead_hopping = l['hopping']
+                lead_phi = l['phi']
+                lead_r = l['reverse']
+
+                sym = kwant.TranslationalSymmetry(self.lattice.vec(lead_vector))
+                a = orthogVecSlope(graphene.vec(lead_vector))
+                lead_up = kwant.Builder(sym)
+                lead_down = kwant.Builder(sym)
+                lead_up[self.lattice.shape(lambda pos: lambda pos: -lead_width/2  < pos[1] + pos[0] * a < lead_width/2, lead_offset)] = partial(self.onSiteFunction, lead_pot, 1/2, phi)
+                lead_down[self.lattice.shape(lambda pos: lambda pos: -lead_width/2  < pos[1] + pos[0] * a < lead_width/2, lead_offset)] = partial(self.onSiteFunction, lead_pot, 1/2, phi)
+                lead_up[self.neighbors] = partial(self.hoppingFunction, lead_hopping, phi)
+                lead_down[self.neighbors] = partial(self.hoppingFunction, lead_hopping, phi)            
+                lead_up.eradicate_dangling()
+                lead_down.eradicate_dangling()
+
+                self.system_up.attach_lead(lead_up)
+                self.system_down.attach_lead(lead_down)
+
+                if lead_r:
+                    self.system_up.attach_lead(lead_up.reversed())
+                    self.system_down.attach_lead(lead_down.reversed())
+
+        else:
+            for l in self.leads:
+                lead_width = l['width']
+                lead_vector = l['symmetry']
+                lead_offset = l['offset']
+                lead_pot = l['potential']
+                lead_hopping = l['hopping']
+                lead_phi = l['phi']
+                lead_r = l['reverse']
+
+                sym = kwant.TranslationalSymmetry(self.lattice.vec(lead_vector))
+                a = orthogVecSlope(graphene.vec(lead_vector))
+                lead = kwant.Builder(sym)
+                lead[self.lattice.shape(lambda pos: lambda pos: -lead_width/2  < pos[1] + pos[0] * a < lead_width/2, lead_offset)] = lead_pot
+                lead[self.neighbors] = partial(self.hoppingFunction, lead_hopping, phi)
+                lead.eradicate_dangling()
+                self.system.attach_lead(lead)
+
+                if lead_r:
+                    self.system.attach_lead(lead.reversed())
+
 
     def applyMask(self, mask):
         tags = []
@@ -124,73 +183,96 @@ class Structure:
         self.system.eradicate_dangling()
 
     def finalize(self):
-        self.pre_system = self.system
-        self.system = self.system.finalized()
+        if self.spin_dep:
+            self.pre_system_up = self.system_up
+            self.pre_system_down = self.system_down
+        
+            self.system_up = self.system_up.finalized()
+            self.system_down = self.system_down.finalized()
+        else:
+            self.pre_system = self.system
+            self.system = self.system.finalized()
 
     def getPreSystem(self):
-        return self.pre_system
+        if self.spin_dep:
+            return self.pre_system_up, self.pre_system_down
+        else:
+            return self.pre_system
 
     def getSystem(self):
-        return self.system
-
-    def getLeads(self):
-        return self.leads
-
-    def getPrimVecs(self):
-        return self.lattice.prim_vecs
-
-    def family_colors(self, site):
-        return 0 if site.family == self.a else 1
+        if self.spin_dep:
+            return self.system_up, self.system_down
+        else:
+            return self.system
 
     def visualizeSystem(self, args={}):
-        return kwant.plot(self.system, site_lw=0.1, colorbar=False, **args)
+        if self.spin_dep:
+            return kwant.plot(self.system_up, site_lw=0.1, colorbar=False, **args)
+        else:
+            return kwant.plot(self.system, site_lw=0.1, colorbar=False, **args)
 
-    '''
-    TODO: pass args to the eigensolver
-    '''
-    def diagonalize(self):
+    def diagonalize(self, args={}):
         # Compute some eigenvalues of the closed system
-        sparse_mat = self.system.hamiltonian_submatrix(sparse=True)
-
-        return sla.eigs(sparse_mat)
+        if self.spin_dep:
+            sparse_mat_up = self.system_up.hamiltonian_submatrix(sparse=True, **args)
+            sparse_mat_down = self.system_down.hamiltonian_submatrix(sparse=True, **args)
+            return sla.eigs(sparse_mat_up), sla.eigs(sparse_mat_down) 
+        else:
+            sparse_mat = self.system.hamiltonian_submatrix(sparse=True, **args)
+            return sla.eigs(sparse_mat)
 
     def getConductance(self, energies, start_lead_id, end_lead_id):
         # Compute transmission as a function of energy
-        data = []
-        for energy in energies:
-            smatrix = kwant.smatrix(self.system, energy)
-            data.append(smatrix.transmission(start_lead_id, end_lead_id))
-        return data
+        if self.spin_dep:
+            data_up, data_down = [], []
+            for energy in energies:
+                smatrix_up = kwant.smatrix(self.system_up, energy)
+                smatrix_down = kwant.smatrix(self.system_down, energy)
+                data_up.append(smatrix_up.transmission(start_lead_id, end_lead_id))
+                data_down.append(smatrix_down.transmission(start_lead_id, end_lead_id))
+            return data_up, data_down
+        else:
+            data = []
+            for energy in energies:
+                smatrix = kwant.smatrix(self.system, energy)
+                data.append(smatrix.transmission(start_lead_id, end_lead_id))
+            return data
 
     def getBandStructure(self, leadid, momenta):
-        bands = kwant.physics.Bands(self.system_leads[leadid].finalized())
-        energies = [bands(k) for k in momenta]
-        return energies
+        if self.spin_dep:
+            bands_up = kwant.physics.Bands(self.system_up.leads[leadid].finalized())
+            bands_down = kwant.physics.Bands(self.system_down.leads[leadid].finalized())
+            energies_up = [bands_up(k) for k in momenta]
+            energies_down = [bands_down(k) for k in momenta]
+            return energies_up, energies_down         
+        else:
+            bands = kwant.physics.Bands(self.system.leads[leadid].finalized())
+            energies = [bands(k) for k in momenta]
+            return energies
 
     def getWaveFunction(self, lead_id, energy=-1):
-        return kwant.wave_function(self.system, energy)(lead_id)
+        if self.spin_dep:
+            return kwant.wave_function(self.system_up, energy)(lead_id), kwant.wave_function(self.system_down, energy)(lead_id)
+        else:
+            return kwant.wave_function(self.system, energy)(lead_id)
 
     # currently not working
     def plotWaveFunction(self, lead_id, energy=0., cmap=cmocean.cm.dense):
         return kwant.plotter.map(self.system, np.absolute(self.getWaveFunction(lead_id, energy)[0])**2, oversampling=10, cmap=cmap)
 
     def plotCurrent(self, lead_id, energy=0., args={}):
-        J = kwant.operator.Current(self.system)
-        current = np.sum(J(p) for p in self.getWaveFunction(lead_id, energy))
-        return kwant.plotter.current(self.system, current, cmap=cmocean.cm.dense, **args)
-
-    def plotBands(self, momenta, leadid=0):
-        kwant.plotter.bands(self.system_leads[leadid].finalized())
-
-    def plotConductance(self, energies, start_lead_id=0, end_lead_id=1):
-        conductances = self.getConductance(energies, start_lead_id, end_lead_id)
-        plt.figure()
-        plt.xlabel("energy [t]")
-        plt.ylabel("conductance [$e^2/h$]")
-        return plt.plot(energies, conductances)
+        if self.spin_dep:
+            pass
+        else:
+            J = kwant.operator.Current(self.system)
+            current = np.sum(J(p) for p in self.getWaveFunction(lead_id, energy))
+            return kwant.plotter.current(self.system, current, cmap=cmocean.cm.dense, **args)
 
     def getNSites(self):
-        return len(list(self.pre_system.site_value_pairs()))
+        if self.spin_dep:
+            return len(list(self.pre_system_up.sites()))
+        else:
+            return len(list(self.pre_system.sites()))
 
     def getDOS(self):
         return kwant.kpm.SpectralDensity(self.system)()
@@ -253,23 +335,3 @@ class Structure:
             self.applyMask(partial(multiMasks, masks))
             self.attachLeads()
             self.finalize()
-
-
-    # def __reduce__(self):
-    #     return (self.__class__, (
-    #                 self.index,
-    #                 self.logger,
-    #                 self.shape,
-    #                 self.body,
-    #                 self.potential,
-    #                 self.lead_shapes,
-    #                 self.lead_vectors,
-    #                 self.lead_offsets,
-    #                 self.lead_potentials,
-    #                 self.mask,
-    #                 self.shape_offset,
-    #                 self.lattice_type,
-    #                 self.lattice_const,
-    #                 self.t,
-    #                 )
-    #             )

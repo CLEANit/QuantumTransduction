@@ -32,7 +32,7 @@ class Parser:
 
 
     def parseModel(self):
-        junction_shapes = self.config['Model']['Junction']
+        junction_shapes = self.config['System']['Junction']
         if len(junction_shapes) == 0:
             logger.error('You have no shapes defined in junction!')
             exit(-1)
@@ -40,8 +40,8 @@ class Parser:
             shapes = []
             hoppings = []
             offsets = []
-
             pots = []
+            phis = []
             for js in junction_shapes:
                 if 'id' in js and js['id'] == 'body':
                     self.body = partial(whatShape(js['shape']), **js['args'])
@@ -49,16 +49,18 @@ class Parser:
                 hoppings.append(js['hopping'])
                 offsets.append(js['offset'])
                 pots.append(js['potential'])
+                phis.append(js['phi'])
 
             self.device =   {
                                 'shapes': shapes,
                                 'hoppings': hoppings,
                                 'offsets': offsets,
                                 'potentials': pots,
+                                'phis': phis,
                                 'body': self.body
                             }
 
-        junction_masks = self.config['Model']['Masks']
+        junction_masks = self.config['System']['Masks']
         if junction_masks is not None:
             masks = []
             for jm in junction_masks:
@@ -66,21 +68,12 @@ class Parser:
 
             self.mask = partial(multiMasks, masks)
 
-        junction_leads = self.config['Model']['Leads']
+        junction_leads = self.config['System']['Leads']
         if len(junction_leads) == 0:
             logger.error('You have not defined any leads!')
             exit(-1)
         else:
-            self.leads = []
-            for jl in junction_leads:
-                lead = {}
-                lead['shape'] = partial(whatShape(jl['shape']), **jl['shape_args'])
-                lead['symmetry'] = jl['symmetry']
-                lead['offset'] = jl['offset']
-                lead['potential'] = jl['potential']
-                lead['hopping'] = jl['hopping']
-                self.leads.append(lead)
-
+            pass
 
     def parseGA(self):
         self.n_structures = self.config['GA']['n_structures']
@@ -99,7 +92,7 @@ class Parser:
         return self.mask
 
     def getLeads(self):
-        return self.leads
+        return self.config['System']['Leads']
 
     def getLatticeType(self):
         return self.config['System']['lattice_type']
@@ -115,4 +108,7 @@ class Parser:
 
     def getNumOrbitals(self):
         return self.config['System']['n_orbitals']
+
+    def spinDependent(self):
+        return self.config['spin_dependent']
 
