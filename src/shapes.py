@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from .helper import rot
+from helper import rot
 import numpy as np
 
 

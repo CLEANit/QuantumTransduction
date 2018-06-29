@@ -10,9 +10,9 @@ import copy
 import multiprocessing
 import dill
 from functools import partial
-from .shapes import *
-from .masks import *
-from .helper import *
+from shapes import *
+from masks import *
+from helper import *
 
 import coloredlogs, verboselogs
 import copy
@@ -22,6 +22,9 @@ coloredlogs.install(level='INFO')
 logger = verboselogs.VerboseLogger(' <-- QMT: model --> ')
 
 class Generator:
+    """
+    this is a test
+    """
     def __init__(self, model):
         self.model = model
         self.dill_model = dill.dumps(model)
@@ -42,6 +45,14 @@ class Generator:
     #     return (self.__class__, (self.generator, self.n_generated))
 
 class Structure:
+    """
+    This is the main class which stores all of the information needed for kwant as well as functions to make it easier to use kwant (not that it is too difficult).
+
+    Parameters
+    ----------
+    parser : This takes the YAML configuration file which is read in as a dictionary.
+
+    """
     def __init__(   self,
                     parser
                  ):
