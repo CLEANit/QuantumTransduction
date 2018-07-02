@@ -17,7 +17,7 @@ System:
   # number of orbitals
   n_orbitals: 1
 
-  spin_dependent: false
+  spin_dependent: true
 
 
   Junction:
@@ -28,7 +28,7 @@ System:
         shape: 'rectangle', 
         
         # args passed to the shape function
-        args: {xcoords: [-10, 10], ycoords: [-10, 10]},
+        args: {xcoords: [-10, 10], ycoords: [-10, 10], angle: 0.0, shift: [0.0, 0.0]},
 
         # we need to id the body to know where to apply a mask  
         id: 'body',
@@ -46,19 +46,20 @@ System:
         offset: [0, 0]
       }
     # Left channel
-    # - {shape: 'rectangle', args: {xcoords: [-6, -4], ycoords: [-2, 2]}, potential: 1.0, hopping: -2.7, phi: 0.0, offset: [-4, 0]}
-    # # Right upper channel
-    # - {shape: 'rectangle', args: {xcoords: [2, 7], ycoords: [2, 6], angle: -1.0471975511965976}, potential: 1.0, hopping: -2.7, phi: 0.0, offset: [4, 3]}
-    # # Right lower channel
-    # - {shape: 'rectangle', args: {xcoords: [2, 7], ycoords: [-6, -2], angle: 1.0471975511965976}, potential: 1.0, hopping: -2.7, phi: 0.0, offset: [4, -3]}
+    - {shape: 'rectangle', args: {xcoords: [-20, -10], ycoords: [-5, 5], angle: 0., shift: [0., 0.]}, potential: 1.0, hopping: -2.7, phi: 0.0, offset: [-15, 0], id: 'channel'}
+    # Right upper channel
+    - {shape: 'rectangle', args: {xcoords: [10, 20], ycoords: [2, 8], angle: 0., shift: [0., 0.]}, potential: 1.0, hopping: -2.7, phi: 0.0, offset: [15, 5], id: 'channel'}
+    # Right lower channel
+    - {shape: 'rectangle', args: {xcoords: [10, 20], ycoords: [-8, -2], angle: 0., shift: [0., 0.]}, potential: 1.0, hopping: -2.7, phi: 0.0, offset: [15, -5], id: 'channel'}
 
   Masks:
       # Let's place a random circle
-    - {name: 'circle', args: {xpos: 0.0, ypos: 0.0, radius: 1.0}}
+    #- {name: 'circle', args: {xpos: 0.0, ypos: 0.0, radius: 1.0}}
 
   Leads:
-    - {width: 20, symmetry: [-1, 0], offset: [0, 0], potential: 0.0, hopping: -2.7, phi: 0.0, reverse: True}
-
+    - {range: [-5, 5], symmetry: [-1, 1], offset: [0, 0], potential: 0.0, hopping: -2.7, phi: 0.0, reverse: False}
+    - {range: [2, 8], symmetry: [1, -1], offset: [0, 5], potential: 0.0, hopping: -2.7, phi: 0.0, reverse: False}
+    - {range: [-8, -2], symmetry: [1, -1], offset: [0, -5], potential: 0.0, hopping: -2.7, phi: 0.0, reverse: False}
 
 # Genetic algorithm
 GA:
@@ -66,3 +67,9 @@ GA:
   n_structures: 16
   # number of iterations to perform
   n_iterations: 10
+
+  Genes:
+    - { type: 'deviceLength'  , args: {range: [-5, 5]} }
+    - { type: 'deviceWidth'   , args: {range: [-5, 5]} }
+    - { type: 'channelWidth'  , args: {range: [-5, 5]} }
+    - { type: 'magneticField' , args: {range: [ 0, 1]} }

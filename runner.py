@@ -32,6 +32,7 @@ def main():
     logger.success(' --- Welcome to the Quantum transmission device optimizer --- ')
 
     parser = Parser()
+    s = Structure(parser)
 
 if __name__ == '__main__':
     main()

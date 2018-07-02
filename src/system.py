@@ -10,9 +10,6 @@ import copy
 import multiprocessing
 import dill
 from functools import partial
-from shapes import *
-from masks import *
-from helper import *
 
 import coloredlogs, verboselogs
 import copy
@@ -66,6 +63,21 @@ class Structure:
         self.build()
 
     def hoppingFunction(t, phi, site1, site2):
+        """
+        This is a function which returns the hopping value when a magnetic field is being applied.
+
+        Parameters
+        ----------
+        t : The hopping parameter without a magnetic field being applied.
+        phi: The magnetic flux though a single unit cell.
+        site1: A kwant site for the first lattice site.
+        site2: A kwant site for the second lattice site.
+
+        Returns
+        -------
+        The hopping parameter with a magnetic field being applied.
+        """
+
         B = phi / (lattice_vectors[0][0] * lattice_vectors[1][1] - lattice_vectors[0][1] * lattice_vectors[1][0])
         p1 = site1.pos
         p2 = site2.pos
@@ -85,17 +97,23 @@ class Structure:
 
         if lattice_type == 'general':
             self.lattice = kwant.lattice.general(lattice_vectors, lattice_basis, norbs=norbs)
+            if self.spin_dep:
+                self.system_up = kwant.Builder()
+                self.system_down = kwant.Builder()
+            else:
+                self.system = kwant.Builder()
+
         else:
             logger.error('Sorry, we do not support the lattice type: %s' % (lattice_type))
             exit(-1)
 
 
-        for shape, offset, hopping, potential, phi in zip(self.device['shapes'], self.device['offsets'], self.device['hoppings'], self.device['potentials']):
+        for shape, offset, hopping, potential, phi in zip(self.device['shapes'], self.device['offsets'], self.device['hoppings'], self.device['potentials'], self.device['phis']):
             
             # if we want to consider spin dependent transport
             if self.spin_dep:
-                self.system_up[self.lattice.shape(shape, offset)] = partial(onSiteFunction, potential, 1/2, phi)
-                self.system_down[self.lattice.shape(shape, offset)] = partial(onSiteFunction, potential, -1/2, phi)
+                self.system_up[self.lattice.shape(shape, offset)] = partial(self.onSiteFunction, potential, 1/2, phi)
+                self.system_down[self.lattice.shape(shape, offset)] = partial(self.onSiteFunction, potential, -1/2, phi)
                 
                 self.neighbors = self.lattice.neighbors()
                 
@@ -110,7 +128,7 @@ class Structure:
     def attachLeads(self):
         if self.spin_dep:
             for l in self.leads:
-                lead_width = l['width']
+                lead_range = l['range']
                 lead_vector = l['symmetry']
                 lead_offset = l['offset']
                 lead_pot = l['potential']
@@ -122,8 +140,8 @@ class Structure:
                 a = orthogVecSlope(graphene.vec(lead_vector))
                 lead_up = kwant.Builder(sym)
                 lead_down = kwant.Builder(sym)
-                lead_up[self.lattice.shape(lambda pos: lambda pos: -lead_width/2  < pos[1] + pos[0] * a < lead_width/2, lead_offset)] = partial(self.onSiteFunction, lead_pot, 1/2, phi)
-                lead_down[self.lattice.shape(lambda pos: lambda pos: -lead_width/2  < pos[1] + pos[0] * a < lead_width/2, lead_offset)] = partial(self.onSiteFunction, lead_pot, 1/2, phi)
+                lead_up[self.lattice.shape(lambda pos: lambda pos: -lead_range[0]  < pos[1] + pos[0] * a < lead_range[1], lead_offset)] = partial(self.onSiteFunction, lead_pot, 1/2, phi)
+                lead_down[self.lattice.shape(lambda pos: lambda pos: -lead_range[0]  < pos[1] + pos[0] * a < lead_range[1], lead_offset)] = partial(self.onSiteFunction, lead_pot, 1/2, phi)
                 lead_up[self.neighbors] = partial(self.hoppingFunction, lead_hopping, phi)
                 lead_down[self.neighbors] = partial(self.hoppingFunction, lead_hopping, phi)            
                 lead_up.eradicate_dangling()
@@ -138,7 +156,7 @@ class Structure:
 
         else:
             for l in self.leads:
-                lead_width = l['width']
+                lead_range = l['range']
                 lead_vector = l['symmetry']
                 lead_offset = l['offset']
                 lead_pot = l['potential']
@@ -149,7 +167,7 @@ class Structure:
                 sym = kwant.TranslationalSymmetry(self.lattice.vec(lead_vector))
                 a = orthogVecSlope(graphene.vec(lead_vector))
                 lead = kwant.Builder(sym)
-                lead[self.lattice.shape(lambda pos: lambda pos: -lead_width/2  < pos[1] + pos[0] * a < lead_width/2, lead_offset)] = lead_pot
+                lead[self.lattice.shape(lambda pos: lambda pos: lead_range[0]  < pos[1] + pos[0] * a < lead_range[1], lead_offset)] = lead_pot
                 lead[self.neighbors] = partial(self.hoppingFunction, lead_hopping, phi)
                 lead.eradicate_dangling()
                 self.system.attach_lead(lead)

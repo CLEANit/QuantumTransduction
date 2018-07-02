@@ -110,5 +110,5 @@ class Parser:
         return self.config['System']['n_orbitals']
 
     def spinDependent(self):
-        return self.config['spin_dependent']
+        return self.config['System']['spin_dependent']
 
