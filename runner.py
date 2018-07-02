@@ -6,13 +6,10 @@ from src.ga import GA
 from src.serialize import Serializer
 from src.parser import Parser
 from src.timer import Timer
-from src.builder import parentStructure, applyMask, attachLead
 from src.parser import Parser
-from functools import partial
 
 import numpy as np
-from mpi4py import MPI
-import kwant
+
 
 import multiprocessing
 from pathos.multiprocessing import ProcessingPool as Pool
@@ -23,7 +20,7 @@ import matplotlib.pyplot as plt
 # create logger
 coloredlogs.install(level='INFO')
 
-logger = verboselogs.VerboseLogger(' <-- QMT: runner --> ')
+logger = verboselogs.VerboseLogger(' <-- QMT (runner) --> ')
 
 def main():
     total_timer = Timer()
@@ -33,6 +30,8 @@ def main():
 
     parser = Parser()
     s = Structure(parser)
+    print(s.getEnergyRange())
 
+    logger.success(' --- Elasped time: %s ---' % (total_timer.stop()))
 if __name__ == '__main__':
     main()

@@ -17,7 +17,14 @@ System:
   # number of orbitals
   n_orbitals: 1
 
-  spin_dependent: true
+  # do we want to do spin polarized or not
+  spin_dependent: false
+
+  # bias applied to the system
+  bias: 1.0
+
+  # Boltzmann constant times the temperature
+  kb_T: 0.027
 
 
   Junction:
