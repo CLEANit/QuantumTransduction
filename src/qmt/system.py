@@ -295,7 +295,7 @@ class Structure:
         if self.spin_dep:
             pass
 
-    def getBandStructure(self, lead_id, momenta=np.linspace(-np.pi, np.pi, 256)):
+    def getBandStructure(self, lead_id, momenta=None):
         """
         Get the band structure of a certain lead.
 
@@ -308,6 +308,9 @@ class Structure:
         -------
         A tuple with length 2 or three. Zeroth element is momenta and the rest are the energies for that momenta. For spin polarized systems it returns the bands for spin-up and spin-down (length 3 tuple).
         """
+        if momenta == None:
+            momenta = np.linspace(-np.pi, np.pi, 256)
+
         if self.spin_dep:
             bands_up = kwant.physics.Bands(self.system_up.leads[lead_id].finalized())
             bands_down = kwant.physics.Bands(self.system_down.leads[lead_id].finalized())
@@ -335,11 +338,13 @@ class Structure:
                 e_downs.append(e_down)
             return [np.min(e_ups + e_downs), np.max(e_ups + e_downs)]
         else:
-            es = []
+            mins = []
+            maxs = []
             for i, l in enumerate(self.system.leads):
                 m, e = self.getBandStructure(i)
-                es.append(e)
-            return[np.min(np.array(es)), np.max(np.flatten(es))]
+                mins.append(np.min(np.array(e).flatten()))
+                maxs.append(np.max(np.array(e).flatten()))
+            return [min(mins), max(maxs)]
 
     def getWaveFunction(self, lead_id, energy=-1):
         if self.spin_dep:

@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 
-from src.system import Structure, Generator
-from src.ga import GA
-from src.serialize import Serializer
-from src.parser import Parser
-from src.timer import Timer
-from src.parser import Parser
+from src.qmt.system import Structure, Generator
+from src.qmt.ga import GA
+from src.qmt.serialize import Serializer
+from src.qmt.parser import Parser
+from src.qmt.timer import Timer
+from src.qmt.parser import Parser
 
 import numpy as np
 
