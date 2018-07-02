@@ -1,0 +1,409 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>qmt.parser &mdash; QMT 0.0.1a documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> QMT
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1a
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../qmt.html">qmt Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../parser.html">Parser class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../system.html">System class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../helper.html">helper Module</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">QMT</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>qmt.parser</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for qmt.parser</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">import</span> <span class="nn">coloredlogs</span><span class="o">,</span> <span class="nn">verboselogs</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">.shapes</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">.masks</span> <span class="k">import</span> <span class="o">*</span>
+
+<span class="c1"># create logger for parser</span>
+<span class="n">coloredlogs</span><span class="o">.</span><span class="n">install</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s1">&#39;INFO&#39;</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">verboselogs</span><span class="o">.</span><span class="n">VerboseLogger</span><span class="p">(</span><span class="s1">&#39;QMT - Parser&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Parser"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser">[docs]</a><span class="k">class</span> <span class="nc">Parser</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for reading in the YAML file: &#39;input.yaml&#39;, and parsing it such that methods return convenient objects.</span>
+<span class="sd">    </span>
+<span class="sd">    Steps:</span>
+
+<span class="sd">    1. Open the file &#39;input.yaml&#39;.</span>
+<span class="sd">    2. Parse the Junction section of the file.</span>
+<span class="sd">    3. Parse the GA section of the file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s1">&#39;input.yaml&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Could not parse the configuration file: &quot;input.yaml&quot;.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># all of the variables set in self.parseModel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">leads</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parseModel</span><span class="p">()</span>
+        
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_structures</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_iterations</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parseGA</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="Parser.parseModel"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.parseModel">[docs]</a>    <span class="k">def</span> <span class="nf">parseModel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function that parses the Junction part of the input file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">junction_shapes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;Junction&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">junction_shapes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;You have no shapes defined in junction!&#39;</span><span class="p">)</span>
+            <span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">shapes</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">hoppings</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">offsets</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">pots</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">phis</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">js</span> <span class="ow">in</span> <span class="n">junction_shapes</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s1">&#39;id&#39;</span> <span class="ow">in</span> <span class="n">js</span> <span class="ow">and</span> <span class="n">js</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;body&#39;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">whatShape</span><span class="p">(</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]),</span> <span class="o">**</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">])</span>
+                <span class="n">shapes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">whatShape</span><span class="p">(</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]),</span> <span class="o">**</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]))</span>
+                <span class="n">hoppings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;hopping&#39;</span><span class="p">])</span>
+                <span class="n">offsets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;offset&#39;</span><span class="p">])</span>
+                <span class="n">pots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;potential&#39;</span><span class="p">])</span>
+                <span class="n">phis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;phi&#39;</span><span class="p">])</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span>   <span class="p">{</span>
+                                <span class="s1">&#39;shapes&#39;</span><span class="p">:</span> <span class="n">shapes</span><span class="p">,</span>
+                                <span class="s1">&#39;hoppings&#39;</span><span class="p">:</span> <span class="n">hoppings</span><span class="p">,</span>
+                                <span class="s1">&#39;offsets&#39;</span><span class="p">:</span> <span class="n">offsets</span><span class="p">,</span>
+                                <span class="s1">&#39;potentials&#39;</span><span class="p">:</span> <span class="n">pots</span><span class="p">,</span>
+                                <span class="s1">&#39;phis&#39;</span><span class="p">:</span> <span class="n">phis</span><span class="p">,</span>
+                                <span class="s1">&#39;body&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">body</span>
+                            <span class="p">}</span>
+
+        <span class="n">junction_masks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;Masks&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">junction_masks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">masks</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">jm</span> <span class="ow">in</span> <span class="n">junction_masks</span><span class="p">:</span>
+                <span class="n">masks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">whatMask</span><span class="p">(</span><span class="n">jm</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]),</span> <span class="o">**</span><span class="n">jm</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">multiMasks</span><span class="p">,</span> <span class="n">masks</span><span class="p">)</span>
+
+        <span class="n">junction_leads</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;Leads&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">junction_leads</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;You have not defined any leads!&#39;</span><span class="p">)</span>
+            <span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Parser.parseGA"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.parseGA">[docs]</a>    <span class="k">def</span> <span class="nf">parseGA</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function that parses the GA section of the input file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_structures</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;GA&#39;</span><span class="p">][</span><span class="s1">&#39;n_structures&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_iterations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;GA&#39;</span><span class="p">][</span><span class="s1">&#39;n_iterations&#39;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Parser.getNStructures"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.getNStructures">[docs]</a>    <span class="k">def</span> <span class="nf">getNStructures</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        The number of GA structures.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_structures</span></div>
+
+<div class="viewcode-block" id="Parser.getNIterations"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.getNIterations">[docs]</a>    <span class="k">def</span> <span class="nf">getNIterations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        The number of GA iterations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_iterations</span></div>
+
+<div class="viewcode-block" id="Parser.getDevice"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.getDevice">[docs]</a>    <span class="k">def</span> <span class="nf">getDevice</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        The device which contains all the information needed to constuct it with Kwant.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">device</span></div>
+
+<div class="viewcode-block" id="Parser.getMaskFunction"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.getMaskFunction">[docs]</a>    <span class="k">def</span> <span class="nf">getMaskFunction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        The mask function to be applied onto the body of the junction.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask</span></div>
+
+<div class="viewcode-block" id="Parser.getLeads"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.getLeads">[docs]</a>    <span class="k">def</span> <span class="nf">getLeads</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        The configuration of the leads.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;Leads&#39;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Parser.getLatticeType"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.getLatticeType">[docs]</a>    <span class="k">def</span> <span class="nf">getLatticeType</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        The lattice type.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;lattice_type&#39;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Parser.getLatticeConstant"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.getLatticeConstant">[docs]</a>    <span class="k">def</span> <span class="nf">getLatticeConstant</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        The lattice constant.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;lattice_constant&#39;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Parser.getLatticeVectors"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.getLatticeVectors">[docs]</a>    <span class="k">def</span> <span class="nf">getLatticeVectors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        The lattice vectors.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;lattice_vectors&#39;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Parser.getLatticeBasis"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.getLatticeBasis">[docs]</a>    <span class="k">def</span> <span class="nf">getLatticeBasis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        The lattice basis atoms.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;lattice_basis&#39;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Parser.getNumOrbitals"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.getNumOrbitals">[docs]</a>    <span class="k">def</span> <span class="nf">getNumOrbitals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        The number of orbitals on each site.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;n_orbitals&#39;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Parser.spinDependent"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.spinDependent">[docs]</a>    <span class="k">def</span> <span class="nf">spinDependent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        True if we want to do spin-dependent calculations, False if not.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;spin_dependent&#39;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Parser.getBias"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.getBias">[docs]</a>    <span class="k">def</span> <span class="nf">getBias</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        The bias parameter.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;bias&#39;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Parser.getKBT"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.getKBT">[docs]</a>    <span class="k">def</span> <span class="nf">getKBT</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        The Boltzmann constant times the temperature.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Kevin Ryczko.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.0.1a',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

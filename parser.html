@@ -1,0 +1,419 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Parser class &mdash; QMT 0.0.1a documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="System class" href="system.html" />
+    <link rel="prev" title="qmt Package" href="qmt.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> QMT
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1a
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="qmt.html">qmt Package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Parser class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="system.html">System class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="helper.html">helper Module</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">QMT</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Parser class</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/parser.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-qmt.parser">
+<span id="parser-class"></span><h1>Parser class<a class="headerlink" href="#module-qmt.parser" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="qmt.parser.Parser">
+<em class="property">class </em><code class="descclassname">qmt.parser.</code><code class="descname">Parser</code><a class="reference internal" href="_modules/qmt/parser.html#Parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.parser.Parser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for reading in the YAML file: ‘input.yaml’, and parsing it such that methods return convenient objects.</p>
+<p>Steps:</p>
+<ol class="arabic simple">
+<li>Open the file ‘input.yaml’.</li>
+<li>Parse the Junction section of the file.</li>
+<li>Parse the GA section of the file.</li>
+</ol>
+<p class="rubric">Methods</p>
+<dl class="method">
+<dt id="qmt.parser.Parser.getBias">
+<code class="descname">getBias</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/parser.html#Parser.getBias"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.parser.Parser.getBias" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The bias parameter.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.parser.Parser.getDevice">
+<code class="descname">getDevice</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/parser.html#Parser.getDevice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.parser.Parser.getDevice" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The device which contains all the information needed to constuct it with Kwant.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.parser.Parser.getKBT">
+<code class="descname">getKBT</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/parser.html#Parser.getKBT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.parser.Parser.getKBT" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The Boltzmann constant times the temperature.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.parser.Parser.getLatticeBasis">
+<code class="descname">getLatticeBasis</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/parser.html#Parser.getLatticeBasis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.parser.Parser.getLatticeBasis" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The lattice basis atoms.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.parser.Parser.getLatticeConstant">
+<code class="descname">getLatticeConstant</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/parser.html#Parser.getLatticeConstant"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.parser.Parser.getLatticeConstant" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The lattice constant.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.parser.Parser.getLatticeType">
+<code class="descname">getLatticeType</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/parser.html#Parser.getLatticeType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.parser.Parser.getLatticeType" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The lattice type.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.parser.Parser.getLatticeVectors">
+<code class="descname">getLatticeVectors</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/parser.html#Parser.getLatticeVectors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.parser.Parser.getLatticeVectors" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The lattice vectors.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.parser.Parser.getLeads">
+<code class="descname">getLeads</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/parser.html#Parser.getLeads"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.parser.Parser.getLeads" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The configuration of the leads.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.parser.Parser.getMaskFunction">
+<code class="descname">getMaskFunction</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/parser.html#Parser.getMaskFunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.parser.Parser.getMaskFunction" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The mask function to be applied onto the body of the junction.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.parser.Parser.getNIterations">
+<code class="descname">getNIterations</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/parser.html#Parser.getNIterations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.parser.Parser.getNIterations" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The number of GA iterations.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.parser.Parser.getNStructures">
+<code class="descname">getNStructures</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/parser.html#Parser.getNStructures"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.parser.Parser.getNStructures" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The number of GA structures.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.parser.Parser.getNumOrbitals">
+<code class="descname">getNumOrbitals</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/parser.html#Parser.getNumOrbitals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.parser.Parser.getNumOrbitals" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The number of orbitals on each site.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.parser.Parser.parseGA">
+<code class="descname">parseGA</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/parser.html#Parser.parseGA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.parser.Parser.parseGA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that parses the GA section of the input file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.parser.Parser.parseModel">
+<code class="descname">parseModel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/parser.html#Parser.parseModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.parser.Parser.parseModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that parses the Junction part of the input file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.parser.Parser.spinDependent">
+<code class="descname">spinDependent</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/parser.html#Parser.spinDependent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.parser.Parser.spinDependent" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if we want to do spin-dependent calculations, False if not.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="system.html" class="btn btn-neutral float-right" title="System class" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="qmt.html" class="btn btn-neutral" title="qmt Package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Kevin Ryczko.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.0.1a',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

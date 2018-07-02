@@ -1,0 +1,322 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>System class &mdash; QMT 0.0.1a documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="helper Module" href="helper.html" />
+    <link rel="prev" title="Parser class" href="parser.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> QMT
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1a
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="qmt.html">qmt Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parser.html">Parser class</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">System class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="helper.html">helper Module</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">QMT</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>System class</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/system.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-qmt.system">
+<span id="system-class"></span><h1>System class<a class="headerlink" href="#module-qmt.system" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="qmt.system.Generator">
+<em class="property">class </em><code class="descclassname">qmt.system.</code><code class="descname">Generator</code><span class="sig-paren">(</span><em>model</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/system.html#Generator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.system.Generator" title="Permalink to this definition">¶</a></dt>
+<dd><p>this is a test</p>
+<p class="rubric">Methods</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="qmt.system.Structure">
+<em class="property">class </em><code class="descclassname">qmt.system.</code><code class="descname">Structure</code><span class="sig-paren">(</span><em>parser</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/system.html#Structure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.system.Structure" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the main class which stores all of the information needed for kwant as well as functions to make it easier to use kwant (not that it is too difficult).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parser</strong> : This takes the YAML configuration file which is read in as a dictionary.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<dl class="method">
+<dt id="qmt.system.Structure.getBandStructure">
+<code class="descname">getBandStructure</code><span class="sig-paren">(</span><em>lead_id</em>, <em>momenta=array([-3.14159265</em>, <em>-3.11695271</em>, <em>-3.09231277</em>, <em>-3.06767283</em>, <em>-3.04303288</em>, <em>-3.01839294</em>, <em>-2.993753</em>, <em>-2.96911306</em>, <em>-2.94447311</em>, <em>-2.91983317</em>, <em>-2.89519323</em>, <em>-2.87055329</em>, <em>-2.84591335</em>, <em>-2.8212734</em>, <em>-2.79663346</em>, <em>-2.77199352</em>, <em>-2.74735358</em>, <em>-2.72271363</em>, <em>-2.69807369</em>, <em>-2.67343375</em>, <em>-2.64879381</em>, <em>-2.62415386</em>, <em>-2.59951392</em>, <em>-2.57487398</em>, <em>-2.55023404</em>, <em>-2.52559409</em>, <em>-2.50095415</em>, <em>-2.47631421</em>, <em>-2.45167427</em>, <em>-2.42703432</em>, <em>-2.40239438</em>, <em>-2.37775444</em>, <em>-2.3531145</em>, <em>-2.32847456</em>, <em>-2.30383461</em>, <em>-2.27919467</em>, <em>-2.25455473</em>, <em>-2.22991479</em>, <em>-2.20527484</em>, <em>-2.1806349</em>, <em>-2.15599496</em>, <em>-2.13135502</em>, <em>-2.10671507</em>, <em>-2.08207513</em>, <em>-2.05743519</em>, <em>-2.03279525</em>, <em>-2.0081553</em>, <em>-1.98351536</em>, <em>-1.95887542</em>, <em>-1.93423548</em>, <em>-1.90959553</em>, <em>-1.88495559</em>, <em>-1.86031565</em>, <em>-1.83567571</em>, <em>-1.81103577</em>, <em>-1.78639582</em>, <em>-1.76175588</em>, <em>-1.73711594</em>, <em>-1.712476</em>, <em>-1.68783605</em>, <em>-1.66319611</em>, <em>-1.63855617</em>, <em>-1.61391623</em>, <em>-1.58927628</em>, <em>-1.56463634</em>, <em>-1.5399964</em>, <em>-1.51535646</em>, <em>-1.49071651</em>, <em>-1.46607657</em>, <em>-1.44143663</em>, <em>-1.41679669</em>, <em>-1.39215674</em>, <em>-1.3675168</em>, <em>-1.34287686</em>, <em>-1.31823692</em>, <em>-1.29359698</em>, <em>-1.26895703</em>, <em>-1.24431709</em>, <em>-1.21967715</em>, <em>-1.19503721</em>, <em>-1.17039726</em>, <em>-1.14575732</em>, <em>-1.12111738</em>, <em>-1.09647744</em>, <em>-1.07183749</em>, <em>-1.04719755</em>, <em>-1.02255761</em>, <em>-0.99791767</em>, <em>-0.97327772</em>, <em>-0.94863778</em>, <em>-0.92399784</em>, <em>-0.8993579</em>, <em>-0.87471795</em>, <em>-0.85007801</em>, <em>-0.82543807</em>, <em>-0.80079813</em>, <em>-0.77615819</em>, <em>-0.75151824</em>, <em>-0.7268783</em>, <em>-0.70223836</em>, <em>-0.67759842</em>, <em>-0.65295847</em>, <em>-0.62831853</em>, <em>-0.60367859</em>, <em>-0.57903865</em>, <em>-0.5543987</em>, <em>-0.52975876</em>, <em>-0.50511882</em>, <em>-0.48047888</em>, <em>-0.45583893</em>, <em>-0.43119899</em>, <em>-0.40655905</em>, <em>-0.38191911</em>, <em>-0.35727916</em>, <em>-0.33263922</em>, <em>-0.30799928</em>, <em>-0.28335934</em>, <em>-0.2587194</em>, <em>-0.23407945</em>, <em>-0.20943951</em>, <em>-0.18479957</em>, <em>-0.16015963</em>, <em>-0.13551968</em>, <em>-0.11087974</em>, <em>-0.0862398</em>, <em>-0.06159986</em>, <em>-0.03695991</em>, <em>-0.01231997</em>, <em>0.01231997</em>, <em>0.03695991</em>, <em>0.06159986</em>, <em>0.0862398</em>, <em>0.11087974</em>, <em>0.13551968</em>, <em>0.16015963</em>, <em>0.18479957</em>, <em>0.20943951</em>, <em>0.23407945</em>, <em>0.2587194</em>, <em>0.28335934</em>, <em>0.30799928</em>, <em>0.33263922</em>, <em>0.35727916</em>, <em>0.38191911</em>, <em>0.40655905</em>, <em>0.43119899</em>, <em>0.45583893</em>, <em>0.48047888</em>, <em>0.50511882</em>, <em>0.52975876</em>, <em>0.5543987</em>, <em>0.57903865</em>, <em>0.60367859</em>, <em>0.62831853</em>, <em>0.65295847</em>, <em>0.67759842</em>, <em>0.70223836</em>, <em>0.7268783</em>, <em>0.75151824</em>, <em>0.77615819</em>, <em>0.80079813</em>, <em>0.82543807</em>, <em>0.85007801</em>, <em>0.87471795</em>, <em>0.8993579</em>, <em>0.92399784</em>, <em>0.94863778</em>, <em>0.97327772</em>, <em>0.99791767</em>, <em>1.02255761</em>, <em>1.04719755</em>, <em>1.07183749</em>, <em>1.09647744</em>, <em>1.12111738</em>, <em>1.14575732</em>, <em>1.17039726</em>, <em>1.19503721</em>, <em>1.21967715</em>, <em>1.24431709</em>, <em>1.26895703</em>, <em>1.29359698</em>, <em>1.31823692</em>, <em>1.34287686</em>, <em>1.3675168</em>, <em>1.39215674</em>, <em>1.41679669</em>, <em>1.44143663</em>, <em>1.46607657</em>, <em>1.49071651</em>, <em>1.51535646</em>, <em>1.5399964</em>, <em>1.56463634</em>, <em>1.58927628</em>, <em>1.61391623</em>, <em>1.63855617</em>, <em>1.66319611</em>, <em>1.68783605</em>, <em>1.712476</em>, <em>1.73711594</em>, <em>1.76175588</em>, <em>1.78639582</em>, <em>1.81103577</em>, <em>1.83567571</em>, <em>1.86031565</em>, <em>1.88495559</em>, <em>1.90959553</em>, <em>1.93423548</em>, <em>1.95887542</em>, <em>1.98351536</em>, <em>2.0081553</em>, <em>2.03279525</em>, <em>2.05743519</em>, <em>2.08207513</em>, <em>2.10671507</em>, <em>2.13135502</em>, <em>2.15599496</em>, <em>2.1806349</em>, <em>2.20527484</em>, <em>2.22991479</em>, <em>2.25455473</em>, <em>2.27919467</em>, <em>2.30383461</em>, <em>2.32847456</em>, <em>2.3531145</em>, <em>2.37775444</em>, <em>2.40239438</em>, <em>2.42703432</em>, <em>2.45167427</em>, <em>2.47631421</em>, <em>2.50095415</em>, <em>2.52559409</em>, <em>2.55023404</em>, <em>2.57487398</em>, <em>2.59951392</em>, <em>2.62415386</em>, <em>2.64879381</em>, <em>2.67343375</em>, <em>2.69807369</em>, <em>2.72271363</em>, <em>2.74735358</em>, <em>2.77199352</em>, <em>2.79663346</em>, <em>2.8212734</em>, <em>2.84591335</em>, <em>2.87055329</em>, <em>2.89519323</em>, <em>2.91983317</em>, <em>2.94447311</em>, <em>2.96911306</em>, <em>2.993753</em>, <em>3.01839294</em>, <em>3.04303288</em>, <em>3.06767283</em>, <em>3.09231277</em>, <em>3.11695271</em>, <em>3.14159265])</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/system.html#Structure.getBandStructure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.system.Structure.getBandStructure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the band structure of a certain lead.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>lead_id</strong> : The id of the lead the band structure will be calculated.</p>
+<p><strong>momenta</strong> : The values of momenta for which you would like the band structure. Default: np.linspace(-np.pi, np.pi, 256)</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A tuple with length 2 or three. Zeroth element is momenta and the rest are the energies for that momenta. For spin polarized systems it returns the bands for spin-up and spin-down (length 3 tuple).</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.system.Structure.getEnergyRange">
+<code class="descname">getEnergyRange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/system.html#Structure.getEnergyRange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.system.Structure.getEnergyRange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the energy range that must be integrated over to calcuate the current.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A list of length 2 with the zeroth element being the minimum and the first element being the maximum.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="qmt.system.hoppingFunction">
+<code class="descclassname">qmt.system.</code><code class="descname">hoppingFunction</code><span class="sig-paren">(</span><em>self</em>, <em>t</em>, <em>phi</em>, <em>site1</em>, <em>site2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/system.html#hoppingFunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.system.hoppingFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a function which returns the hopping value when a magnetic field is being applied.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>t</strong> : The hopping parameter without a magnetic field being applied.</p>
+<p><strong>phi</strong> : The magnetic flux though a single unit cell.</p>
+<p><strong>site1</strong> : A kwant site for the first lattice site.</p>
+<p><strong>site2</strong> : A kwant site for the second lattice site.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The hopping parameter with a magnetic field being applied.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="qmt.system.onSiteFunction">
+<code class="descclassname">qmt.system.</code><code class="descname">onSiteFunction</code><span class="sig-paren">(</span><em>self</em>, <em>pot</em>, <em>spin</em>, <em>phi</em>, <em>site</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/system.html#onSiteFunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.system.onSiteFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a function which returns the on-site potential when a magnetic field is being applied.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>t</strong> : The hopping parameter without a magnetic field being applied.</p>
+<p><strong>phi</strong> : The magnetic flux though a single unit cell.</p>
+<p><strong>site1</strong> : A kwant site for the first lattice site.</p>
+<p><strong>site2</strong> : A kwant site for the second lattice site.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The hopping parameter with a magnetic field being applied.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="helper.html" class="btn btn-neutral float-right" title="helper Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="parser.html" class="btn btn-neutral" title="Parser class" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Kevin Ryczko.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.0.1a',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
