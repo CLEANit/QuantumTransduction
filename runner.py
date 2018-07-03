@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 
-from src.qmt.system import Structure, Generator
+from src.qmt.system import Structure
+from src.qmt.generator import Generator
 from src.qmt.ga import GA
 from src.qmt.serialize import Serializer
 from src.qmt.parser import Parser
@@ -29,7 +30,8 @@ def main():
     logger.success(' --- Welcome to the Quantum transmission device optimizer --- ')
 
     parser = Parser()
-    s = Structure(parser)
+    g = Generator(parser)
+    g.generate()
 
     logger.success(' --- Elasped time: %s ---' % (total_timer.stop()))
 if __name__ == '__main__':

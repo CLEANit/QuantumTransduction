@@ -39,38 +39,48 @@ class Parser:
         self.n_iterations = None
         self.parseGA()
 
+    def resetConfig(self, config):
+        self.config = config
+        self.body = None
+        self.device = None
+        self.mask = None
+        self.leads = None
+        self.parseModel()
+        
+        self.n_structures = None
+        self.n_iterations = None
+        self.parseGA()
+
 
     def parseModel(self):
         """
         Function that parses the Junction part of the input file.
         """
-        junction_shapes = self.config['System']['Junction']
-        if len(junction_shapes) == 0:
-            logger.error('You have no shapes defined in junction!')
-            exit(-1)
-        else:
-            shapes = []
-            hoppings = []
-            offsets = []
-            pots = []
-            phis = []
-            for js in junction_shapes:
-                if 'id' in js and js['id'] == 'body':
-                    self.body = partial(whatShape(js['shape']), **js['args'])
-                shapes.append(partial(whatShape(js['shape']), **js['args']))
-                hoppings.append(js['hopping'])
-                offsets.append(js['offset'])
-                pots.append(js['potential'])
-                phis.append(js['phi'])
+        body = self.config['System']['Junction']['body']
+        channels = self.config['System']['Junction']['channels']
+        shapes = []
+        hoppings = []
+        offsets = []
+        pots = []
+        self.body = partial(whatShape(body['shape']), **body['args'])
+        shapes.append(self.body)
+        hoppings.append(body['hopping'])
+        offsets.append(body['offset'])
+        pots.append(body['potential'])
+        
+        for js in channels:
+            shapes.append(partial(whatShape(js['shape']), **js['args']))
+            hoppings.append(js['hopping'])
+            offsets.append(js['offset'])
+            pots.append(js['potential'])
 
-            self.device =   {
-                                'shapes': shapes,
-                                'hoppings': hoppings,
-                                'offsets': offsets,
-                                'potentials': pots,
-                                'phis': phis,
-                                'body': self.body
-                            }
+        self.device =   {
+                            'shapes': shapes,
+                            'hoppings': hoppings,
+                            'offsets': offsets,
+                            'potentials': pots,
+                            'body': self.body
+                        }
 
         junction_masks = self.config['System']['Masks']
         if junction_masks is not None:
@@ -86,6 +96,14 @@ class Parser:
             exit(-1)
         else:
             pass
+
+    def getConfig(self):
+        """
+        Returns
+        -------
+        The parsed configuration.
+        """
+        return self.config
 
     def parseGA(self):
         """
@@ -190,6 +208,14 @@ class Parser:
         """
         return self.config['System']['bias']
 
+    def getPhi(self):
+        """
+        Returns
+        -------
+        The magnetic flux through a unit cell parameter.
+        """
+        return self.config['System']['phi']
+
     def getKBT(self):
         """
         Returns
@@ -197,4 +223,12 @@ class Parser:
         The Boltzmann constant times the temperature.
         """
         return self.config['System']['kb_T']
+
+    def getGenes(self):
+        """
+        Returns
+        -------
+        The genes configuration
+        """
+        return self.config['GA']['Genes']
 

@@ -6,6 +6,9 @@
 Welcome to QMT's documentation!
 ===============================
 
+.. image:: _static/promo.png
+   :width: 500
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
@@ -13,6 +16,7 @@ Welcome to QMT's documentation!
    qmt
    parser
    system
+   generator
    helper
 
 Indices and tables

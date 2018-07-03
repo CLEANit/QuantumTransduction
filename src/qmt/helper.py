@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import numpy as np
+from functools import reduce
+import operator
 
 def rot(vec, theta):
     """
@@ -53,3 +55,31 @@ def fermi(E, mu, kB_T=0.01):
 
 vectorizedFermi = np.vectorize(fermi)
 
+def getFromDict(dictionary, listed_keys):
+    """
+    This function finds the value of a nested dictionary where the chain is directed by the listed_keys.
+
+    Parameters
+    ----------
+    dictionary : Nested dictionary to return the value from.
+    listed_keys : Path of keys to be followed to obtain the value.
+
+    Returns
+    -------
+    The value found from the path of keys.
+
+    """
+    return reduce(operator.getitem, listed_keys, dictionary)
+
+def setInDict(dictionary, listed_keys, value):
+    """
+    Set the value for a key in a nested dictionary.
+    
+    Parameters
+    ----------
+    dictionary : Nested dictionary to return the value from.
+    listed_keys : Path of keys to be followed to obtain the value.
+    value : The value to be set.
+    """
+
+    getFromDict(dictionary, listed_keys[:-1])[listed_keys[-1]] = value
