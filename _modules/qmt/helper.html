@@ -190,7 +190,7 @@
         <span class="n">a</span> <span class="o">=</span> <span class="n">trans_vec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">trans_vec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">a</span></div>
 
-<div class="viewcode-block" id="fermi"><a class="viewcode-back" href="../../helper.html#qmt.helper.fermi">[docs]</a><span class="k">def</span> <span class="nf">fermi</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">kb_T</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+<div class="viewcode-block" id="fermi"><a class="viewcode-back" href="../../helper.html#qmt.helper.fermi">[docs]</a><span class="k">def</span> <span class="nf">fermi</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">kB_T</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The Fermi-Dirac function.</span>
 
@@ -201,6 +201,8 @@
 <span class="sd">    kb_T : Boltzmann constant times the temperature. Default value is 0.01.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="n">E</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">kB_T</span><span class="p">))</span> <span class="o">+</span> <span class="mf">1.</span><span class="p">)</span></div>
+
+<span class="n">vectorizedFermi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">fermi</span><span class="p">)</span>
 
 </pre></div>
 

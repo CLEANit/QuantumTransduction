@@ -183,10 +183,56 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>lead_id</strong> : The id of the lead the band structure will be calculated.</p>
-<p><strong>momenta</strong> : The values of momenta for which you would like the band structure. Default: np.linspace(-np.pi, np.pi, 256)</p>
+<p><strong>momenta</strong> : The values of momenta for which you would like the band structure. Default: np.linspace(-np.pi, np.pi, self.grid_size)</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A tuple with length 2 or three. Zeroth element is momenta and the rest are the energies for that momenta. For spin polarized systems it returns the bands for spin-up and spin-down (length 3 tuple).</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.system.Structure.getConductance">
+<code class="descname">getConductance</code><span class="sig-paren">(</span><em>lead1_id</em>, <em>lead2_id</em>, <em>energies=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/system.html#Structure.getConductance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.system.Structure.getConductance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the conductance between 2 leads.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>lead1_id</strong> : The id of the lead you are injecting electrons.</p>
+<p><strong>lead2_id</strong> : The id of the lead you would like to find the transmission through.</p>
+<p><strong>energies</strong> : The range of energies that must be integrated over. By default, the energies are found from the minimum and maximum values in the band structure.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The range of energies and either one or two (spin-dependent) vectors of conductance. i.e.</p>
+<p>(energies, conductances)</p>
+<p>or</p>
+<p class="last">(energies, conductances_up, conductances_down)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.system.Structure.getCurrent">
+<code class="descname">getCurrent</code><span class="sig-paren">(</span><em>lead1</em>, <em>lead2</em>, <em>avg_chem_pot=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/system.html#Structure.getCurrent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.system.Structure.getCurrent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the current between 2 leads.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>lead1_id</strong> : The id of the lead you are injecting electrons.</p>
+<p><strong>lead2_id</strong> : The id of the lead you would like to find the transmission through.</p>
+<p><strong>avg_chem_pot</strong> : The average chemical potential difference. Default: 1.0. It is common practice to set this to the hopping energy.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Either one or two (spin-dependent) values of current i.e.</p>
+<p>current</p>
+<p>or</p>
+<p class="last">current_up, current_down</p>
 </td>
 </tr>
 </tbody>
