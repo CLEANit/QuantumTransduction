@@ -39,7 +39,7 @@ def orthogVecSlope(vec):
         a = trans_vec[1] / trans_vec[0]
     return a
 
-def fermi(E, mu, kb_T=0.01):
+def fermi(E, mu, kB_T=0.01):
     """
     The Fermi-Dirac function.
 
@@ -50,4 +50,6 @@ def fermi(E, mu, kb_T=0.01):
     kb_T : Boltzmann constant times the temperature. Default value is 0.01.
     """
     return 1. / (np.exp((E - mu) / (kB_T)) + 1.)
+
+vectorizedFermi = np.vectorize(fermi)
 

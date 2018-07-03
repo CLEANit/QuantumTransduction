@@ -30,7 +30,6 @@ def main():
 
     parser = Parser()
     s = Structure(parser)
-    print(s.getEnergyRange())
 
     logger.success(' --- Elasped time: %s ---' % (total_timer.stop()))
 if __name__ == '__main__':

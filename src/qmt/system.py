@@ -98,6 +98,7 @@ class Structure:
                  ):
         # define the class parameters
         self.parser = parser
+        self.grid_size = 128
         self.device = parser.getDevice()
         self.leads = parser.getLeads()
         self.body = self.device['body']
@@ -164,7 +165,6 @@ class Structure:
                 a = orthogVecSlope(self.lattice.vec(lead_vector))
                 lead_up = kwant.Builder(sym)
                 lead_down = kwant.Builder(sym)
-                print(lead_range)
                 lead_up[self.lattice.shape(lambda pos: lead_range[0]  < pos[1] + pos[0] * a < lead_range[1], lead_offset)] = partial(onSiteFunction, self, lead_pot, 1/2, lead_phi)
                 lead_down[self.lattice.shape(lambda pos: lead_range[0]  < pos[1] + pos[0] * a < lead_range[1], lead_offset)] = partial(onSiteFunction, self, lead_pot, -1/2, lead_phi)
                 lead_up[self.neighbors] = partial(hoppingFunction, self, lead_hopping, lead_phi)
@@ -274,26 +274,88 @@ class Structure:
             sparse_mat = self.system.hamiltonian_submatrix(sparse=True, **args)
             return sla.eigs(sparse_mat)
 
-    def getConductance(self, energies, start_lead_id, end_lead_id):
-        # Compute transmission as a function of energy
+    def getConductance(self, lead1_id, lead2_id, energies=None):
+        """
+        Compute the conductance between 2 leads.
+
+        Parameters
+        ----------
+        lead1_id : The id of the lead you are injecting electrons.
+        lead2_id : The id of the lead you would like to find the transmission through.
+        energies : The range of energies that must be integrated over. By default, the energies are found from the minimum and maximum values in the band structure.
+
+        Returns
+        -------
+        The range of energies and either one or two (spin-dependent) vectors of conductance. i.e.
+
+        (energies, conductances) 
+
+        or
+
+        (energies, conductances_up, conductances_down)
+
+        """
+        if energies == None:
+            energy_range = self.getEnergyRange()
+            energies = np.linspace(energy_range[0], energy_range[1], self.grid_size)
+
         if self.spin_dep:
             data_up, data_down = [], []
             for energy in energies:
                 smatrix_up = kwant.smatrix(self.system_up, energy)
                 smatrix_down = kwant.smatrix(self.system_down, energy)
-                data_up.append(smatrix_up.transmission(start_lead_id, end_lead_id))
-                data_down.append(smatrix_down.transmission(start_lead_id, end_lead_id))
-            return data_up, data_down
+                data_up.append(smatrix_up.transmission(lead1_id, lead2_id))
+                data_down.append(smatrix_down.transmission(lead1_id, lead2_id))
+            return energies, data_up, data_down
         else:
             data = []
             for energy in energies:
                 smatrix = kwant.smatrix(self.system, energy)
-                data.append(smatrix.transmission(start_lead_id, end_lead_id))
-            return data
+                data.append(smatrix.transmission(lead1_id, lead2_id))
+            return energies, data
 
-    def getCurrent(self, energies):
+    def getCurrent(self, lead1, lead2, avg_chem_pot=1.0):
+        """
+        Compute the current between 2 leads.
+
+        Parameters
+        ----------
+        lead1_id : The id of the lead you are injecting electrons.
+        lead2_id : The id of the lead you would like to find the transmission through.
+        avg_chem_pot : The average chemical potential difference. Default: 1.0. It is common practice to set this to the hopping energy.
+
+        Returns
+        -------
+        Either one or two (spin-dependent) values of current i.e.
+
+        current
+
+        or 
+
+        current_up, current_down
+
+        """
+
+        bias = self.parser.getBias()
+        kb_T = self.parser.getKBT()
+
         if self.spin_dep:
-            pass
+            e, cond_up, cond_down = self.getConductance(lead1, lead2)
+            de = e[1] - e[0]
+            mu_left = bias / 2.0 + avg_chem_pot
+            mu_right = -bias / 2.0 + avg_chem_pot
+            diff_fermi = vectorizedFermi(e, mu_left, kb_T) - vectorizedFermi(e, mu_right, kb_T)
+            return de * np.sum(cond_up * diff_fermi), de * np.sum(cond_down * diff_fermi)
+
+        else:
+            e, cond = self.getConductance(lead1, lead2)
+            de = e[1] - e[0]
+            mu_left = bias / 2.0 + avg_chem_pot
+            mu_right = -bias / 2.0 + avg_chem_pot
+            diff_fermi = vectorizedFermi(e, mu_left, kb_T) - vectorizedFermi(e, mu_right, kb_T)
+            return de * np.sum(cond * diff_fermi)
+
+
 
     def getBandStructure(self, lead_id, momenta=None):
         """
@@ -302,23 +364,23 @@ class Structure:
         Parameters
         ----------
         lead_id : The id of the lead the band structure will be calculated.
-        momenta : The values of momenta for which you would like the band structure. Default: np.linspace(-np.pi, np.pi, 256)
+        momenta : The values of momenta for which you would like the band structure. Default: np.linspace(-np.pi, np.pi, self.grid_size)
 
         Returns
         -------
         A tuple with length 2 or three. Zeroth element is momenta and the rest are the energies for that momenta. For spin polarized systems it returns the bands for spin-up and spin-down (length 3 tuple).
         """
         if momenta == None:
-            momenta = np.linspace(-np.pi, np.pi, 256)
+            momenta = np.linspace(-np.pi, np.pi, self.grid_size)
 
         if self.spin_dep:
-            bands_up = kwant.physics.Bands(self.system_up.leads[lead_id].finalized())
-            bands_down = kwant.physics.Bands(self.system_down.leads[lead_id].finalized())
+            bands_up = kwant.physics.Bands(self.system_up.leads[lead_id])
+            bands_down = kwant.physics.Bands(self.system_down.leads[lead_id])
             energies_up = [bands_up(k) for k in momenta]
             energies_down = [bands_down(k) for k in momenta]
             return momenta, energies_up, energies_down         
         else:
-            bands = kwant.physics.Bands(self.system.leads[lead_id].finalized())
+            bands = kwant.physics.Bands(self.system.leads[lead_id])
             energies = [bands(k) for k in momenta]
             return momenta, energies
 
@@ -331,12 +393,15 @@ class Structure:
         A list of length 2 with the zeroth element being the minimum and the first element being the maximum.
         """
         if self.spin_dep:
-            e_ups = [], e_downs = []
+            mins = []
+            maxs = []
             for i, l in enumerate(self.system_up.leads):
                 m, e_up, e_down = self.getBandStructure(i)
-                e_ups.append(e_up)
-                e_downs.append(e_down)
-            return [np.min(e_ups + e_downs), np.max(e_ups + e_downs)]
+                mins.append(np.min(np.array(e_up).flatten()))
+                maxs.append(np.max(np.array(e_up).flatten()))
+                mins.append(np.min(np.array(e_down).flatten()))
+                maxs.append(np.max(np.array(e_down).flatten()))
+            return [min(mins), max(maxs)]
         else:
             mins = []
             maxs = []

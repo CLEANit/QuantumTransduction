@@ -196,4 +196,5 @@ class Parser:
         -------
         The Boltzmann constant times the temperature.
         """
+        return self.config['System']['kb_T']
 
