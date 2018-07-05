@@ -131,12 +131,13 @@ class Structure:
                 lead_pot = l['potential']
                 lead_hopping = l['hopping']
                 lead_r = l['reverse']
+                lead_shift = l['shift']
                 sym = kwant.TranslationalSymmetry(self.lattice.vec(lead_vector))
                 a = orthogVecSlope(self.lattice.vec(lead_vector))
                 lead_up = kwant.Builder(sym)
                 lead_down = kwant.Builder(sym)
-                lead_up[self.lattice.shape(lambda pos: lead_range[0]  < pos[1] + pos[0] * a < lead_range[1], lead_offset)] = partial(onSiteFunction, self, lead_pot, 1/2, self.parser.getPhi())
-                lead_down[self.lattice.shape(lambda pos: lead_range[0]  < pos[1] + pos[0] * a < lead_range[1], lead_offset)] = partial(onSiteFunction, self, lead_pot, -1/2, self.parser.getPhi())
+                lead_up[self.lattice.shape(lambda pos: lead_range[0]  <= pos[1] - lead_shift[1] + (pos[0] - lead_shift[0]) * a <= lead_range[1], lead_offset)] = partial(onSiteFunction, self, lead_pot, 1/2, self.parser.getPhi())
+                lead_down[self.lattice.shape(lambda pos: lead_range[0]  <= pos[1] - lead_shift[1] + (pos[0] - lead_shift[0]) * a <= lead_range[1], lead_offset)] = partial(onSiteFunction, self, lead_pot, -1/2, self.parser.getPhi())
                 lead_up[self.neighbors] = partial(hoppingFunction, self, lead_hopping, self.parser.getPhi())
                 lead_down[self.neighbors] = partial(hoppingFunction, self, lead_hopping, self.parser.getPhi())            
                 lead_up.eradicate_dangling()
@@ -160,7 +161,7 @@ class Structure:
                 sym = kwant.TranslationalSymmetry(self.lattice.vec(lead_vector))
                 a = orthogVecSlope(self.lattice.vec(lead_vector))
                 lead = kwant.Builder(sym)
-                lead[self.lattice.shape(lambda pos: lead_range[0]  < pos[1] + pos[0] * a < lead_range[1], lead_offset)] = lead_pot
+                lead[self.lattice.shape(lambda pos: lead_range[0]  <= pos[1] - lead_shift[1] + (pos[0] - lead_shift[0]) * a <= lead_range[1], lead_offset)] = lead_pot
                 lead[self.neighbors] = partial(hoppingFunction, self, lead_hopping, self.parser.getPhi())
                 lead.eradicate_dangling()
                 self.system.attach_lead(lead)

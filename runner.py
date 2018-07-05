@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 # create logger
 coloredlogs.install(level='INFO')
 
-logger = verboselogs.VerboseLogger(' <-- QMT (runner) --> ')
+logger = verboselogs.VerboseLogger('qmt: runner')
 
 def main():
     total_timer = Timer()
@@ -31,8 +31,11 @@ def main():
 
     parser = Parser()
     g = Generator(parser)
-    g.generate()
-
+    for i in range(10):
+        p = g.generate()
+        s = Structure(p)
+        s.visualizeSystem()
+        plt.show()
     logger.success(' --- Elasped time: %s ---' % (total_timer.stop()))
 if __name__ == '__main__':
     main()

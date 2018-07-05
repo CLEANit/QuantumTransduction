@@ -39,7 +39,7 @@ class Parser:
         self.n_iterations = None
         self.parseGA()
 
-    def resetConfig(self, config):
+    def updateConfig(self, config):
         self.config = config
         self.body = None
         self.device = None
@@ -62,24 +62,28 @@ class Parser:
         hoppings = []
         offsets = []
         pots = []
+        directions = [None]
         self.body = partial(whatShape(body['shape']), **body['args'])
         shapes.append(self.body)
         hoppings.append(body['hopping'])
         offsets.append(body['offset'])
         pots.append(body['potential'])
+
         
         for js in channels:
             shapes.append(partial(whatShape(js['shape']), **js['args']))
             hoppings.append(js['hopping'])
             offsets.append(js['offset'])
             pots.append(js['potential'])
+            directions.append(js['direction'])
 
         self.device =   {
                             'shapes': shapes,
                             'hoppings': hoppings,
                             'offsets': offsets,
                             'potentials': pots,
-                            'body': self.body
+                            'body': self.body,
+                            'directions': directions
                         }
 
         junction_masks = self.config['System']['Masks']
