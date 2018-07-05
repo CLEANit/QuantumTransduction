@@ -87,18 +87,23 @@ GA:
 
     - { 
         path: ['System', 'Junction', 'channels', 0, 'args', 'ycoords'],
-        range: [20, 40],
-        shift: [-30, 30]
+        range: [20, 20],
+        shift: [-40, 40]
       }
 
     - { 
         path: ['System', 'Junction', 'channels', 1, 'args', 'ycoords'],
-        range: [20, 40],
-        shift: [-30, 10]
+        range: [20, 20],
+        shift: [-15, 40]
       }
 
     - { 
         path: ['System', 'Junction', 'channels', 2, 'args', 'ycoords'],
-        range: [20, 40],
-        shift: [-10, 30]
+        range: [20, 20],
+        shift: [-40, 15]
+      }
+
+    - {
+        path: ['System', 'phi'],
+        range: [0.05, 0.1],
       }

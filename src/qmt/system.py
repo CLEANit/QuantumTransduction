@@ -77,6 +77,7 @@ class Structure:
 
         self.build()
         self.attachLeads()
+        self.finalize()
 
     def build(self):
         # first construct the lattice

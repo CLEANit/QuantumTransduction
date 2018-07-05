@@ -13,10 +13,11 @@ Welcome to QMT's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   qmt
    parser
    system
    generator
+   ga
+   serializer
    helper
 
 Indices and tables
