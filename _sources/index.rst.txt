@@ -16,6 +16,8 @@ Welcome to QMT's documentation!
    parser
    system
    generator
+   ga
+   serializer
    helper
 
 Indices and tables
