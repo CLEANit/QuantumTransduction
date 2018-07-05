@@ -1,0 +1,350 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>qmt.generator &mdash; QMT 0.0.1a documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> QMT
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1a
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../qmt.html">qmt Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../parser.html">Parser class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../system.html">System class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../generator.html">Generator class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../helper.html">helper Module</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">QMT</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>qmt.generator</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for qmt.generator</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.system</span> <span class="k">import</span> <span class="n">Structure</span>
+<span class="kn">from</span> <span class="nn">.helper</span> <span class="k">import</span> <span class="n">getFromDict</span><span class="p">,</span> <span class="n">setInDict</span>
+
+<span class="kn">import</span> <span class="nn">coloredlogs</span><span class="o">,</span> <span class="nn">verboselogs</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="c1"># create logger</span>
+<span class="n">coloredlogs</span><span class="o">.</span><span class="n">install</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s1">&#39;INFO&#39;</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">verboselogs</span><span class="o">.</span><span class="n">VerboseLogger</span><span class="p">(</span><span class="s1">&#39; &lt;-- QMT: Generator --&gt; &#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Generator"><a class="viewcode-back" href="../../generator.html#qmt.generator.Generator">[docs]</a><span class="k">class</span> <span class="nc">Generator</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class generates structures based on the GA confuration. It takes a parser,</span>
+<span class="sd">    tweaks it, and allows it to be ready to perform calculations on.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parser : YAML configuation.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">parser</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">known_genes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;bodyLength&#39;</span><span class="p">,</span> <span class="s1">&#39;bodyWidth&#39;</span><span class="p">,</span> <span class="s1">&#39;channelWidth&#39;</span><span class="p">,</span> <span class="s1">&#39;channelShift&#39;</span><span class="p">,</span> <span class="s1">&#39;magneticField&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="Generator.generate"><a class="viewcode-back" href="../../generator.html#qmt.generator.Generator.generate">[docs]</a>    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate a random structure based on the genes given in the output.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        A Parser class that can be passed to the structure class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># we want to make sure our generated structure is good</span>
+        <span class="n">clean_generation</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">clean_generation</span><span class="p">:</span>
+            <span class="c1"># assume we start clean</span>
+            <span class="n">clean_generation</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="n">new_parser</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="p">)</span>
+            <span class="n">old_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">getConfig</span><span class="p">()</span>
+            <span class="n">new_config</span> <span class="o">=</span> <span class="n">new_parser</span><span class="o">.</span><span class="n">getConfig</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">getGenes</span><span class="p">():</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">getFromDict</span><span class="p">(</span><span class="n">old_config</span><span class="p">,</span> <span class="n">elem</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">])</span>
+                <span class="n">new_val</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+                    <span class="n">l</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">elem</span><span class="p">[</span><span class="s1">&#39;range&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">elem</span><span class="p">[</span><span class="s1">&#39;range&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">elem</span><span class="p">[</span><span class="s1">&#39;shift&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">elem</span><span class="p">[</span><span class="s1">&#39;shift&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">new_val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span> <span class="n">l</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">s</span>
+                    <span class="n">new_val</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span>   <span class="n">l</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">s</span>
+                <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span><span class="p">:</span>
+                    <span class="n">new_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">elem</span><span class="p">[</span><span class="s1">&#39;range&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">elem</span><span class="p">[</span><span class="s1">&#39;range&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">setInDict</span><span class="p">(</span><span class="n">new_config</span><span class="p">,</span> <span class="n">elem</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">],</span> <span class="n">new_val</span><span class="p">)</span>
+
+                <span class="c1"># if we modify the body, we must update the channels</span>
+                <span class="k">if</span> <span class="s1">&#39;body&#39;</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;xcoords&#39;</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">]:</span>
+                    <span class="n">channels</span> <span class="o">=</span> <span class="n">new_config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;Junction&#39;</span><span class="p">][</span><span class="s1">&#39;channels&#39;</span><span class="p">]</span>
+                    <span class="n">shift</span> <span class="o">=</span> <span class="n">new_val</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">val</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">channels</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="s1">&#39;direction&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">c</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;shift&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-=</span> <span class="n">shift</span>
+                            <span class="n">c</span><span class="p">[</span><span class="s1">&#39;offset&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">shift</span> <span class="o">+</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;xcoords&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;xcoords&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+                        <span class="k">elif</span> <span class="n">c</span><span class="p">[</span><span class="s1">&#39;direction&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">c</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;shift&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">shift</span>
+                            <span class="n">c</span><span class="p">[</span><span class="s1">&#39;offset&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">shift</span> <span class="o">+</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;xcoords&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;xcoords&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">pass</span>
+                    
+                <span class="k">if</span> <span class="s1">&#39;body&#39;</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;ycoords&#39;</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">]:</span>
+                    <span class="n">channels</span> <span class="o">=</span> <span class="n">new_config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;Junction&#39;</span><span class="p">][</span><span class="s1">&#39;channels&#39;</span><span class="p">]</span>
+                    <span class="n">shift</span> <span class="o">=</span> <span class="n">new_val</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">val</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">channels</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="s1">&#39;direction&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">c</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;shift&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-=</span> <span class="n">shift</span>
+                            <span class="n">c</span><span class="p">[</span><span class="s1">&#39;offset&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">shift</span> <span class="o">+</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;ycoords&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;ycoords&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+                        <span class="k">elif</span> <span class="n">c</span><span class="p">[</span><span class="s1">&#39;direction&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">c</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;shift&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">shift</span>
+                            <span class="n">c</span><span class="p">[</span><span class="s1">&#39;offset&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">shift</span> <span class="o">+</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;ycoords&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;ycoords&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">pass</span> 
+
+                <span class="c1"># if we modify the channels, we must update the leads</span>
+                <span class="k">if</span> <span class="s1">&#39;channels&#39;</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">]:</span>
+                    <span class="c1"># index of channel / lead</span>
+                    <span class="n">i</span> <span class="o">=</span> <span class="n">elem</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span>
+                    <span class="n">channels</span> <span class="o">=</span> <span class="n">new_config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;Junction&#39;</span><span class="p">][</span><span class="s1">&#39;channels&#39;</span><span class="p">]</span>
+
+                    <span class="c1"># ctm - channel to modify</span>
+                    <span class="n">ctm</span> <span class="o">=</span> <span class="n">new_config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;Junction&#39;</span><span class="p">][</span><span class="s1">&#39;channels&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                    <span class="c1"># ltm - lead to modify</span>
+                    <span class="n">ltm</span> <span class="o">=</span> <span class="n">new_config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;Leads&#39;</span><span class="p">][</span><span class="n">elem</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">][</span><span class="mi">3</span><span class="p">]]</span>
+                    <span class="n">ltm</span><span class="p">[</span><span class="s1">&#39;range&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">ltm</span><span class="p">[</span><span class="s1">&#39;range&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_val</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+                    <span class="n">direction</span> <span class="o">=</span> <span class="n">ctm</span><span class="p">[</span><span class="s1">&#39;direction&#39;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">direction</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">ctm</span><span class="p">[</span><span class="s1">&#39;offset&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">new_val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">new_val</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+                        <span class="n">new_config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;Leads&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;offset&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">new_val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">new_val</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+                    <span class="k">elif</span> <span class="n">direction</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">new_config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;Leads&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;offset&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">new_val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">new_val</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+                        <span class="n">ctm</span><span class="p">[</span><span class="s1">&#39;offset&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">new_val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">new_val</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+
+                    <span class="c1"># check and see if we have overlapping channels</span>
+
+                    <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">ch</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">channels</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span> <span class="ow">and</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;direction&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">channels</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;direction&#39;</span><span class="p">]:</span>
+                            <span class="k">if</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;direction&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                                <span class="c1"># check overlap of x</span>
+                                <span class="n">overlap1</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;xcoords&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">channels</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;xcoords&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;xcoords&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">channels</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;xcoords&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                                <span class="n">overlap2</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;xcoords&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">channels</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;xcoords&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;xcoords&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">channels</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;xcoords&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                                <span class="k">if</span> <span class="n">overlap1</span> <span class="ow">or</span> <span class="n">overlap2</span><span class="p">:</span>
+                                    <span class="n">clean_generation</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="k">elif</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;direction&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                                <span class="c1"># check overlap of y</span>
+                                <span class="n">overlap1</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;ycoords&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">channels</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;ycoords&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;ycoords&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">channels</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;ycoords&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                                <span class="n">overlap2</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;ycoords&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">channels</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;ycoords&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">channels</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;ycoords&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">channels</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;args&#39;</span><span class="p">][</span><span class="s1">&#39;ycoords&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                                <span class="k">if</span> <span class="n">overlap1</span> <span class="ow">or</span> <span class="n">overlap2</span><span class="p">:</span>
+                                    <span class="n">clean_generation</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="c1"># pass for now</span>
+                                <span class="k">pass</span>
+
+
+
+        <span class="n">new_parser</span><span class="o">.</span><span class="n">updateConfig</span><span class="p">(</span><span class="n">new_config</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">new_parser</span></div>
+
+<div class="viewcode-block" id="Generator.generateAll"><a class="viewcode-back" href="../../generator.html#qmt.generator.Generator.generateAll">[docs]</a>    <span class="k">def</span> <span class="nf">generateAll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates all of the structures specified in the input file.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        A list of Parser classes that can be handed to Structure classes.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">generate</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">getNStructures</span><span class="p">())]</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Kevin Ryczko.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.0.1a',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

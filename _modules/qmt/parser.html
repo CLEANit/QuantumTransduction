@@ -85,6 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../qmt.html">qmt Package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../parser.html">Parser class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../system.html">System class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../generator.html">Generator class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../helper.html">helper Module</a></li>
 </ul>
 
@@ -190,38 +191,52 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">n_iterations</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parseGA</span><span class="p">()</span>
 
+    <span class="k">def</span> <span class="nf">updateConfig</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">leads</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parseModel</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_structures</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_iterations</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parseGA</span><span class="p">()</span>
+
 
 <div class="viewcode-block" id="Parser.parseModel"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.parseModel">[docs]</a>    <span class="k">def</span> <span class="nf">parseModel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Function that parses the Junction part of the input file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">junction_shapes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;Junction&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">junction_shapes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;You have no shapes defined in junction!&#39;</span><span class="p">)</span>
-            <span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">shapes</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">hoppings</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">offsets</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">pots</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">phis</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">js</span> <span class="ow">in</span> <span class="n">junction_shapes</span><span class="p">:</span>
-                <span class="k">if</span> <span class="s1">&#39;id&#39;</span> <span class="ow">in</span> <span class="n">js</span> <span class="ow">and</span> <span class="n">js</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;body&#39;</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">whatShape</span><span class="p">(</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]),</span> <span class="o">**</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">])</span>
-                <span class="n">shapes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">whatShape</span><span class="p">(</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]),</span> <span class="o">**</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]))</span>
-                <span class="n">hoppings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;hopping&#39;</span><span class="p">])</span>
-                <span class="n">offsets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;offset&#39;</span><span class="p">])</span>
-                <span class="n">pots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;potential&#39;</span><span class="p">])</span>
-                <span class="n">phis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;phi&#39;</span><span class="p">])</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;Junction&#39;</span><span class="p">][</span><span class="s1">&#39;body&#39;</span><span class="p">]</span>
+        <span class="n">channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;Junction&#39;</span><span class="p">][</span><span class="s1">&#39;channels&#39;</span><span class="p">]</span>
+        <span class="n">shapes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">hoppings</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">offsets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">pots</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">directions</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">whatShape</span><span class="p">(</span><span class="n">body</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]),</span> <span class="o">**</span><span class="n">body</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">])</span>
+        <span class="n">shapes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+        <span class="n">hoppings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">body</span><span class="p">[</span><span class="s1">&#39;hopping&#39;</span><span class="p">])</span>
+        <span class="n">offsets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">body</span><span class="p">[</span><span class="s1">&#39;offset&#39;</span><span class="p">])</span>
+        <span class="n">pots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">body</span><span class="p">[</span><span class="s1">&#39;potential&#39;</span><span class="p">])</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span>   <span class="p">{</span>
-                                <span class="s1">&#39;shapes&#39;</span><span class="p">:</span> <span class="n">shapes</span><span class="p">,</span>
-                                <span class="s1">&#39;hoppings&#39;</span><span class="p">:</span> <span class="n">hoppings</span><span class="p">,</span>
-                                <span class="s1">&#39;offsets&#39;</span><span class="p">:</span> <span class="n">offsets</span><span class="p">,</span>
-                                <span class="s1">&#39;potentials&#39;</span><span class="p">:</span> <span class="n">pots</span><span class="p">,</span>
-                                <span class="s1">&#39;phis&#39;</span><span class="p">:</span> <span class="n">phis</span><span class="p">,</span>
-                                <span class="s1">&#39;body&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">body</span>
-                            <span class="p">}</span>
+        
+        <span class="k">for</span> <span class="n">js</span> <span class="ow">in</span> <span class="n">channels</span><span class="p">:</span>
+            <span class="n">shapes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">whatShape</span><span class="p">(</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]),</span> <span class="o">**</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]))</span>
+            <span class="n">hoppings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;hopping&#39;</span><span class="p">])</span>
+            <span class="n">offsets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;offset&#39;</span><span class="p">])</span>
+            <span class="n">pots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;potential&#39;</span><span class="p">])</span>
+            <span class="n">directions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;direction&#39;</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span>   <span class="p">{</span>
+                            <span class="s1">&#39;shapes&#39;</span><span class="p">:</span> <span class="n">shapes</span><span class="p">,</span>
+                            <span class="s1">&#39;hoppings&#39;</span><span class="p">:</span> <span class="n">hoppings</span><span class="p">,</span>
+                            <span class="s1">&#39;offsets&#39;</span><span class="p">:</span> <span class="n">offsets</span><span class="p">,</span>
+                            <span class="s1">&#39;potentials&#39;</span><span class="p">:</span> <span class="n">pots</span><span class="p">,</span>
+                            <span class="s1">&#39;body&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">,</span>
+                            <span class="s1">&#39;directions&#39;</span><span class="p">:</span> <span class="n">directions</span>
+                        <span class="p">}</span>
 
         <span class="n">junction_masks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;Masks&#39;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">junction_masks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -237,6 +252,14 @@
             <span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Parser.getConfig"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.getConfig">[docs]</a>    <span class="k">def</span> <span class="nf">getConfig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        The parsed configuration.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span></div>
 
 <div class="viewcode-block" id="Parser.parseGA"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.parseGA">[docs]</a>    <span class="k">def</span> <span class="nf">parseGA</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -341,13 +364,29 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;bias&#39;</span><span class="p">]</span></div>
 
+<div class="viewcode-block" id="Parser.getPhi"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.getPhi">[docs]</a>    <span class="k">def</span> <span class="nf">getPhi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        The magnetic flux through a unit cell parameter.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;phi&#39;</span><span class="p">]</span></div>
+
 <div class="viewcode-block" id="Parser.getKBT"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.getKBT">[docs]</a>    <span class="k">def</span> <span class="nf">getKBT</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        The Boltzmann constant times the temperature.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;kb_T&#39;</span><span class="p">]</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;System&#39;</span><span class="p">][</span><span class="s1">&#39;kb_T&#39;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Parser.getGenes"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.getGenes">[docs]</a>    <span class="k">def</span> <span class="nf">getGenes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        The genes configuration</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;GA&#39;</span><span class="p">][</span><span class="s1">&#39;Genes&#39;</span><span class="p">]</span></div></div>
 
 </pre></div>
 

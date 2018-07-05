@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Python Module Index &mdash; QMT 0.0.1a documentation</title>
+  <title>Generator class &mdash; QMT 0.0.1a documentation</title>
   
 
   
@@ -28,9 +28,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
- 
-
-
+    <link rel="next" title="helper Module" href="helper.html" />
+    <link rel="prev" title="System class" href="system.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -84,11 +83,11 @@
             
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="qmt.html">qmt Package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="parser.html">Parser class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="system.html">System class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generator.html">Generator class</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Generator class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="helper.html">helper Module</a></li>
 </ul>
 
@@ -135,10 +134,14 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Python Module Index</li>
+      <li>Generator class</li>
     
     
       <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/generator.rst.txt" rel="nofollow"> View page source</a>
+          
         
       </li>
     
@@ -150,50 +153,68 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
+  <div class="section" id="module-qmt.generator">
+<span id="generator-class"></span><h1>Generator class<a class="headerlink" href="#module-qmt.generator" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="qmt.generator.Generator">
+<em class="property">class </em><code class="descclassname">qmt.generator.</code><code class="descname">Generator</code><span class="sig-paren">(</span><em>parser</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/generator.html#Generator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.generator.Generator" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class generates structures based on the GA confuration. It takes a parser,
+tweaks it, and allows it to be ready to perform calculations on.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parser</strong> : YAML configuation.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<dl class="method">
+<dt id="qmt.generator.Generator.generate">
+<code class="descname">generate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/generator.html#Generator.generate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.generator.Generator.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a random structure based on the genes given in the output.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A Parser class that can be passed to the structure class.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
-   <h1>Python Module Index</h1>
+<dl class="method">
+<dt id="qmt.generator.Generator.generateAll">
+<code class="descname">generateAll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/generator.html#Generator.generateAll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.generator.Generator.generateAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates all of the structures specified in the input file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A list of Parser classes that can be handed to Structure classes.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
-   <div class="modindex-jumpbox">
-   <a href="#cap-q"><strong>q</strong></a>
-   </div>
+</dd></dl>
 
-   <table class="indextable modindextable">
-     <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
-     <tr class="cap" id="cap-q"><td></td><td>
-       <strong>q</strong></td><td></td></tr>
-     <tr>
-       <td><img src="_static/minus.png" class="toggler"
-              id="toggle-1" style="display: none" alt="-" /></td>
-       <td>
-       <a href="qmt.html#module-qmt"><code class="xref">qmt</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="generator.html#module-qmt.generator"><code class="xref">qmt.generator</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="helper.html#module-qmt.helper"><code class="xref">qmt.helper</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="parser.html#module-qmt.parser"><code class="xref">qmt.parser</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="system.html#module-qmt.system"><code class="xref">qmt.system</code></a></td><td>
-       <em></em></td></tr>
-   </table>
+</div>
 
 
            </div>
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="helper.html" class="btn btn-neutral float-right" title="helper Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="system.html" class="btn btn-neutral" title="System class" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>

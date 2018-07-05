@@ -85,6 +85,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../qmt.html">qmt Package</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../parser.html">Parser class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../system.html">System class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../generator.html">Generator class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../helper.html">helper Module</a></li>
 </ul>
 
@@ -152,6 +153,8 @@
 <span></span><span class="ch">#!/usr/bin/env python</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">reduce</span>
+<span class="kn">import</span> <span class="nn">operator</span>
 
 <div class="viewcode-block" id="rot"><a class="viewcode-back" href="../../helper.html#qmt.helper.rot">[docs]</a><span class="k">def</span> <span class="nf">rot</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -204,6 +207,34 @@
 
 <span class="n">vectorizedFermi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">fermi</span><span class="p">)</span>
 
+<div class="viewcode-block" id="getFromDict"><a class="viewcode-back" href="../../helper.html#qmt.helper.getFromDict">[docs]</a><span class="k">def</span> <span class="nf">getFromDict</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span> <span class="n">listed_keys</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function finds the value of a nested dictionary where the chain is directed by the listed_keys.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dictionary : Nested dictionary to return the value from.</span>
+<span class="sd">    listed_keys : Path of keys to be followed to obtain the value.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    The value found from the path of keys.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">getitem</span><span class="p">,</span> <span class="n">listed_keys</span><span class="p">,</span> <span class="n">dictionary</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="setInDict"><a class="viewcode-back" href="../../helper.html#qmt.helper.setInDict">[docs]</a><span class="k">def</span> <span class="nf">setInDict</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span> <span class="n">listed_keys</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set the value for a key in a nested dictionary.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dictionary : Nested dictionary to return the value from.</span>
+<span class="sd">    listed_keys : Path of keys to be followed to obtain the value.</span>
+<span class="sd">    value : The value to be set.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">getFromDict</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span> <span class="n">listed_keys</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])[</span><span class="n">listed_keys</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">value</span></div>
 </pre></div>
 
            </div>
