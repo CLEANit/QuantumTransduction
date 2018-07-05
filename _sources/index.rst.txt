@@ -13,7 +13,6 @@ Welcome to QMT's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   qmt
    parser
    system
    generator
