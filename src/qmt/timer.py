@@ -10,14 +10,14 @@ class Timer:
         self.maxs = [60., 3600., 3600. * 24, 1000.]
 
     def start(self):
-        self.start_time = time.clock()
+        self.start_time = time.time()
 
     def stop(self, tformat='auto'):
         if tformat == 'auto':
-            diff = time.clock() - self.start_time
+            diff = time.time() - self.start_time
             for u, d, m in zip(self.units, self.divs, self.maxs):
                 if diff < m:
-                    return '{:1.2f}'.format(diff / d) + ' ' + u
+                    return '{:1.2f}'.format(diff) + ' ' + u
                 else:
                     diff /= m
 

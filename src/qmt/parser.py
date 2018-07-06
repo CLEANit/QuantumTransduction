@@ -8,7 +8,7 @@ from .masks import *
 
 # create logger for parser
 coloredlogs.install(level='INFO')
-logger = verboselogs.VerboseLogger('QMT - Parser')
+logger = verboselogs.VerboseLogger('QMT::parser')
 
 
 class Parser:

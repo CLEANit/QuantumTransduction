@@ -23,45 +23,64 @@ coloredlogs.install(level='INFO')
 
 logger = verboselogs.VerboseLogger('qmt::runner ')
 
+def threadedCall(structure, lead0, lead1):
+    return structure.getCurrent(lead0, lead1, avg_chem_pot=2.7)
+
+def objectiveFunction(currents_0_1, currents_0_2):
+    objectives = []
+    for v1, v2 in  zip(currents_0_1, currents_0_2):
+        objective = []
+        objective.append(np.abs((v1[0] - v1[1]) / (v1[0] + v1[1]) - 1))
+        objective.append(np.abs((v2[0] - v2[1]) / (v2[0] + v2[1]) + 1))
+        objectives.append(np.sum(objective))
+    return np.array(objectives)
+
 def main():
     total_timer = Timer()
     short_timer = Timer()
     total_timer.start()
+    pool = Pool()
 
     logger.success(' --- Welcome to the Quantum transmission device optimizer --- ')
 
-    serializer = Serializer()
+    parser = Parser()
+    g = Generator(parser)
+    serializer = Serializer(parser)
     ga = serializer.deserialize()
     if ga is not None:
         # continue from before
         logger.success('Successfully loaded previous GA. Will continue previous calculation.')
     else:
         logger.info('GA starting from scratch.')
-        parser = Parser()
-        g = Generator(parser)
         logger.info('Generating initial structures...')
         short_timer.start()
         parsers = g.generateAll()
         structures = [Structure(parser) for parser in parsers]
         logger.success('Initial structures generated. Elapsed time: %s' % (short_timer.stop()))
         
-        ga = GA(parser, structures)
+        ga = GA(parser, structures, objective_function=objectiveFunction)
 
     #########################
     # main loop here
     #########################
 
-    # while ga.generationNumber() < parser.getNIterations():
-    short_timer.start()
-    ga.summarizeGeneration()
-    structures = ga.getCurrentGeneration()
-    currents_0_1 = [s.getCurrent(0, 1, avg_chem_pot=2.7) for s in structures]
-    currents_0_2 = [s.getCurrent(0, 2, avg_chem_pot=2.7) for s in structures]
-    logger.info('Calculations finished. Elapsed time: %s' % (short_timer.stop()))
+    while ga.generationNumber() < parser.getNIterations():
+        short_timer.start()
+        ga.summarizeGeneration()
+        structures = ga.getCurrentGeneration()
+        # for s in structures:
+        #     s.visualizeSystem()
+        #     plt.show()
+        currents_0_1 = pool.map(threadedCall, structures, [0] * len(structures), [1] * len(structures))
+        currents_0_2 = pool.map(threadedCall, structures, [0] * len(structures), [2] * len(structures))
+        ga.calculate((currents_0_1, currents_0_2))
+        ga.writePhaseSpace(structures)
+        ga.setNextGeneration(g.mutateAll(structures))
+        logger.info('Calculations finished. Elapsed time: %s' % (short_timer.stop()))
+        short_timer.start()
+        serializer.serialize(ga)
+        logger.success('Generation %i completed. Elapsed time: %s' % (ga.generationNumber(), short_timer.stop()))
 
-    short_timer.start()
-    serializer.serialize(ga)
-    logger.success('Serialized the GA successfully. Elapsed time: %s' % (short_timer.stop()))
     logger.success(' --- Elapsed time: %s ---' % (total_timer.stop()))
 if __name__ == '__main__':
     main()

@@ -409,4 +409,10 @@ class Structure:
     def getDOS(self):
         return kwant.kpm.SpectralDensity(self.system)()
 
+    def getChromosome(self):
+        chromosome = []
+        for gene in self.parser.getGenes():
+            val = getFromDict(self.parser.getConfig(), gene['path'])
+            chromosome.append(val)
+        return chromosome
 
