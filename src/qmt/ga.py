@@ -22,7 +22,9 @@ class GA:
         self.objective_function = objective_function
 
         self.past_objectives = []
+        self.past_vectors = []
         self.current_objectives = []
+        self.current_vectors = []
 
         subprocess.run(['mkdir -p output'], shell=True)
         self.phase_space = open('output/phase_space.dat', 'w')
@@ -64,10 +66,13 @@ class GA:
                     self.phase_space.write('%1.20e\t' % (np.mean(val)))
                 elif type(val) == float:
                     self.phase_space.write('%1.20e\t' % (val))
+            for elem in self.current_vectors[i]:
+                self.phase_space.write('%1.20e\t' % elem)
             self.phase_space.write('%1.20e\n' % (self.current_objectives[i]))
         self.phase_space.flush()
 
     def calculate(self, args):
         self.past_objectives = copy.copy(self.current_objectives)
-        self.current_objectives = self.objective_function(*args)
+        self.past_vectors = copy.copy(self.current_vectors)
+        self.current_objectives, self.current_vectors = self.objective_function(*args)
         self.step()

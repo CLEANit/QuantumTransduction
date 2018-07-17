@@ -27,13 +27,15 @@ def threadedCall(structure, lead0, lead1):
     return structure.getCurrent(lead0, lead1, avg_chem_pot=2.7)
 
 def objectiveFunction(currents_0_1, currents_0_2):
+    vectors = []
     objectives = []
     for v1, v2 in  zip(currents_0_1, currents_0_2):
         objective = []
-        objective.append(np.abs((v1[0] - v1[1]) / (v1[0] + v1[1]) - 1))
-        objective.append(np.abs((v2[0] - v2[1]) / (v2[0] + v2[1]) + 1))
-        objectives.append(np.sum(objective))
-    return np.array(objectives)
+        objective.append((v1[0]) / (v1[0] + v1[1]) - 1)
+        objective.append((v2[1]) / (v2[0] + v2[1]) - 1)
+        vectors.append([np.abs((v1[0]) / (v1[0] + v1[1]) - 1), np.abs((v2[1]) / (v2[0] + v2[1]) - 1)])
+        objectives.append((objective[0]**2 + objective[1]**2)**0.5)
+    return np.array(objectives), np.array(vectors)
 
 def main():
     total_timer = Timer()

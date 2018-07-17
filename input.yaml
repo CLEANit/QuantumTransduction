@@ -61,9 +61,9 @@ System:
     #- {name: 'circle', args: {xpos: 0.0, ypos: 0.0, radius: 1.0}}
 
   Leads:
-    - {range: [-4, 4], symmetry: [-1, 1], shift: [0, -0.5], offset: [0, 0], potential: 0.0, hopping: -2.7, reverse: False}
-    - {range: [36, 44], symmetry: [1, -1], shift: [0, -0.5], offset: [0, 5], potential: 0.0, hopping: -2.7, reverse: False}
-    - {range: [-44, -36], symmetry: [1, -1], shift: [0, -0.5], offset: [0, -5], potential: 0.0, hopping: -2.7, reverse: False}
+    - {range: [-4, 4], symmetry: [-1, 1], shift: [0, -0.5], offset: [0, 0], potential: 0.0, hopping: -2.7, reverse: False, direction: [-1, 0]}
+    - {range: [36, 44], symmetry: [1, -1], shift: [0, -0.5], offset: [0, 5], potential: 0.0, hopping: -2.7, reverse: False, direction: [1, 0]}
+    - {range: [-44, -36], symmetry: [1, -1], shift: [0, -0.5], offset: [0, -5], potential: 0.0, hopping: -2.7, reverse: False, direction: [1, 0]}
 
 # Genetic algorithm
 GA:

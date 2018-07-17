@@ -14,9 +14,11 @@ import coloredlogs, verboselogs
 coloredlogs.install(level='INFO')
 logger = verboselogs.VerboseLogger(' <-- QMT: Structure --> ')
 
-def hoppingFunction(self, t, phi, site1, site2):
+def hoppingFunction(self, t, phi, direction, site1, site2):
     """
     This is a function which returns the hopping value when a magnetic field is being applied.
+
+    For the magnetic field: A value of 1 phi = 789436.238138607 Tesla!
 
     Parameters
     ----------
@@ -33,6 +35,8 @@ def hoppingFunction(self, t, phi, site1, site2):
     B = phi / (lattice_vectors[0][0] * lattice_vectors[1][1] - lattice_vectors[0][1] * lattice_vectors[1][0])
     p1 = site1.pos
     p2 = site2.pos
+
+
     return t * np.exp(1j * np.pi * (p2[0] - p1[0]) * (p2[1] + p1[1]) * B)
 
 def onSiteFunction(self, pot, spin, phi, site):
@@ -100,7 +104,7 @@ class Structure:
             exit(-1)
 
 
-        for shape, offset, hopping, potential in zip(self.device['shapes'], self.device['offsets'], self.device['hoppings'], self.device['potentials']):
+        for shape, offset, hopping, potential, direction in zip(self.device['shapes'], self.device['offsets'], self.device['hoppings'], self.device['potentials'], self.device['directions']):
             
             # if we want to consider spin dependent transport
             if self.spin_dep:
@@ -109,13 +113,13 @@ class Structure:
                 
                 self.neighbors = self.lattice.neighbors()
                 
-                self.system_up[self.neighbors] = partial(hoppingFunction, self, hopping, self.parser.getPhi())
-                self.system_down[self.neighbors] = partial(hoppingFunction, self, hopping, self.parser.getPhi())
+                self.system_up[self.neighbors] = partial(hoppingFunction, self, hopping, self.parser.getPhi(), direction)
+                self.system_down[self.neighbors] = partial(hoppingFunction, self, hopping, self.parser.getPhi(), direction)
 
             else:
                 self.system[self.lattice.shape(shape, offset)] = potential
                 self.neighbors = self.lattice.neighbors()
-                self.system[self.neighbors] = partial(hoppingFunction, self, hopping, self.parser.getPhi())
+                self.system[self.neighbors] = partial(hoppingFunction, self, hopping, self.parser.getPhi(), direction)
 
         if self.spin_dep:
             self.system_up.eradicate_dangling()
@@ -133,14 +137,15 @@ class Structure:
                 lead_hopping = l['hopping']
                 lead_r = l['reverse']
                 lead_shift = l['shift']
+                lead_direction = l['direction']
                 sym = kwant.TranslationalSymmetry(self.lattice.vec(lead_vector))
                 a = orthogVecSlope(self.lattice.vec(lead_vector))
                 lead_up = kwant.Builder(sym)
                 lead_down = kwant.Builder(sym)
                 lead_up[self.lattice.shape(lambda pos: lead_range[0]  <= pos[1] - lead_shift[1] + (pos[0] - lead_shift[0]) * a <= lead_range[1], lead_offset)] = partial(onSiteFunction, self, lead_pot, 1/2, self.parser.getPhi())
                 lead_down[self.lattice.shape(lambda pos: lead_range[0]  <= pos[1] - lead_shift[1] + (pos[0] - lead_shift[0]) * a <= lead_range[1], lead_offset)] = partial(onSiteFunction, self, lead_pot, -1/2, self.parser.getPhi())
-                lead_up[self.neighbors] = partial(hoppingFunction, self, lead_hopping, self.parser.getPhi())
-                lead_down[self.neighbors] = partial(hoppingFunction, self, lead_hopping, self.parser.getPhi())            
+                lead_up[self.neighbors] = partial(hoppingFunction, self, lead_hopping, self.parser.getPhi(), lead_direction)
+                lead_down[self.neighbors] = partial(hoppingFunction, self, lead_hopping, self.parser.getPhi(), lead_direction)            
                 lead_up.eradicate_dangling()
                 lead_down.eradicate_dangling()
 
@@ -159,11 +164,13 @@ class Structure:
                 lead_pot = l['potential']
                 lead_hopping = l['hopping']
                 lead_r = l['reverse']
+                lead_shift = l['shift']
+                lead_direction = l['direction']
                 sym = kwant.TranslationalSymmetry(self.lattice.vec(lead_vector))
                 a = orthogVecSlope(self.lattice.vec(lead_vector))
                 lead = kwant.Builder(sym)
                 lead[self.lattice.shape(lambda pos: lead_range[0]  <= pos[1] - lead_shift[1] + (pos[0] - lead_shift[0]) * a <= lead_range[1], lead_offset)] = lead_pot
-                lead[self.neighbors] = partial(hoppingFunction, self, lead_hopping, self.parser.getPhi())
+                lead[self.neighbors] = partial(hoppingFunction, self, lead_hopping, self.parser.getPhi(), lead_direction)
                 lead.eradicate_dangling()
                 self.system.attach_lead(lead)
 
