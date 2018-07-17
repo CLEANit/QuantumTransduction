@@ -88,6 +88,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../ga.html">GA class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../serializer.html">Serializer class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../helper.html">helper Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../timer.html">Timer class</a></li>
 </ul>
 
             
@@ -156,22 +157,35 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">subprocess</span>
 <span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">import</span> <span class="nn">coloredlogs</span><span class="o">,</span> <span class="nn">verboselogs</span>
 <span class="c1"># create logger</span>
 <span class="n">coloredlogs</span><span class="o">.</span><span class="n">install</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s1">&#39;INFO&#39;</span><span class="p">)</span>
-<span class="n">logger</span> <span class="o">=</span> <span class="n">verboselogs</span><span class="o">.</span><span class="n">VerboseLogger</span><span class="p">(</span><span class="s1">&#39;qmt::GA &#39;</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">verboselogs</span><span class="o">.</span><span class="n">VerboseLogger</span><span class="p">(</span><span class="s1">&#39;qmt::ga &#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="GA"><a class="viewcode-back" href="../../ga.html#qmt.ga.GA">[docs]</a><span class="k">class</span> <span class="nc">GA</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Genetic algorithm class. This class holds the structures, creates child configurations based on parents.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">structures</span><span class="p">,</span> <span class="n">fresh</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">structures</span><span class="p">,</span> <span class="n">objective_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fresh</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">parser</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">initial_generation</span> <span class="o">=</span> <span class="n">structures</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_structures</span> <span class="o">=</span> <span class="n">structures</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">past_generation</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">iteration_number</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generation_number</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objective_function</span> <span class="o">=</span> <span class="n">objective_function</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">past_objectives</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">past_vectors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_objectives</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_vectors</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s1">&#39;mkdir -p output&#39;</span><span class="p">],</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="s1">&#39;output/phase_space.dat&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">phase_space</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;output/phase_space.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">phase_space</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;output/phase_space.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="GA.summarizeGeneration"><a class="viewcode-back" href="../../ga.html#qmt.ga.GA.summarizeGeneration">[docs]</a>    <span class="k">def</span> <span class="nf">summarizeGeneration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -192,11 +206,70 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_structures</span></div>
 
-    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">iteration_number</span> <span class="o">+=</span> <span class="mi">1</span>
+<div class="viewcode-block" id="GA.setNextGeneration"><a class="viewcode-back" href="../../ga.html#qmt.ga.GA.setNextGeneration">[docs]</a>    <span class="k">def</span> <span class="nf">setNextGeneration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structures</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the current structures in the GA, set the previous structures to past generation.</span>
 
-    <span class="k">def</span> <span class="nf">generationNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration_number</span></div>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        structures : A list of structures.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">past_generation</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_structures</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_structures</span> <span class="o">=</span> <span class="n">structures</span></div>
+
+<div class="viewcode-block" id="GA.step"><a class="viewcode-back" href="../../ga.html#qmt.ga.GA.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Increment the generation number by 1.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generation_number</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="GA.generationNumber"><a class="viewcode-back" href="../../ga.html#qmt.ga.GA.generationNumber">[docs]</a>    <span class="k">def</span> <span class="nf">generationNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the generation number of the GA.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        The generation number</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">generation_number</span></div>
+
+<div class="viewcode-block" id="GA.writePhaseSpace"><a class="viewcode-back" href="../../ga.html#qmt.ga.GA.writePhaseSpace">[docs]</a>    <span class="k">def</span> <span class="nf">writePhaseSpace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structures</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write out the values of the genes, the vectors associated with the multivariate optimization</span>
+<span class="sd">        and the scalar merit function. The data is written to &quot;output/phase_space.dat&quot;.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        structures : The structures that contain the information necessary to write out to the file.</span>
+<span class="sd">    </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">structures</span><span class="p">):</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">getChromosome</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">c</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">phase_space</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%1.20e</span><span class="se">\t</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">val</span><span class="p">)))</span>
+                <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">phase_space</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%1.20e</span><span class="se">\t</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">val</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_vectors</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">phase_space</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%1.20e</span><span class="se">\t</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">elem</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">phase_space</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%1.20e</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_objectives</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phase_space</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="GA.calculate"><a class="viewcode-back" href="../../ga.html#qmt.ga.GA.calculate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the scalar value of the objection function which has been passed into the GA class.</span>
+<span class="sd">        The objective function should also return a vector of values that corresponds to the </span>
+<span class="sd">        multivariate optimization problem. Afterwards increment the generation.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        args : Arguments that are passed into your objective function. This should be a tuple.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">past_objectives</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_objectives</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">past_vectors</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_vectors</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_objectives</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_vectors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objective_function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">()</span></div></div>
 </pre></div>
 
            </div>

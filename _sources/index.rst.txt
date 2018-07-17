@@ -19,6 +19,7 @@ Welcome to QMT's documentation!
    ga
    serializer
    helper
+   timer
 
 Indices and tables
 ==================

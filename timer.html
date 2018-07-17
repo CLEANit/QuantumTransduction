@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Welcome to QMT’s documentation! &mdash; QMT 0.0.1a documentation</title>
+  <title>Timer class &mdash; QMT 0.0.1a documentation</title>
   
 
   
@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Parser class" href="parser.html" /> 
+    <link rel="prev" title="helper Module" href="helper.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -47,7 +47,7 @@
           
 
           
-            <a href="#" class="icon icon-home"> QMT
+            <a href="index.html" class="icon icon-home"> QMT
           
 
           
@@ -82,14 +82,14 @@
             
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="parser.html">Parser class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="system.html">System class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generator.html">Generator class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ga.html">GA class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="serializer.html">Serializer class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="helper.html">helper Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="timer.html">Timer class</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Timer class</a></li>
 </ul>
 
             
@@ -104,7 +104,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">QMT</a>
+          <a href="index.html">QMT</a>
         
       </nav>
 
@@ -133,15 +133,15 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="#">Docs</a> &raquo;</li>
+      <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Welcome to QMT’s documentation!</li>
+      <li>Timer class</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/timer.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -154,29 +154,37 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="welcome-to-qmt-s-documentation">
-<h1>Welcome to QMT’s documentation!<a class="headerlink" href="#welcome-to-qmt-s-documentation" title="Permalink to this headline">¶</a></h1>
-<a class="reference internal image-reference" href="_images/promo.png"><img alt="_images/promo.png" src="_images/promo.png" style="width: 500px;" /></a>
-<div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="parser.html">Parser class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="system.html">System class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generator.html">Generator class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ga.html">GA class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="serializer.html">Serializer class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="helper.html">helper Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="timer.html">Timer class</a></li>
-</ul>
-</div>
-</div>
-<div class="section" id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
-<ul class="simple">
-<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
-<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
-<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
-</ul>
+  <div class="section" id="module-qmt.timer">
+<span id="timer-class"></span><h1>Timer class<a class="headerlink" href="#module-qmt.timer" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="qmt.timer.Timer">
+<em class="property">class </em><code class="descclassname">qmt.timer.</code><code class="descname">Timer</code><a class="reference internal" href="_modules/qmt/timer.html#Timer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.timer.Timer" title="Permalink to this definition">¶</a></dt>
+<dd><p>A simple timer class which can be used like a stop watch. Used for timing different parts of the code.</p>
+<p class="rubric">Methods</p>
+<dl class="method">
+<dt id="qmt.timer.Timer.start">
+<code class="descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/timer.html#Timer.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.timer.Timer.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start the stop watch.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.timer.Timer.stop">
+<code class="descname">stop</code><span class="sig-paren">(</span><em>tformat='auto'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/timer.html#Timer.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.timer.Timer.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop the stop watch.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>tformat</strong> : Format of the time. Accepts: ‘s’, ‘min’, ‘hrs’, ‘days’. Default is ‘auto’, where it tries</p>
+<p class="last"><strong>to figure out what the best format is for readability.</strong></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 
 
@@ -187,8 +195,8 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="parser.html" class="btn btn-neutral float-right" title="Parser class" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
+        <a href="helper.html" class="btn btn-neutral" title="helper Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

@@ -90,6 +90,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">GA class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="serializer.html">Serializer class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="helper.html">helper Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="timer.html">Timer class</a></li>
 </ul>
 
             
@@ -158,9 +159,39 @@
 <span id="ga-class"></span><h1>GA class<a class="headerlink" href="#module-qmt.ga" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="qmt.ga.GA">
-<em class="property">class </em><code class="descclassname">qmt.ga.</code><code class="descname">GA</code><span class="sig-paren">(</span><em>parser</em>, <em>structures</em>, <em>fresh=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/ga.html#GA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.ga.GA" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">qmt.ga.</code><code class="descname">GA</code><span class="sig-paren">(</span><em>parser</em>, <em>structures</em>, <em>objective_function=None</em>, <em>fresh=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/ga.html#GA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.ga.GA" title="Permalink to this definition">¶</a></dt>
 <dd><p>Genetic algorithm class. This class holds the structures, creates child configurations based on parents.</p>
 <p class="rubric">Methods</p>
+<dl class="method">
+<dt id="qmt.ga.GA.calculate">
+<code class="descname">calculate</code><span class="sig-paren">(</span><em>args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/ga.html#GA.calculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.ga.GA.calculate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the scalar value of the objection function which has been passed into the GA class.
+The objective function should also return a vector of values that corresponds to the 
+multivariate optimization problem. Afterwards increment the generation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>args</strong> : Arguments that are passed into your objective function. This should be a tuple.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.ga.GA.generationNumber">
+<code class="descname">generationNumber</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/ga.html#GA.generationNumber"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.ga.GA.generationNumber" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the generation number of the GA.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The generation number</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="method">
 <dt id="qmt.ga.GA.getCurrentGeneration">
 <code class="descname">getCurrentGeneration</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/ga.html#GA.getCurrentGeneration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.ga.GA.getCurrentGeneration" title="Permalink to this definition">¶</a></dt>
@@ -176,9 +207,44 @@
 </dd></dl>
 
 <dl class="method">
+<dt id="qmt.ga.GA.setNextGeneration">
+<code class="descname">setNextGeneration</code><span class="sig-paren">(</span><em>structures</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/ga.html#GA.setNextGeneration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.ga.GA.setNextGeneration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the current structures in the GA, set the previous structures to past generation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>structures</strong> : A list of structures.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.ga.GA.step">
+<code class="descname">step</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/ga.html#GA.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.ga.GA.step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Increment the generation number by 1.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="qmt.ga.GA.summarizeGeneration">
 <code class="descname">summarizeGeneration</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/ga.html#GA.summarizeGeneration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.ga.GA.summarizeGeneration" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print out the average and standard deviation of the number of orbitals we are currently investigating.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.ga.GA.writePhaseSpace">
+<code class="descname">writePhaseSpace</code><span class="sig-paren">(</span><em>structures</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/ga.html#GA.writePhaseSpace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.ga.GA.writePhaseSpace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write out the values of the genes, the vectors associated with the multivariate optimization
+and the scalar merit function. The data is written to “output/phase_space.dat”.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>structures</strong> : The structures that contain the information necessary to write out to the file.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
