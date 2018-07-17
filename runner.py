@@ -57,7 +57,8 @@ def main():
         logger.info('Generating initial structures...')
         short_timer.start()
         parsers = g.generateAll()
-        structures = [Structure(parser) for parser in parsers]
+        # structures = [Structure(parser) for parser in parsers]
+        structures = pool.map(Structure, parsers)
         logger.success('Initial structures generated. Elapsed time: %s' % (short_timer.stop()))
         
         ga = GA(parser, structures, objective_function=objectiveFunction)
@@ -77,7 +78,7 @@ def main():
         currents_0_2 = pool.map(threadedCall, structures, [0] * len(structures), [2] * len(structures))
         ga.calculate((currents_0_1, currents_0_2))
         ga.writePhaseSpace(structures)
-        ga.setNextGeneration(g.mutateAll(structures))
+        ga.setNextGeneration(g.mutateAll(structures, pool))
         logger.info('Calculations finished. Elapsed time: %s' % (short_timer.stop()))
         short_timer.start()
         serializer.serialize(ga)

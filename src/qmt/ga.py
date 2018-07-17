@@ -3,6 +3,7 @@
 import numpy as np
 import subprocess
 import copy
+import os
 
 import coloredlogs, verboselogs
 # create logger
@@ -27,7 +28,10 @@ class GA:
         self.current_vectors = []
 
         subprocess.run(['mkdir -p output'], shell=True)
-        self.phase_space = open('output/phase_space.dat', 'w')
+        if os.path.isfile('output/phase_space.dat'):
+            self.phase_space = open('output/phase_space.dat', 'a')
+        else:
+            self.phase_space = open('output/phase_space.dat', 'w')
 
     def summarizeGeneration(self):
         """
@@ -49,16 +53,42 @@ class GA:
         return self.current_structures
 
     def setNextGeneration(self, structures):
+        """
+        Update the current structures in the GA, set the previous structures to past generation.
+
+        Parameters
+        ----------
+        structures : A list of structures.
+        """
         self.past_generation = copy.deepcopy(self.current_structures)
         self.current_structures = structures
 
     def step(self):
+        """
+        Increment the generation number by 1.
+        """
         self.generation_number += 1
 
     def generationNumber(self):
+        """
+        Get the generation number of the GA.
+
+        Returns
+        -------
+        The generation number
+        """
         return self.generation_number
 
     def writePhaseSpace(self, structures):
+        """
+        Write out the values of the genes, the vectors associated with the multivariate optimization
+        and the scalar merit function. The data is written to "output/phase_space.dat".
+
+        Parameters
+        ----------
+        structures : The structures that contain the information necessary to write out to the file.
+    
+        """
         for i, s in enumerate(structures):
             c = s.getChromosome()
             for val in c:
@@ -72,6 +102,16 @@ class GA:
         self.phase_space.flush()
 
     def calculate(self, args):
+        """
+        Calculate the scalar value of the objection function which has been passed into the GA class.
+        The objective function should also return a vector of values that corresponds to the 
+        multivariate optimization problem. Afterwards increment the generation.
+
+        Parameters
+        ----------
+        args : Arguments that are passed into your objective function. This should be a tuple.
+
+        """
         self.past_objectives = copy.copy(self.current_objectives)
         self.past_vectors = copy.copy(self.current_vectors)
         self.current_objectives, self.current_vectors = self.objective_function(*args)

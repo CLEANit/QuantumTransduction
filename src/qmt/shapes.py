@@ -5,6 +5,10 @@ import numpy as np
 
 
 def hexagon(coord, xcoords=None, ycoords=None, shift=[0.0, 0.0]):
+    """
+    Return a hexagon shaped cystal.
+    
+    """
     x, y = coord
     m = np.sin(np.pi / 6) / np.cos(np.pi / 6)
     return xcoords[0] <= x <= xcoords[1] and ycoords[0] <= x * m + y <= ycoords[1] and ycoords[0] <= -x * m  + y  <= ycoords[1]

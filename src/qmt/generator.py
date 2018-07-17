@@ -165,8 +165,23 @@ class Generator:
         new_parser.updateConfig(new_config)
         return Structure(new_parser)
 
-    def mutateAll(self, structures):
-        return [self.mutate(s) for s in structures]
+    def mutateAll(self, structures, pool=None):
+        """
+        Mutate all structures. Possibly in parallel.
+
+        Parameters
+        ----------
+        structures : A list of structure classes that the mutate function will be called on.
+        pool : A process pool so the mutations can be done in parallel. Default is None.
+
+        Returns
+        -------
+        A mutated structure class.
+        """
+        if pool is None:
+            return [self.mutate(s) for s in structures]
+        else:
+            return pool.map(self.mutate, structures)
 
 
     def generateAll(self):
