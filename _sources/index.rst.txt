@@ -18,8 +18,9 @@ Welcome to QMT's documentation!
    generator
    ga
    serializer
-   helper
    timer
+   io
+   helper
 
 Indices and tables
 ==================

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Serializer class &mdash; QMT 0.0.1a documentation</title>
+  <title>IO class &mdash; QMT 0.0.1a documentation</title>
   
 
   
@@ -28,8 +28,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Timer class" href="timer.html" />
-    <link rel="prev" title="GA class" href="ga.html" /> 
+    <link rel="next" title="helper Module" href="helper.html" />
+    <link rel="prev" title="Timer class" href="timer.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -88,9 +88,9 @@
 <li class="toctree-l1"><a class="reference internal" href="system.html">System class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generator.html">Generator class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ga.html">GA class</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Serializer class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="serializer.html">Serializer class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Timer class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="io.html">IO class</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">IO class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="helper.html">helper Module</a></li>
 </ul>
 
@@ -137,13 +137,13 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Serializer class</li>
+      <li>IO class</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/serializer.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/io.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -156,36 +156,32 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-qmt.serializer">
-<span id="serializer-class"></span><h1>Serializer class<a class="headerlink" href="#module-qmt.serializer" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-qmt.io">
+<span id="io-class"></span><h1>IO class<a class="headerlink" href="#module-qmt.io" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
-<dt id="qmt.serializer.Serializer">
-<em class="property">class </em><code class="descclassname">qmt.serializer.</code><code class="descname">Serializer</code><span class="sig-paren">(</span><em>parser</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/serializer.html#Serializer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.serializer.Serializer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Serialize the GA class so we can restart a calculation later.</p>
+<dt id="qmt.io.IO">
+<em class="property">class </em><code class="descclassname">qmt.io.</code><code class="descname">IO</code><a class="reference internal" href="_modules/qmt/io.html#IO"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.io.IO" title="Permalink to this definition">¶</a></dt>
+<dd><p>Input/output class mainly for writing data to disk. You should write to the output directory
+but this can handle writing/reading anywhere.</p>
 <p class="rubric">Methods</p>
 <dl class="method">
-<dt id="qmt.serializer.Serializer.deserialize">
-<code class="descname">deserialize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/serializer.html#Serializer.deserialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.serializer.Serializer.deserialize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Try and load the serialized GA class.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">If successful, a GA class. If not, returns None.</td>
-</tr>
-</tbody>
-</table>
+<dt id="qmt.io.IO.reInit">
+<code class="descname">reInit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/io.html#IO.reInit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.io.IO.reInit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reinitialize the files, so we can append rather than re-write them.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="qmt.serializer.Serializer.serialize">
-<code class="descname">serialize</code><span class="sig-paren">(</span><em>ga</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/serializer.html#Serializer.serialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.serializer.Serializer.serialize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Serialize a GA class. The class is written to ‘restart/ga.dill’</p>
+<dt id="qmt.io.IO.writer">
+<code class="descname">writer</code><span class="sig-paren">(</span><em>filename</em>, <em>data</em>, <em>header=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/io.html#IO.writer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.io.IO.writer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write to a file called filename. If not created, this class will open it for you.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ga</strong> : A GA class.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>filename</strong> : Name of the file you would like to write to.</p>
+<p><strong>data</strong> : A tuple of data that will be written to the file.</p>
+<p class="last"><strong>header</strong> : If you would like to write a string to the file, use the header. This allows one to comment the data files. Default: False.</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -203,10 +199,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="timer.html" class="btn btn-neutral float-right" title="Timer class" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="helper.html" class="btn btn-neutral float-right" title="helper Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="ga.html" class="btn btn-neutral" title="GA class" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="timer.html" class="btn btn-neutral" title="Timer class" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
