@@ -126,7 +126,7 @@ class Generator:
 
         return new_parser
 
-    def mutate(self, structure):
+    def mutate(self, structure, seed=None):
         """
         Mutate the structures gene in some way.
 
@@ -139,7 +139,8 @@ class Generator:
         A new modified Structure class.
         
         """
-
+        random.seed(seed)
+        np.random.seed(seed)
         old_config = structure.parser.getConfig()
         new_parser = copy.deepcopy(structure.parser)
         new_config = new_parser.getConfig()
@@ -165,7 +166,7 @@ class Generator:
         new_parser.updateConfig(new_config)
         return Structure(new_parser)
 
-    def mutateAll(self, structures, pool=None):
+    def mutateAll(self, structures, pool=None, seeds=None):
         """
         Mutate all structures. Possibly in parallel.
 
@@ -181,7 +182,7 @@ class Generator:
         if pool is None:
             return [self.mutate(s) for s in structures]
         else:
-            return pool.map(self.mutate, structures)
+            return pool.map(self.mutate, structures, seeds)
 
 
     def generateAll(self):

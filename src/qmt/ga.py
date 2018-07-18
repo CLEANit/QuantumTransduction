@@ -4,6 +4,7 @@ import numpy as np
 import subprocess
 import copy
 import os
+from .io import IO
 
 import coloredlogs, verboselogs
 # create logger
@@ -21,7 +22,7 @@ class GA:
         self.past_generation = None
         self.generation_number = 0
         self.objective_function = objective_function
-
+        self.io = IO()
         self.past_objectives = []
         self.past_vectors = []
         self.current_objectives = []
@@ -89,6 +90,7 @@ class GA:
         structures : The structures that contain the information necessary to write out to the file.
     
         """
+        self.phase_space.write('# Generation number: %i\n' % self.generationNumber())
         for i, s in enumerate(structures):
             c = s.getChromosome()
             for val in c:

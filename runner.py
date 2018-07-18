@@ -52,6 +52,7 @@ def main():
     if ga is not None:
         # continue from before
         logger.success('Successfully loaded previous GA. Will continue previous calculation.')
+        ga.io.reInit()
     else:
         logger.info('GA starting from scratch.')
         logger.info('Generating initial structures...')
@@ -67,23 +68,44 @@ def main():
     # main loop here
     #########################
 
+    ga.io.writer('output/currents.dat', '# Currents (lead1-spin-up, lead1-spin-down, lead2-spin-up, lead2-spin-down)\n', header=True)
+
     while ga.generationNumber() < parser.getNIterations():
+
         short_timer.start()
+
+        # print info about the upcoming calculation
         ga.summarizeGeneration()
+
+        # get the structures we are going to run calculations on
         structures = ga.getCurrentGeneration()
-        # for s in structures:
-        #     s.visualizeSystem()
-        #     plt.show()
+
+        # plot the systems and save image to disk
+        for i, s in enumerate(structures):
+            s.visualizeSystem(args={'file': 'output/gen_%i_struct_%i.png' % (ga.generationNumber(), i)})
+
+        # calculate currents and write them out to disk
         currents_0_1 = pool.map(threadedCall, structures, [0] * len(structures), [1] * len(structures))
         currents_0_2 = pool.map(threadedCall, structures, [0] * len(structures), [2] * len(structures))
+
+        for cs1, cs2 in zip(currents_0_1, currents_0_2):
+            ga.io.writer('output/currents.dat', cs1 + cs2)
+
+        # calculate the objective function
         ga.calculate((currents_0_1, currents_0_2))
+
+        # write gene variables and objective function parameters to file
         ga.writePhaseSpace(structures)
-        ga.setNextGeneration(g.mutateAll(structures, pool))
+
+        # mutate the current generation
+        ga.setNextGeneration(g.mutateAll(structures, pool=pool, seeds=np.random.random_integers(0, 2**32 - 1, len(structures))))
+
+        # print how long it took and serialize the current GA
         logger.info('Calculations finished. Elapsed time: %s' % (short_timer.stop()))
-        short_timer.start()
         serializer.serialize(ga)
         logger.success('Generation %i completed. Elapsed time: %s' % (ga.generationNumber(), short_timer.stop()))
 
     logger.success(' --- Elapsed time: %s ---' % (total_timer.stop()))
+
 if __name__ == '__main__':
     main()
