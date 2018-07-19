@@ -37,7 +37,7 @@ System:
         shape: 'rectangle', 
         
         # args passed to the shape function
-        args: {xcoords: [-32, 32], ycoords: [-32, 32], angle: 0.0, shift: [0, -0.5]},
+        args: {xcoords: [-32, 32], ycoords: [-32, 32], angle: 0.0, shift: [-0.75, -0.75]},
 
         # on-site energy
         potential: 0.0,
@@ -50,25 +50,25 @@ System:
       }
     
     channels:
-      - {shape: 'rectangle', args: {xcoords: [-48, -32], ycoords: [-4, 4], angle: 0., shift: [0, -0.5]}, potential: 0.0, hopping: -2.7, offset: [-36, 0], direction: [-1, 0]}
+      - {shape: 'rectangle', args: {xcoords: [-48, -32], ycoords: [-4, 4], angle: 0., shift: [-0.75, -0.75]}, potential: 0.0, hopping: -2.7, offset: [-36, 0], direction: [-1, 0]}
       # Right upper channel
-      - {shape: 'rectangle', args: {xcoords: [32, 48], ycoords: [36, 44], angle: 0., shift: [0, -0.5]}, potential: 0.0, hopping: -2.7, offset: [36, 36], direction: [1, 0]}
+      - {shape: 'rectangle', args: {xcoords: [32, 48], ycoords: [36, 44], angle: 0., shift: [-0.75, -0.75]}, potential: 0.0, hopping: -2.7, offset: [36, 36], direction: [1, 0]}
       # Right lower channel
-      - {shape: 'rectangle', args: {xcoords: [32, 48], ycoords: [-44, -36], angle: 0., shift: [0, -0.5]}, potential: 0.0, hopping: -2.7, offset: [36, -36], direction: [1, 0]}
+      - {shape: 'rectangle', args: {xcoords: [32, 48], ycoords: [-44, -36], angle: 0., shift: [-0.75, -0.75]}, potential: 0.0, hopping: -2.7, offset: [36, -36], direction: [1, 0]}
 
   Masks:
       # Let's place a random circle
     #- {name: 'circle', args: {xpos: 0.0, ypos: 0.0, radius: 1.0}}
 
   Leads:
-    - {range: [-4, 4], symmetry: [-1, 1], shift: [0, -0.5], offset: [0, 0], potential: 0.0, hopping: -2.7, reverse: False, direction: [-1, 0]}
-    - {range: [36, 44], symmetry: [1, -1], shift: [0, -0.5], offset: [0, 5], potential: 0.0, hopping: -2.7, reverse: False, direction: [1, 0]}
-    - {range: [-44, -36], symmetry: [1, -1], shift: [0, -0.5], offset: [0, -5], potential: 0.0, hopping: -2.7, reverse: False, direction: [1, 0]}
+    - {range: [-4, 4], symmetry: [-1, 1], shift: [-0.75, -0.75], offset: [0, 0], potential: 0.0, hopping: -2.7, reverse: False, direction: [-1, 0]}
+    - {range: [36, 44], symmetry: [1, -1], shift: [-0.75, -0.75], offset: [0, 5], potential: 0.0, hopping: -2.7, reverse: False, direction: [1, 0]}
+    - {range: [-44, -36], symmetry: [1, -1], shift: [-0.75, -0.75], offset: [0, -5], potential: 0.0, hopping: -2.7, reverse: False, direction: [1, 0]}
 
 # Genetic algorithm
 GA:
   # number of structures in the GA
-  n_structures: 4
+  n_structures: 2
   # number of iterations to perform
   n_iterations: 100
 
@@ -85,11 +85,11 @@ GA:
     #     shift: [0, 0]
     #   }
 
-    # - { 
-    #     path: ['System', 'Junction', 'channels', 0, 'args', 'ycoords'],
-    #     range: [20, 20],
-    #     shift: [-40, 40]
-    #   }
+    - { 
+        path: ['System', 'Junction', 'channels', 0, 'args', 'ycoords'],
+        range: [8, 8],
+        shift: [-28, 28]
+      }
 
     - { 
         path: ['System', 'Junction', 'channels', 1, 'args', 'ycoords'],

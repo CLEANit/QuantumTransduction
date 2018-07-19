@@ -101,6 +101,7 @@ class GA:
             for elem in self.current_vectors[i]:
                 self.phase_space.write('%1.20e\t' % elem)
             self.phase_space.write('%1.20e\n' % (self.current_objectives[i]))
+        self.phase_space.write('\n')
         self.phase_space.flush()
 
     def calculate(self, args):

@@ -39,6 +39,8 @@ class Parser:
         self.n_iterations = None
         self.parseGA()
 
+        self.checkConfig()
+
     def updateConfig(self, config):
         self.config = config
         self.body = None
@@ -51,6 +53,20 @@ class Parser:
         self.n_iterations = None
         self.parseGA()
 
+    def checkConfig(self):
+        """
+        Check some parameters and let the user know if anything is odd.
+        """
+
+        # check the magnetic field strength
+        phi = self.getPhi()
+        lattice_vectors = self.getLatticeVectors()
+        B = phi / (lattice_vectors[0][0] * lattice_vectors[1][1] - lattice_vectors[0][1] * lattice_vectors[1][0])
+        B_in_T = 6.62607004e-34 * B * 10e20 / 1.60217662e-19
+        if B_in_T > 100.:
+            logger.warning('Your magnetic field is very large: %1.5e T. I hope you know what you are doing.' % B_in_T)
+        else:
+            logger.info('Your magnetic field strength is: %1.5e T' % B_in_T)
 
     def parseModel(self):
         """
