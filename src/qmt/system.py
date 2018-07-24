@@ -58,8 +58,8 @@ def onSiteFunction(self, pot, spin, phi, site):
 
     B = phi / (lattice_vectors[0][0] * lattice_vectors[1][1] - lattice_vectors[0][1] * lattice_vectors[1][0])
     B_in_T = 6.62607004e-34 * B * 10e20 / 1.60217662e-19
-    B_in_G = B * 1e4
-    return pot + 2.0 * 0.579e-8 * spin * B
+    B_in_G = B_in_T * 1e4
+    return pot + 2.0 * 0.579e-8 * spin * B_in_G
 
 class Structure:
     """
