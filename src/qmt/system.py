@@ -82,7 +82,21 @@ class Structure:
         self.spin_dep = parser.spinDependent()
 
         self.build()
+
+        self.mask = self.parser.getMaskFunction()
+        if self.mask is not None:
+            if self.spin_dep:
+                self.system_up = self.applyMask(self.mask, self.system_up)
+                self.system_down = self.applyMask(self.mask, self.system_down)
+            else:
+                self.system = self.applyMask(self.mask, self.system)
+        else:
+            # there is no mask to apply
+            pass
+            
         self.attachLeads()
+
+
         self.finalize()
 
     def build(self):
@@ -180,11 +194,11 @@ class Structure:
                     self.system.attach_lead(lead.reversed())
 
 
-    def applyMask(self, mask):
+    def applyMask(self, mask, system):
         tags = []
         positions = []
         sites = []
-        for s, v in self.system.site_value_pairs():
+        for s, v in system.site_value_pairs():
             # if the site is in the body
             if self.body(s.pos):
                 tags.append(s.tag)
@@ -212,8 +226,10 @@ class Structure:
         removed_tags = np.argwhere(masc == 0).astype(int)
         removed_tags = removed_tags.reshape(removed_tags.shape[0]).astype(int)
         for elem in removed_tags:
-            del self.system[sites[int(elem)]]
-        self.system.eradicate_dangling()
+            del system[sites[int(elem)]]
+        system.eradicate_dangling()
+
+        return system
 
     def finalize(self):
         if self.spin_dep:

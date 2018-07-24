@@ -67,6 +67,26 @@ def randomSquares(max_tag, min_pos, max_pos, pos, number=None, length=None):
 
     return img[(pos[:,0] / hx).astype(int), (pos[:,1] / hy).astype(int)], {'xpos': rx, 'ypos': ry}
 
+def rectangle(max_tag, min_pos, max_pos, pos, xcoords=None, ycoords=None):
+    '''
+        This places n random squares of size r by r randomly in the lattice.
+    '''
+
+    hx = (max_pos[0] - min_pos[0]) / max_tag[0]
+    hy = (max_pos[1] - min_pos[1]) / max_tag[1]
+
+    x = np.linspace(min_pos[0], max_pos[0], max_tag[0] + 1)
+    y = np.linspace(min_pos[1], max_pos[1], max_tag[1] + 1)
+    img = np.ones((max_tag[0] + 1, max_tag[1] + 1))
+
+    xinds = np.argwhere(np.logical_and(x > xcoords[0], x < xcoords[1]))
+    yinds = np.argwhere(np.logical_and(y > ycoords[0], y < ycoords[1]))
+    for xi in xinds:
+        for yi in yinds:
+            img[xi, yi] = 0
+
+    return img[(pos[:,0] / hx).astype(int), (pos[:,1] / hy).astype(int)], {'xcoords': xcoords, 'ycoords': ycoords}
+
 def randomCircles(max_tag, min_pos, max_pos, pos, number=None, radius=None):
     '''
         This places n random circles of size r by r randomly in the lattice.
@@ -151,7 +171,8 @@ def image(name, shape, max_tag, min_pos, max_pos, pos):
 mask_dict = {
     'randomCircles': randomCircles,
     'randomSquares': randomSquares,
-    'circle': circle
+    'circle': circle,
+    'rectangle': rectangle
 }
 
 def whatMask(name):

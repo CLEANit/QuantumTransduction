@@ -112,12 +112,12 @@ class Generator:
             for gene in self.parser.getGenes():
                 val = getFromDict(old_config, gene['path'])
                 new_val = copy.copy(val)
-                if type(val) == list:
+                if 'range' in gene and 'shift' in gene:
                     l = np.random.uniform(gene['range'][0], gene['range'][1])
                     s = np.random.uniform(gene['shift'][0], gene['shift'][1])
                     new_val[0] = - l / 2 + s
                     new_val[1] =   l / 2 + s
-                elif type(val) == float:
+                elif 'range' in gene and 'shift' not in gene:
                     new_val = np.random.uniform(gene['range'][0], gene['range'][1])
                 setInDict(new_config, gene['path'], new_val)
                 new_config, clean_generation = self.checkAndUpdate(new_config, gene, val, new_val)

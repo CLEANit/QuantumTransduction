@@ -58,7 +58,7 @@ System:
 
   Masks:
       # Let's place a random circle
-    #- {name: 'circle', args: {xpos: 0.0, ypos: 0.0, radius: 1.0}}
+    - {name: 'rectangle', args: {xcoords: [-8, 8], ycoords: [-8, 8]}}
 
   Leads:
     - {range: [-4, 4], symmetry: [-1, 1], shift: [-0.75, -0.75], offset: [0, 0], potential: 0.0, hopping: -2.7, reverse: False, direction: [-1, 0]}
@@ -101,6 +101,18 @@ GA:
         path: ['System', 'Junction', 'channels', 2, 'args', 'ycoords'],
         range: [8, 8],
         shift: [-28, 20]
+      }
+
+    - {
+        path: ['System', 'Masks', 0, 'args', 'xcoords'],
+        range: [16, 16],
+        shift: [-20, 20]
+      }
+
+    - {
+        path: ['System', 'Masks', 0, 'args', 'ycoords'],
+        range: [16, 16],
+        shift: [-20, 20]
       }
 
     # - {
