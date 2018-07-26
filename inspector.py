@@ -98,7 +98,7 @@ def main():
     plt.savefig('conductances.png')
     plt.savefig('conductances.pdf')
 
-    fig, axes = plt.subplots(len(structures), 1, figsize=(len(structures)*5, 5))
+    fig, axes = plt.subplots(len(structures), 1, figsize=(5, len(structures)*5))
     for i in range(len(structures)):
         axes[i].plot(bands[i][0], bands[i][1], bands[i][0], bands[i][2])
         axes[i].legend(['Spin-up', 'Spin-down'])
@@ -108,7 +108,7 @@ def main():
     plt.savefig('bands.png')
     plt.savefig('bands.pdf')
 
-    fig, axes = plt.subplots(len(structures), 1, figsize=(len(structures)*5, 5))
+    fig, axes = plt.subplots(len(structures), 1, figsize=(5, len(structures)*5))
     for i in range(len(structures)):
         axes[i].plot(dosses[i][0], dosses[i][1], dosses[i][0], dosses[i][2])
         axes[i].legend(['Spin-up', 'Spin-down'])
