@@ -98,9 +98,9 @@ def main():
     plt.savefig('conductances.png')
     plt.savefig('conductances.pdf')
 
-    fig, axes = plt.subplots(len(structures), 1, figsize=(5, len(structures)*5))
+    fig, axes = plt.subplots(len(structures), 1, figsize=(7.5, len(structures)*5))
     for i in range(len(structures)):
-        axes[i].plot(bands[i][0], bands[i][1], bands[i][0], bands[i][2])
+        axes[i].plot(bands[i][0], bands[i][1],, 'b-' bands[i][0], bands[i][2], 'r--')
         axes[i].legend(['Spin-up', 'Spin-down'])
         axes[i].set_xlabel('Momenta [Lattice constants${}^{-1}$]')
         axes[i].set_ylabel('Energy [eV]')
@@ -108,7 +108,7 @@ def main():
     plt.savefig('bands.png')
     plt.savefig('bands.pdf')
 
-    fig, axes = plt.subplots(len(structures), 1, figsize=(5, len(structures)*5))
+    fig, axes = plt.subplots(len(structures), 1, figsize=(7.5, len(structures)*5))
     for i in range(len(structures)):
         axes[i].plot(dosses[i][0], dosses[i][1], dosses[i][0], dosses[i][2])
         axes[i].legend(['Spin-up', 'Spin-down'])
