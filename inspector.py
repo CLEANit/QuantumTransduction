@@ -100,7 +100,7 @@ def main():
 
     fig, axes = plt.subplots(len(structures), 1, figsize=(7.5, len(structures)*5))
     for i in range(len(structures)):
-        axes[i].plot(bands[i][0], bands[i][1], 'b-' bands[i][0], bands[i][2], 'r--')
+        axes[i].plot(bands[i][0], bands[i][1], 'b-', bands[i][0], bands[i][2], 'r--')
         axes[i].legend(['Spin-up', 'Spin-down'])
         axes[i].set_xlabel('Momenta [Lattice constant${}^{-1}$]')
         axes[i].set_ylabel('Energy [eV]')
