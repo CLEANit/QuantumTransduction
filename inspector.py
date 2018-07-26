@@ -100,20 +100,20 @@ def main():
 
     fig, axes = plt.subplots(len(structures), 1, figsize=(len(structures)*5, 10))
     for i in range(len(structures)):
-        axes[i][0].plot(bands[i][0], bands[i][1], bands[i][0], bands[i][2])
-        axes[i][0].legend(['Spin-up', 'Spin-down'])
-        axes[i][0].set_xlabel('Momenta [Lattice constants${}^{-1}$]')
-        axes[i][0].set_ylabel('Energy [eV]')
+        axes[i].plot(bands[i][0], bands[i][1], bands[i][0], bands[i][2])
+        axes[i].legend(['Spin-up', 'Spin-down'])
+        axes[i].set_xlabel('Momenta [Lattice constants${}^{-1}$]')
+        axes[i].set_ylabel('Energy [eV]')
     
     plt.savefig('bands.png')
     plt.savefig('bands.pdf')
 
     fig, axes = plt.subplots(len(structures), 1, figsize=(len(structures)*5, 10))
     for i in range(len(structures)):
-        axes[i][0].plot(dosses[i][0], dosses[i][1], dosses[i][0], dosses[i][2])
-        axes[i][0].legend(['Spin-up', 'Spin-down'])
-        axes[i][0].set_xlabel('Energy [eV]')
-        axes[i][0].set_ylabel('Number of states [Arbitrary units]')
+        axes[i].plot(dosses[i][0], dosses[i][1], dosses[i][0], dosses[i][2])
+        axes[i].legend(['Spin-up', 'Spin-down'])
+        axes[i].set_xlabel('Energy [eV]')
+        axes[i].set_ylabel('Number of states [Arbitrary units]')
     
     plt.savefig('dosses.png')
     plt.savefig('dosses.pdf')
