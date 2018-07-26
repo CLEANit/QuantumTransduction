@@ -23,8 +23,14 @@ coloredlogs.install(level='INFO')
 
 logger = verboselogs.VerboseLogger('qmt::inspector ')
 
-def threadedCall(structure, lead0, lead1):
+def getConductances(structure, lead0, lead1):
     return structure.getConductance(lead0, lead1)
+
+def getBandstructures(structure):
+    return structure.getBandstructure(0)
+
+def getDosses(structure):
+    return structure.getDOS()
 
 def objectiveFunction(currents_0_1, currents_0_2):
     vectors = []
@@ -67,8 +73,11 @@ def main():
     ga.summarizeGeneration()
 
     short_timer.start()
-    currents_0_1 = pool.map(threadedCall, structures, [0]*len(structures), [1]*len(structures))
-    currents_0_2 = pool.map(threadedCall, structures, [0]*len(structures), [2]*len(structures))
+    currents_0_1 = pool.map(getConductances, structures, [0]*len(structures), [1]*len(structures))
+    currents_0_2 = pool.map(getConductances, structures, [0]*len(structures), [2]*len(structures))
+
+    bands = pool.map(getBandstructures, structures)
+    dosses = pool.map(getDosses, structures)
     logger.info('Calculations took: %s' % short_timer.stop())
 
     fig, axes = plt.subplots(len(structures), 2, figsize=(len(structures)*5, 10))
@@ -88,7 +97,27 @@ def main():
     
     plt.savefig('conductances.png')
     plt.savefig('conductances.pdf')
-    plt.show()
+
+    fig, axes = plt.subplots(len(structures), 1, figsize=(len(structures)*5, 10))
+    for i in range(len(structures)):
+        axes[i][0].plot(bands[i][0], bands[i][1], bands[i][0], bands[i][2])
+        axes[i][0].legend(['Spin-up', 'Spin-down'])
+        axes[i][0].set_xlabel('Momenta [Lattice constants${}^{-1}$]')
+        axes[i][0].set_ylabel('Energy [eV]')
+    
+    plt.savefig('bands.png')
+    plt.savefig('bands.pdf')
+
+    fig, axes = plt.subplots(len(structures), 1, figsize=(len(structures)*5, 10))
+    for i in range(len(structures)):
+        axes[i][0].plot(dosses[i][0], dosses[i][1], dosses[i][0], dosses[i][2])
+        axes[i][0].legend(['Spin-up', 'Spin-down'])
+        axes[i][0].set_xlabel('Energy [eV]')
+        axes[i][0].set_ylabel('Number of states [Arbitrary units]')
+    
+    plt.savefig('dosses.png')
+    plt.savefig('dosses.pdf')
+    # plt.show()
 
     #########################
     # main loop here

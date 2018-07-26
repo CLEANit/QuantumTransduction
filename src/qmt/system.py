@@ -411,27 +411,47 @@ class Structure:
         """
         Get the density of states for the system.
 
+        Parameters
+        ----------
+        energies : An array of energies that we would like to calculate the LDOS at. Default is the minimum and maximum found from the bandstructure.
+
         Returns
         -------
-        Energies and DOS in the form of a tuple.
+        Energies and DOS in the form of a tuple. If spin-dependent calculations are specified, it returns energies, DOS for spin up, DOS for spin down.
         """
         if energies == None:
             energy_range = self.getEnergyRange()
             energies = np.linspace(energy_range[0], energy_range[1], self.grid_size)
 
-        DOS = []
-        for e in energies:
-            # sometimes the ldos function returns an error for a certain value of energy
-            # -- we therefore must use a try-except statement
-            try:
-                LDOS = kwant.ldos(syst, e)
-                energies.append(e)
-                # integrate the ldos over all space
-                DOS.append(np.sum(LDOS))
-            except:
-                pass
-        return energies, DOS
-        
+        if self.spin_dep:
+            DOS_up, DOS_down = [], []
+            for e in energies:
+                # sometimes the ldos function returns an error for a certain value of energy
+                # -- we therefore must use a try-except statement
+                try:
+                    LDOS_up = kwant.ldos(self.system_up, e)
+                    LDOS_down = kwant.ldos(self.system_down, e)
+                    energies.append(e)
+                    # integrate the ldos over all space
+                    DOS_up.append(np.sum(LDOS_up))
+                    DOS_down.append(np.sum(LDOS_down))
+                except:
+                    pass
+            return energies, DOS_up, DOS_down
+        else:
+            DOS = []
+            for e in energies:
+                # sometimes the ldos function returns an error for a certain value of energy
+                # -- we therefore must use a try-except statement
+                try:
+                    LDOS = kwant.ldos(self.system, e)
+                    energies.append(e)
+                    # integrate the ldos over all space
+                    DOS.append(np.sum(LDOS))
+                except:
+                    pass
+            return energies, DOS
+
     def getWaveFunction(self, lead_id, energy=-1):
         if self.spin_dep:
             return kwant.wave_function(self.system_up, energy)(lead_id), kwant.wave_function(self.system_down, energy)(lead_id)
