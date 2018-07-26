@@ -424,33 +424,33 @@ class Structure:
             energies = np.linspace(energy_range[0], energy_range[1], self.grid_size)
 
         if self.spin_dep:
-            DOS_up, DOS_down = [], []
+            es, DOS_up, DOS_down = [], [], []
             for e in energies:
                 # sometimes the ldos function returns an error for a certain value of energy
                 # -- we therefore must use a try-except statement
                 try:
                     LDOS_up = kwant.ldos(self.system_up, e)
                     LDOS_down = kwant.ldos(self.system_down, e)
-                    energies.append(e)
+                    es.append(e)
                     # integrate the ldos over all space
                     DOS_up.append(np.sum(LDOS_up))
                     DOS_down.append(np.sum(LDOS_down))
                 except:
                     pass
-            return energies, DOS_up, DOS_down
+            return es, DOS_up, DOS_down
         else:
-            DOS = []
+            es, DOS = [], []
             for e in energies:
                 # sometimes the ldos function returns an error for a certain value of energy
                 # -- we therefore must use a try-except statement
-                try:
-                    LDOS = kwant.ldos(self.system, e)
-                    energies.append(e)
-                    # integrate the ldos over all space
-                    DOS.append(np.sum(LDOS))
-                except:
-                    pass
-            return energies, DOS
+                # try:
+                LDOS = kwant.ldos(self.system, e)
+                es.append(e)
+                # integrate the ldos over all space
+                DOS.append(np.sum(LDOS))
+                # except:
+                #     pass
+            return es, DOS
 
     def getWaveFunction(self, lead_id, energy=-1):
         if self.spin_dep:
