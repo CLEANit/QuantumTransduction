@@ -476,9 +476,6 @@ class Structure:
         else:
             return len(list(self.pre_system.sites()))
 
-    def getDOS(self):
-        return kwant.kpm.SpectralDensity(self.system)()
-
     def getChromosome(self):
         chromosome = []
         for gene in self.parser.getGenes():
