@@ -37,7 +37,7 @@ def hoppingFunction(self, t, phi, direction, site1, site2):
     p2 = site2.pos
 
 
-    return t * np.exp(1j * np.pi * (p2[0] - p1[0]) * (p2[1] + p1[1]) * B)
+    return t * np.exp(-0.5j * np.pi * (p2[0] - p1[0]) * (p2[1] + p1[1]) * B)
 
 def onSiteFunction(self, pot, spin, phi, site):
     """
