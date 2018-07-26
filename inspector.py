@@ -27,7 +27,7 @@ def getConductances(structure, lead0, lead1):
     return structure.getConductance(lead0, lead1)
 
 def getBandstructures(structure):
-    return structure.getBandstructure(0)
+    return structure.getBandStructure(0)
 
 def getDosses(structure):
     return structure.getDOS()
