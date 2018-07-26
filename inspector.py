@@ -102,7 +102,7 @@ def main():
     for i in range(len(structures)):
         axes[i].plot(bands[i][0], bands[i][1],, 'b-' bands[i][0], bands[i][2], 'r--')
         axes[i].legend(['Spin-up', 'Spin-down'])
-        axes[i].set_xlabel('Momenta [Lattice constants${}^{-1}$]')
+        axes[i].set_xlabel('Momenta [Lattice constant${}^{-1}$]')
         axes[i].set_ylabel('Energy [eV]')
     
     plt.savefig('bands.png')
