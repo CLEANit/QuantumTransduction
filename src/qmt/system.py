@@ -270,14 +270,14 @@ class Structure:
             sparse_mat = self.system.hamiltonian_submatrix(sparse=True, **args)
             return sla.eigs(sparse_mat)
 
-    def getConductance(self, lead1_id, lead2_id, energies=None):
+    def getConductance(self, lead_in, lead_out, energies=None):
         """
         Compute the conductance between 2 leads.
 
         Parameters
         ----------
-        lead1_id : The id of the lead you are injecting electrons.
-        lead2_id : The id of the lead you would like to find the transmission through.
+        lead_in : The id of the lead you would like to inject electrons.
+        lead_out : The id of the lead you measuring the transmission through.
         energies : The range of energies that must be integrated over. By default, the energies are found from the minimum and maximum values in the band structure.
 
         Returns
@@ -300,24 +300,24 @@ class Structure:
             for energy in energies:
                 smatrix_up = kwant.smatrix(self.system_up, energy)
                 smatrix_down = kwant.smatrix(self.system_down, energy)
-                data_up.append(smatrix_up.transmission(lead1_id, lead2_id))
-                data_down.append(smatrix_down.transmission(lead1_id, lead2_id))
+                data_up.append(smatrix_up.transmission(lead_in, lead_out))
+                data_down.append(smatrix_down.transmission(lead_in, lead_out))
             return energies, data_up, data_down
         else:
             data = []
             for energy in energies:
                 smatrix = kwant.smatrix(self.system, energy)
-                data.append(smatrix.transmission(lead1_id, lead2_id))
+                data.append(smatrix.transmission(lead_in, lead_out))
             return energies, data
 
-    def getCurrent(self, lead1, lead2, avg_chem_pot=1.0):
+    def getCurrent(self, lead_in, lead_out, avg_chem_pot=1.0):
         """
         Compute the current between 2 leads.
 
         Parameters
         ----------
-        lead1_id : The id of the lead you are injecting electrons.
-        lead2_id : The id of the lead you would like to find the transmission through.
+        lead_in : The id of the lead you are injecting electrons.
+        lead_out : The id of the lead you would like to find the transmission through.
         avg_chem_pot : The average chemical potential difference. Default: 1.0. It is common practice to set this to the hopping energy.
 
         Returns
@@ -336,7 +336,7 @@ class Structure:
         kb_T = self.parser.getKBT()
 
         if self.spin_dep:
-            e, cond_up, cond_down = self.getConductance(lead1, lead2)
+            e, cond_up, cond_down = self.getConductance(lead_in, lead_out)
             de = e[1] - e[0]
             mu_left = bias / 2.0 + avg_chem_pot
             mu_right = -bias / 2.0 + avg_chem_pot
@@ -344,7 +344,7 @@ class Structure:
             return de * np.sum(cond_up * diff_fermi), de * np.sum(cond_down * diff_fermi)
 
         else:
-            e, cond = self.getConductance(lead1, lead2)
+            e, cond = self.getConductance(lead_in, lead_out)
             de = e[1] - e[0]
             mu_left = bias / 2.0 + avg_chem_pot
             mu_right = -bias / 2.0 + avg_chem_pot
