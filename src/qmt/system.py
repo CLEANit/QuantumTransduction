@@ -12,7 +12,7 @@ import coloredlogs, verboselogs
 
 # create logger
 coloredlogs.install(level='INFO')
-logger = verboselogs.VerboseLogger(' <-- QMT: Structure --> ')
+logger = verboselogs.VerboseLogger('QMT::Structure ')
 
 def hoppingFunction(self, t, phi, direction, site1, site2):
     """
@@ -451,6 +451,47 @@ class Structure:
                 # except:
                 #     pass
             return es, DOS
+
+    def getValleyPolarizedConductance(self, energy, lead_start=0, lead_end=1, K_prime_range=(-np.inf, -1e8), K_range=(0, np.inf), velocities='left_moving'):
+        """
+        Get the valley-polarized conductances for a given energy between two leads. Note: This function only makes sense when
+        the bandstructure has two valleys in it. An example is zig-zag edged graphene nanoribbons.
+
+        Parameters
+        ----------
+        energy : A value of energy.
+        lead_start : An integer of the lead where electrons are injected.
+        lead_end : An integer of the lead where electrons are transmitting through.
+        K_prime_range : A tuple of length 2 which defines the range where K' would be the polarization. Default: (-np.inf, -1e8)
+        K_range : A tuple of length 2 which defines the range where K would be the polarization. Default (0, np.inf)
+        velocities : If 'left_moving', we only consider velocities >= 0. If 'right_moving', velocities < 0. Default: 'left_moving'
+
+        Returns
+        -------
+        A tuple of length 2. First element is for K', second for K.
+        """
+
+        if self.spin_dep:
+            logger.error('You are trying to compute the Valley Conductances for Spin-Polarized calculations. This is currently not supported.')
+            exit(-1)
+
+        smatrix = kwant.smatrix(syst, energy)
+        if velocities == 'left_moving':
+            positives = np.where(smatrix.lead_info[lead_start].velocities >= 0)[0]
+        elif velocities == 'right_moving':
+            positives = np.where(smatrix.lead_info[lead_start].velocities < 0)[0]
+        else:
+            logger.error("You have defined the direction of the velocities wrong. It is either 'left_moving' or 'right_moving'.")
+
+        momentas = smatrix.lead_info[lead_start].momenta[positives]
+        K_prime_indices = np.where(momentas >= K_prime_range[0] and momentas <= K_prime_range[1])[0]
+        K_indices = np.where(momentas >= K_range[0] and momentas <= K_range[1])[0]
+        submatrix = smatrix.submatrix(lead_end, lead_start)
+        K_prime_T = np.sum(np.absolute(submatrix[:, K_prime_indices])**2) 
+        K_T = np.sum(np.absolute(submatrix[:, K_indices])**2)
+        return (K_prime_T, K_T)
+
+
 
     def getWaveFunction(self, lead_id, energy=-1):
         if self.spin_dep:
