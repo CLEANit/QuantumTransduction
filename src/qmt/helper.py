@@ -83,3 +83,21 @@ def setInDict(dictionary, listed_keys, value):
     """
 
     getFromDict(dictionary, listed_keys[:-1])[listed_keys[-1]] = value
+
+
+def pointInHull(point, hull, tol=1e-12):
+    """
+    Check if a point is inside of a convex hull.
+
+    Parameters
+    ----------
+    points : A 2D point that is to be checked.
+    hull : A convex hull that is to be checked against.
+    tol : A numerical tolerance in the check.
+
+    Returns
+    -------
+    True if the point is in the hull, False if not.
+    """
+
+    return all([np.dot(eq[:-1], point) + eq[-1] <= tol for eq in hull.equations])

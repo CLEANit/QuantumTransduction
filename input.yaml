@@ -18,10 +18,10 @@ System:
   n_orbitals: 1
 
   # do we want to do spin polarized or not
-  spin_dependent: true
+  spin_dependent: false
 
   # magnetic flux through a unit cell
-  phi: 0.0014265
+  phi: 0.0
 
   # bias applied to the system
   bias: 1.0
@@ -46,29 +46,37 @@ System:
         hopping: -2.7,
 
         # offset when kwant uses the food-fill algorithm
-        offset: [0, 0]
+        offset: [0, 0],
+
+        pn-junction: {
+          turn_on: true,
+          n-potential: -0.5,
+          p-potential: 0.5,
+          points : [[-16, 32], [16, 32], [20, 32], [-16, -32], [16, -32]]
+
+        }
       }
     
     channels:
       - {shape: 'rectangle', args: {xcoords: [-48, -32], ycoords: [-4, 4], angle: 0., shift: [-0.75, -0.75]}, potential: 0.0, hopping: -2.7, offset: [-36, 0], direction: [-1, 0]}
       # Right upper channel
-      - {shape: 'rectangle', args: {xcoords: [32, 48], ycoords: [36, 44], angle: 0., shift: [-0.75, -0.75]}, potential: 0.0, hopping: -2.7, offset: [36, 36], direction: [1, 0]}
+      - {shape: 'rectangle', args: {xcoords: [32, 48], ycoords: [24, 32], angle: 0., shift: [-0.75, -0.75]}, potential: 0.0, hopping: -2.7, offset: [36, 30], direction: [1, 0]}
       # Right lower channel
-      - {shape: 'rectangle', args: {xcoords: [32, 48], ycoords: [-44, -36], angle: 0., shift: [-0.75, -0.75]}, potential: 0.0, hopping: -2.7, offset: [36, -36], direction: [1, 0]}
+      - {shape: 'rectangle', args: {xcoords: [32, 48], ycoords: [-32, -24], angle: 0., shift: [-0.75, -0.75]}, potential: 0.0, hopping: -2.7, offset: [36, -30], direction: [1, 0]}
 
   Masks:
-      # Let's place a random circle
-    - {name: 'rectangle', args: {xcoords: [-8, 8], ycoords: [-8, 8]}}
+      # Let's place a rectangle
+    # - {name: 'rectangle', args: {xcoords: [-8, 8], ycoords: [-8, 8]}}
 
   Leads:
     - {range: [-4, 4], symmetry: [-1, 1], shift: [-0.75, -0.75], offset: [0, 0], potential: 0.0, hopping: -2.7, reverse: False, direction: [-1, 0]}
-    - {range: [36, 44], symmetry: [1, -1], shift: [-0.75, -0.75], offset: [0, 5], potential: 0.0, hopping: -2.7, reverse: False, direction: [1, 0]}
-    - {range: [-44, -36], symmetry: [1, -1], shift: [-0.75, -0.75], offset: [0, -5], potential: 0.0, hopping: -2.7, reverse: False, direction: [1, 0]}
+    - {range: [24, 32], symmetry: [1, -1], shift: [-0.75, -0.75], offset: [0, 26], potential: 0.0, hopping: -2.7, reverse: False, direction: [1, 0]}
+    - {range: [-32, -24], symmetry: [1, -1], shift: [-0.75, -0.75], offset: [0, -26], potential: 0.0, hopping: -2.7, reverse: False, direction: [1, 0]}
 
 # Genetic algorithm
 GA:
   # number of structures in the GA
-  n_structures: 1
+  n_structures: 2
   # number of iterations to perform
   n_iterations: 100
 
@@ -85,37 +93,62 @@ GA:
     #     shift: [0, 0]
     #   }
 
-    - { 
-        path: ['System', 'Junction', 'channels', 0, 'args', 'ycoords'],
-        range: [8, 8],
-        shift: [-28, 28]
-      }
+    # - { 
+    #     path: ['System', 'Junction', 'channels', 0, 'args', 'ycoords'],
+    #     range: [8, 8],
+    #     shift: [-28, 28]
+    #   }
 
-    - { 
-        path: ['System', 'Junction', 'channels', 1, 'args', 'ycoords'],
-        range: [8, 8],
-        shift: [-20, 28]
-      }
+    # - { 
+    #     path: ['System', 'Junction', 'channels', 1, 'args', 'ycoords'],
+    #     range: [8, 8],
+    #     shift: [-20, 28]
+    #   }
 
-    - { 
-        path: ['System', 'Junction', 'channels', 2, 'args', 'ycoords'],
-        range: [8, 8],
-        shift: [-28, 20]
-      }
+    # - { 
+    #     path: ['System', 'Junction', 'channels', 2, 'args', 'ycoords'],
+    #     range: [8, 8],
+    #     shift: [-28, 20]
+    #   }
 
-    - {
-        path: ['System', 'Masks', 0, 'args', 'xcoords'],
-        range: [16, 16],
-        shift: [-20, 20]
-      }
+    # - {
+    #     path: ['System', 'Masks', 0, 'args', 'xcoords'],
+    #     range: [16, 16],
+    #     shift: [-20, 20]
+    #   }
 
-    - {
-        path: ['System', 'Masks', 0, 'args', 'ycoords'],
-        range: [16, 16],
-        shift: [-20, 20]
-      }
+    # - {
+    #     path: ['System', 'Masks', 0, 'args', 'ycoords'],
+    #     range: [16, 16],
+    #     shift: [-20, 20]
+    #   }
 
     # - {
     #     path: ['System', 'phi'],
     #     range: [0.05, 0.1],
     #   }
+
+      - {
+        path: ['System', 'Junction', 'body', 'pn-junction', 'points', 0, 0],
+        range: [-16, 0]
+      }
+
+      - {
+        path: ['System', 'Junction', 'body', 'pn-junction', 'points', 1, 0],
+        range: [0, 16]
+      }
+      
+      - {
+        path: ['System', 'Junction', 'body', 'pn-junction', 'points', 2, 1],
+        range: [-16, 0]
+      }
+
+      - {
+        path: ['System', 'Junction', 'body', 'pn-junction', 'points', 3, 0],
+        range: [-16, 0]
+      }
+
+      - {
+        path: ['System', 'Junction', 'body', 'pn-junction', 'points', 4, 0],
+        range: [0, 16]
+      }

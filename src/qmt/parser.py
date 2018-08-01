@@ -52,6 +52,7 @@ class Parser:
         self.n_structures = None
         self.n_iterations = None
         self.parseGA()
+        # self.checkConfig()
 
     def checkConfig(self):
         """
@@ -85,6 +86,10 @@ class Parser:
         offsets.append(body['offset'])
         pots.append(body['potential'])
 
+        try:
+            self.pn_junction = body['pn-junction']
+        except:
+            self.pn_junction = None
         
         for js in channels:
             shapes.append(partial(whatShape(js['shape']), **js['args']))
@@ -116,6 +121,14 @@ class Parser:
             exit(-1)
         else:
             pass
+
+    def getPNJunction(self):
+        """
+        Returns
+        -------
+        The configuration of the PN junction
+        """
+        return self.pn_junction
 
     def getConfig(self):
         """

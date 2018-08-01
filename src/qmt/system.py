@@ -6,6 +6,8 @@ import numpy as np
 import time
 from functools import partial
 import cmocean
+from scipy.spatial import ConvexHull
+import matplotlib.pyplot as plt
 
 from .helper import *
 import coloredlogs, verboselogs
@@ -39,7 +41,7 @@ def hoppingFunction(self, t, phi, direction, site1, site2):
 
     return t * np.exp(-1j * np.pi * (p2[0] - p1[0]) * (p2[1] + p1[1]) * B)
 
-def onSiteFunction(self, pot, spin, phi, site):
+def onSiteFunction(self, pot, spin, phi, lead, site):
     """
     This is a function which returns the on-site potential when a magnetic field is being applied.
 
@@ -54,12 +56,38 @@ def onSiteFunction(self, pot, spin, phi, site):
     -------
     The hopping parameter with a magnetic field being applied.
     """
-    lattice_vectors = self.parser.getLatticeVectors()
+    pnj_config = self.parser.getPNJunction()
+    on_site = 0.
+    if pnj_config['turn_on'] == True and lead == False:
+        # pn-junction stuff
+        ###################################################
+        if pointInHull(site.pos, self.hull):
+            on_site += pnj_config['p-potential']
+        else:
+            on_site += pnj_config['n-potential']
+        ###################################################
 
-    B = phi / (lattice_vectors[0][0] * lattice_vectors[1][1] - lattice_vectors[0][1] * lattice_vectors[1][0])
-    B_in_T = 6.62607004e-34 * B * 10e20 / 1.60217662e-19
-    B_in_G = B_in_T * 1e4
-    return pot + 2.0 * 0.579e-8 * spin * B_in_G
+
+
+        # magnetic field stuff
+        ###################################################
+        lattice_vectors = self.parser.getLatticeVectors()
+
+        B = phi / (lattice_vectors[0][0] * lattice_vectors[1][1] - lattice_vectors[0][1] * lattice_vectors[1][0])
+        B_in_T = 6.62607004e-34 * B * 10e20 / 1.60217662e-19
+        B_in_G = B_in_T * 1e4
+        on_site += pot + 2.0 * 0.579e-8 * spin * B_in_G
+        ###################################################
+
+        return on_site
+    
+    else:
+        lattice_vectors = self.parser.getLatticeVectors()
+
+        B = phi / (lattice_vectors[0][0] * lattice_vectors[1][1] - lattice_vectors[0][1] * lattice_vectors[1][0])
+        B_in_T = 6.62607004e-34 * B * 10e20 / 1.60217662e-19
+        B_in_G = B_in_T * 1e4
+        return pot + 2.0 * 0.579e-8 * spin * B_in_G
 
 class Structure:
     """
@@ -93,8 +121,14 @@ class Structure:
         else:
             # there is no mask to apply
             pass
+
+        self.pnj_config = self.parser.getPNJunction()
+
+        if self.pnj_config['turn_on'] == True:
+            self.hull = ConvexHull(self.pnj_config['points'])
             
         self.attachLeads()
+
 
 
         self.finalize()
@@ -124,8 +158,8 @@ class Structure:
             
             # if we want to consider spin dependent transport
             if self.spin_dep:
-                self.system_up[self.lattice.shape(shape, offset)] = partial(onSiteFunction, self, potential, 1/2, self.parser.getPhi())
-                self.system_down[self.lattice.shape(shape, offset)] = partial(onSiteFunction, self, potential, -1/2, self.parser.getPhi())
+                self.system_up[self.lattice.shape(shape, offset)] = partial(onSiteFunction, self, potential, 1/2, self.parser.getPhi(), False)
+                self.system_down[self.lattice.shape(shape, offset)] = partial(onSiteFunction, self, potential, -1/2, self.parser.getPhi(), False)
                 
                 self.neighbors = self.lattice.neighbors()
                 
@@ -133,7 +167,7 @@ class Structure:
                 self.system_down[self.neighbors] = partial(hoppingFunction, self, hopping, self.parser.getPhi(), direction)
 
             else:
-                self.system[self.lattice.shape(shape, offset)] = potential
+                self.system[self.lattice.shape(shape, offset)] = partial(onSiteFunction, self, potential, 0., self.parser.getPhi(), False)
                 self.neighbors = self.lattice.neighbors()
                 self.system[self.neighbors] = partial(hoppingFunction, self, hopping, self.parser.getPhi(), direction)
 
@@ -158,8 +192,8 @@ class Structure:
                 a = orthogVecSlope(self.lattice.vec(lead_vector))
                 lead_up = kwant.Builder(sym)
                 lead_down = kwant.Builder(sym)
-                lead_up[self.lattice.shape(lambda pos: lead_range[0]  <= pos[1] - lead_shift[1] + (pos[0] - lead_shift[0]) * a <= lead_range[1], lead_offset)] = partial(onSiteFunction, self, lead_pot, 1/2, self.parser.getPhi())
-                lead_down[self.lattice.shape(lambda pos: lead_range[0]  <= pos[1] - lead_shift[1] + (pos[0] - lead_shift[0]) * a <= lead_range[1], lead_offset)] = partial(onSiteFunction, self, lead_pot, -1/2, self.parser.getPhi())
+                lead_up[self.lattice.shape(lambda pos: lead_range[0]  <= pos[1] - lead_shift[1] + (pos[0] - lead_shift[0]) * a <= lead_range[1], lead_offset)] = partial(onSiteFunction, self, lead_pot, 1/2, self.parser.getPhi(), True)
+                lead_down[self.lattice.shape(lambda pos: lead_range[0]  <= pos[1] - lead_shift[1] + (pos[0] - lead_shift[0]) * a <= lead_range[1], lead_offset)] = partial(onSiteFunction, self, lead_pot, -1/2, self.parser.getPhi(), True)
                 lead_up[self.neighbors] = partial(hoppingFunction, self, lead_hopping, self.parser.getPhi(), lead_direction)
                 lead_down[self.neighbors] = partial(hoppingFunction, self, lead_hopping, self.parser.getPhi(), lead_direction)            
                 lead_up.eradicate_dangling()
@@ -185,7 +219,7 @@ class Structure:
                 sym = kwant.TranslationalSymmetry(self.lattice.vec(lead_vector))
                 a = orthogVecSlope(self.lattice.vec(lead_vector))
                 lead = kwant.Builder(sym)
-                lead[self.lattice.shape(lambda pos: lead_range[0]  <= pos[1] - lead_shift[1] + (pos[0] - lead_shift[0]) * a <= lead_range[1], lead_offset)] = lead_pot
+                lead[self.lattice.shape(lambda pos: lead_range[0]  <= pos[1] - lead_shift[1] + (pos[0] - lead_shift[0]) * a <= lead_range[1], lead_offset)] = partial(onSiteFunction, self, lead_pot, 0., self.parser.getPhi(), True)
                 lead[self.neighbors] = partial(hoppingFunction, self, lead_hopping, self.parser.getPhi(), lead_direction)
                 lead.eradicate_dangling()
                 self.system.attach_lead(lead)
@@ -255,10 +289,27 @@ class Structure:
             return self.system
 
     def visualizeSystem(self, args={}):
+        """
+        Create a plot to visualize the constructed system.
+
+        Returns
+        -------
+        A pyplot object.
+        """
         if self.spin_dep:
-            return kwant.plot(self.system_up, site_lw=0.1, colorbar=False, **args, show=False)
+            return kwant.plot(self.pre_system_up, site_lw=0.1, colorbar=False, **args, show=False)
         else:
-            return kwant.plot(self.system, site_lw=0.1, colorbar=False, **args, show=False)
+
+            if self.pnj_config['turn_on'] == True:
+                def siteColours(site):
+                    # print(list(self.pre_system.sites())[site])
+                    if pointInHull(site.pos, self.hull):
+                        return 'r'
+                    else:
+                        return 'b'
+                return kwant.plot(self.pre_system, site_lw=0.1, lead_site_lw=0, colorbar=False, site_color=siteColours, show=True, **args)
+            else:
+                return kwant.plot(self.pre_system, site_lw=0.1, colorbar=False, **args, show=False)
 
     def diagonalize(self, args={}):
         # Compute some eigenvalues of the closed system
@@ -452,7 +503,7 @@ class Structure:
                 #     pass
             return es, DOS
 
-    def getValleyPolarizedConductance(self, energy, lead_start=0, lead_end=1, K_prime_range=(-np.inf, -1e8), K_range=(0, np.inf), velocities='left_moving'):
+    def getValleyPolarizedConductance(self, energy, lead_start=0, lead_end=1, K_prime_range=(-np.inf, -1e8), K_range=(0, np.inf), velocities='out_going'):
         """
         Get the valley-polarized conductances for a given energy between two leads. Note: This function only makes sense when
         the bandstructure has two valleys in it. An example is zig-zag edged graphene nanoribbons.
@@ -464,7 +515,7 @@ class Structure:
         lead_end : An integer of the lead where electrons are transmitting through.
         K_prime_range : A tuple of length 2 which defines the range where K' would be the polarization. Default: (-np.inf, -1e8)
         K_range : A tuple of length 2 which defines the range where K would be the polarization. Default (0, np.inf)
-        velocities : If 'left_moving', we only consider velocities >= 0. If 'right_moving', velocities < 0. Default: 'left_moving'
+        velocities : If 'out_going', we only consider velocities <= 0. If 'in_coming', velocities > 0. Default: 'out_going'
 
         Returns
         -------
@@ -475,13 +526,13 @@ class Structure:
             logger.error('You are trying to compute the Valley Conductances for Spin-Polarized calculations. This is currently not supported.')
             exit(-1)
 
-        smatrix = kwant.smatrix(syst, energy)
-        if velocities == 'left_moving':
-            positives = np.where(smatrix.lead_info[lead_start].velocities >= 0)[0]
-        elif velocities == 'right_moving':
-            positives = np.where(smatrix.lead_info[lead_start].velocities < 0)[0]
+        smatrix = kwant.smatrix(self.system, energy)
+        if velocities == 'out_going':
+            positives = np.where(smatrix.lead_info[lead_start].velocities <= 0)[0]
+        elif velocities == 'in_coming':
+            positives = np.where(smatrix.lead_info[lead_start].velocities > 0)[0]
         else:
-            logger.error("You have defined the direction of the velocities wrong. It is either 'left_moving' or 'right_moving'.")
+            logger.error("You have defined the direction of the velocities wrong. It is either 'out_going' or 'in_coming'.")
 
         momentas = smatrix.lead_info[lead_start].momenta[positives]
         K_prime_indices = np.where(momentas >= K_prime_range[0] and momentas <= K_prime_range[1])[0]

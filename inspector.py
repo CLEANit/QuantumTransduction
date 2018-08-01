@@ -24,7 +24,7 @@ coloredlogs.install(level='INFO')
 logger = verboselogs.VerboseLogger('qmt::inspector ')
 
 def getConductances(structure, lead0, lead1):
-    return structure.getConductance(lead0, lead1)
+    return structure.getValleyPolarizedConductance(1.0, lead0, lead1)
 
 def getBandstructures(structure):
     return structure.getBandStructure(0)
@@ -64,8 +64,8 @@ def main():
         logger.info('Generating initial structures...')
         short_timer.start()
         parsers = g.generateAll()
-        # structures = [Structure(parser) for parser in parsers]
-        structures = pool.map(Structure, parsers)
+        structures = [Structure(parser) for parser in parsers]
+        # structures = pool.map(Structure, parsers)
         logger.success('Initial structures generated. Elapsed time: %s' % (short_timer.stop()))
         
         ga = GA(parser, structures, objective_function=objectiveFunction)
@@ -80,28 +80,28 @@ def main():
     dosses = pool.map(getDosses, structures)
     logger.info('Calculations took: %s' % short_timer.stop())
 
-    fig, axes = plt.subplots(len(structures), 2, figsize=(len(structures)*5, 10))
-    for i in range(len(structures)):
-        structures[i].visualizeSystem(args={'file': 'output/gen_%i_struct_%i.png' % (ga.generationNumber(), i)})
+    # fig, axes = plt.subplots(len(structures), 2, figsize=(len(structures)*5, 10))
+    # for i in range(len(structures)):
+    #     structures[i].visualizeSystem(args={'file': 'output/gen_%i_struct_%i.png' % (ga.generationNumber(), i)})
 
-        # cond1, cond2 = s.getConductance(0, 1), s.getConductance(0, 2)
-        axes[i][0].plot(currents_0_1[i][0], currents_0_1[i][1], currents_0_1[i][0], currents_0_1[i][2])
-        axes[i][0].legend(['Spin-up', 'Spin-down'])
-        axes[i][0].set_xlabel('Energy [eV]')
-        axes[i][0].set_ylabel('Conductance [$e \pi^{-1} \hbar^{-1}$]')
+    #     # cond1, cond2 = s.getConductance(0, 1), s.getConductance(0, 2)
+    #     axes[i][0].plot(currents_0_1[i][0], currents_0_1[i][1], currents_0_1[i][0], currents_0_1[i][2])
+    #     axes[i][0].legend(['k', 'k\''])
+    #     axes[i][0].set_xlabel('Energy [eV]')
+    #     axes[i][0].set_ylabel('Conductance [$2e^2 h^{-1}$]')
 
-        axes[i][1].plot(currents_0_2[i][0], currents_0_2[i][1], currents_0_2[i][0], currents_0_2[i][2])
-        axes[i][1].legend(['Spin-up', 'Spin-down'])
-        axes[i][1].set_xlabel('Energy [eV]')
-        axes[i][1].set_ylabel('Conductance [$e \pi^{-1} \hbar^{-1}$]')
+    #     axes[i][1].plot(currents_0_2[i][0], currents_0_2[i][1], currents_0_2[i][0], currents_0_2[i][2])
+    #     axes[i][1].legend(['k', 'k\''])
+    #     axes[i][1].set_xlabel('Energy [eV]')
+    #     axes[i][1].set_ylabel('Conductance [$2e^2 h^{-1}$]')
     
-    plt.savefig('conductances.png')
-    plt.savefig('conductances.pdf')
+    # plt.savefig('conductances.png')
+    # plt.savefig('conductances.pdf')
 
     fig, axes = plt.subplots(len(structures), 1, figsize=(7.5, len(structures)*5))
     for i in range(len(structures)):
         axes[i].plot(bands[i][0], bands[i][1], 'b-', bands[i][0], bands[i][2], 'r--')
-        axes[i].legend(['Spin-up', 'Spin-down'])
+        axes[i].legend(['k', 'k\''])
         axes[i].set_xlabel('Momenta [Lattice constant${}^{-1}$]')
         axes[i].set_ylabel('Energy [eV]')
     
@@ -111,7 +111,7 @@ def main():
     fig, axes = plt.subplots(len(structures), 1, figsize=(7.5, len(structures)*5))
     for i in range(len(structures)):
         axes[i].plot(dosses[i][0], dosses[i][1], dosses[i][0], dosses[i][2])
-        axes[i].legend(['Spin-up', 'Spin-down'])
+        axes[i].legend(['k', 'k\''])
         axes[i].set_xlabel('Energy [eV]')
         axes[i].set_ylabel('Number of states [Arbitrary units]')
     
