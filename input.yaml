@@ -24,7 +24,7 @@ System:
   phi: 0.0
 
   # bias applied to the system
-  bias: 1.0
+  bias: 2.7
 
   # Boltzmann constant times the temperature
   kb_T: 0.027
@@ -37,7 +37,7 @@ System:
         shape: 'rectangle', 
         
         # args passed to the shape function
-        args: {xcoords: [-32, 32], ycoords: [-32, 32], angle: 0.0, shift: [-0.75, -0.75]},
+        args: {xcoords: [-64, 64], ycoords: [-32, 32], angle: 0.0, shift: [-0.75, -0.75]},
 
         # on-site energy
         potential: 0.0,
@@ -50,28 +50,28 @@ System:
 
         pn-junction: {
           turn_on: true,
-          n-potential: -0.5,
-          p-potential: 0.5,
-          points : [[-16, 32], [16, 32], [20, 32], [-16, -32], [16, -32]]
+          n-potential: -0.2,
+          p-potential: 0.2,
+          points : [[-32, 32], [32, 32], [50, 0], [-32, -32], [32, -32]]
 
         }
       }
     
     channels:
-      - {shape: 'rectangle', args: {xcoords: [-48, -32], ycoords: [-4, 4], angle: 0., shift: [-0.75, -0.75]}, potential: 0.0, hopping: -2.7, offset: [-36, 0], direction: [-1, 0]}
+      - {shape: 'rectangle', args: {xcoords: [-96, -64], ycoords: [-16, 16], angle: 0., shift: [-0.75, -0.75]}, potential: 0.0, hopping: -2.7, offset: [-70, 0], direction: [-1, 0]}
       # Right upper channel
-      - {shape: 'rectangle', args: {xcoords: [32, 48], ycoords: [24, 32], angle: 0., shift: [-0.75, -0.75]}, potential: 0.0, hopping: -2.7, offset: [36, 30], direction: [1, 0]}
+      - {shape: 'rectangle', args: {xcoords: [64, 96], ycoords: [16, 32], angle: 0., shift: [-0.75, -0.75]}, potential: 0.0, hopping: -2.7, offset: [70, 30], direction: [1, 0]}
       # Right lower channel
-      - {shape: 'rectangle', args: {xcoords: [32, 48], ycoords: [-32, -24], angle: 0., shift: [-0.75, -0.75]}, potential: 0.0, hopping: -2.7, offset: [36, -30], direction: [1, 0]}
+      - {shape: 'rectangle', args: {xcoords: [64, 96], ycoords: [-32, -16], angle: 0., shift: [-0.75, -0.75]}, potential: 0.0, hopping: -2.7, offset: [70, -30], direction: [1, 0]}
 
   Masks:
       # Let's place a rectangle
     # - {name: 'rectangle', args: {xcoords: [-8, 8], ycoords: [-8, 8]}}
 
   Leads:
-    - {range: [-4, 4], symmetry: [-1, 1], shift: [-0.75, -0.75], offset: [0, 0], potential: 0.0, hopping: -2.7, reverse: False, direction: [-1, 0]}
-    - {range: [24, 32], symmetry: [1, -1], shift: [-0.75, -0.75], offset: [0, 26], potential: 0.0, hopping: -2.7, reverse: False, direction: [1, 0]}
-    - {range: [-32, -24], symmetry: [1, -1], shift: [-0.75, -0.75], offset: [0, -26], potential: 0.0, hopping: -2.7, reverse: False, direction: [1, 0]}
+    - {range: [-16, 16], symmetry: [-1, 1], shift: [-0.75, -0.75], offset: [0, 0], potential: 0.0, hopping: -2.7, reverse: False, direction: [-1, 0]}
+    - {range: [16, 32], symmetry: [1, -1], shift: [-0.75, -0.75], offset: [0, 26], potential: 0.0, hopping: -2.7, reverse: False, direction: [1, 0]}
+    - {range: [-32, -16], symmetry: [1, -1], shift: [-0.75, -0.75], offset: [0, -26], potential: 0.0, hopping: -2.7, reverse: False, direction: [1, 0]}
 
 # Genetic algorithm
 GA:
@@ -130,25 +130,25 @@ GA:
 
       - {
         path: ['System', 'Junction', 'body', 'pn-junction', 'points', 0, 0],
-        range: [-16, 0]
+        range: [-32, 0]
       }
 
       - {
         path: ['System', 'Junction', 'body', 'pn-junction', 'points', 1, 0],
-        range: [0, 16]
+        range: [0, 32]
       }
       
       - {
         path: ['System', 'Junction', 'body', 'pn-junction', 'points', 2, 1],
-        range: [-16, 0]
+        range: [-32, 32]
       }
 
       - {
         path: ['System', 'Junction', 'body', 'pn-junction', 'points', 3, 0],
-        range: [-16, 0]
+        range: [-32, 0]
       }
 
       - {
         path: ['System', 'Junction', 'body', 'pn-junction', 'points', 4, 0],
-        range: [0, 16]
+        range: [0, 32]
       }

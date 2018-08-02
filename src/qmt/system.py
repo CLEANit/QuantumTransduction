@@ -503,7 +503,7 @@ class Structure:
                 #     pass
             return es, DOS
 
-    def getValleyPolarizedConductance(self, energy, lead_start=0, lead_end=1, K_prime_range=(-np.inf, -1e8), K_range=(0, np.inf), velocities='out_going'):
+    def getValleyPolarizedConductance(self, energy, lead_start=0, lead_end=1, K_prime_range=(-np.inf, -1e-8), K_range=(0, np.inf), velocities='out_going'):
         """
         Get the valley-polarized conductances for a given energy between two leads. Note: This function only makes sense when
         the bandstructure has two valleys in it. An example is zig-zag edged graphene nanoribbons.
@@ -513,7 +513,7 @@ class Structure:
         energy : A value of energy.
         lead_start : An integer of the lead where electrons are injected.
         lead_end : An integer of the lead where electrons are transmitting through.
-        K_prime_range : A tuple of length 2 which defines the range where K' would be the polarization. Default: (-np.inf, -1e8)
+        K_prime_range : A tuple of length 2 which defines the range where K' would be the polarization. Default: (-np.inf, -1e-8)
         K_range : A tuple of length 2 which defines the range where K would be the polarization. Default (0, np.inf)
         velocities : If 'out_going', we only consider velocities <= 0. If 'in_coming', velocities > 0. Default: 'out_going'
 
@@ -535,13 +535,58 @@ class Structure:
             logger.error("You have defined the direction of the velocities wrong. It is either 'out_going' or 'in_coming'.")
 
         momentas = smatrix.lead_info[lead_start].momenta[positives]
-        K_prime_indices = np.where(momentas >= K_prime_range[0] and momentas <= K_prime_range[1])[0]
-        K_indices = np.where(momentas >= K_range[0] and momentas <= K_range[1])[0]
+        K_prime_indices = np.where(np.logical_and(momentas >= K_prime_range[0], momentas <= K_prime_range[1]))[0]
+        K_prime_indices = np.where(momentas < 0)
+        K_indices = np.where(np.logical_and(momentas >= K_range[0], momentas <= K_range[1]))[0]
         submatrix = smatrix.submatrix(lead_end, lead_start)
         K_prime_T = np.sum(np.absolute(submatrix[:, K_prime_indices])**2) 
         K_T = np.sum(np.absolute(submatrix[:, K_indices])**2)
         return (K_prime_T, K_T)
 
+    def getValleyPolarizedCurrent(self, lead_start=0, lead_end=1, K_prime_range=(-np.inf, -1e-8), K_range=(0, np.inf), velocities='out_going', avg_chem_pot=0.0):
+        """
+        Get the valley-polarized currents between two leads. Note: This function only makes sense when
+        the bandstructure has two valleys in it. An example is zig-zag edged graphene nanoribbons.
+
+        Parameters
+        ----------
+        lead_start : An integer of the lead where electrons are injected.
+        lead_end : An integer of the lead where electrons are transmitting through.
+        K_prime_range : A tuple of length 2 which defines the range where K' would be the polarization. Default: (-np.inf, -1e-8)
+        K_range : A tuple of length 2 which defines the range where K would be the polarization. Default (0, np.inf)
+        velocities : If 'out_going', we only consider velocities <= 0. If 'in_coming', velocities > 0. Default: 'out_going'
+        avg_chem_pot : The average of the chemical potentials between two leads. Default: 1.0.
+
+        Returns
+        -------
+        A tuple of length 2. First element is for K', second for K.
+        """
+
+        bias = self.parser.getBias()
+        kb_T = self.parser.getKBT()
+
+        if self.spin_dep:
+            logger.error('Cannot calculate valley dependent currents for spin-dependent systems.')
+            exit(-1)
+        else:
+            energy_range = self.getEnergyRange()
+            energies = np.linspace(energy_range[0], energy_range[1], self.grid_size)
+            
+            KPs = []
+            Ks = []
+            for e in energies:
+                vals = self.getValleyPolarizedConductance(e, lead_start, lead_end, K_prime_range, K_range, velocities)
+                KPs.append(vals[0])
+                Ks.append(vals[1])
+
+            KPs = np.array(KPs)
+            Ks = np.array(Ks)
+
+            de = energies[1] - energies[0]
+            mu_left = bias / 2.0 + avg_chem_pot
+            mu_right = -bias / 2.0 + avg_chem_pot
+            diff_fermi = vectorizedFermi(energies, mu_left, kb_T) - vectorizedFermi(energies, mu_right, kb_T)
+            return de * np.sum(KPs * diff_fermi), de * np.sum(Ks * diff_fermi)
 
 
     def getWaveFunction(self, lead_id, energy=-1):

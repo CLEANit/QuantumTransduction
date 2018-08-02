@@ -23,8 +23,11 @@ coloredlogs.install(level='INFO')
 
 logger = verboselogs.VerboseLogger('qmt::runner ')
 
-def threadedCall(structure, lead0, lead1):
-    return structure.getCurrent(lead0, lead1, avg_chem_pot=2.7)
+# def threadedCall(structure, lead0, lead1):
+#     return structure.getCurrent(lead0, lead1, avg_chem_pot=2.7)
+
+def getConductances(structure, lead0, lead1):
+    return structure.getValleyPolarizedCurrent(lead0, lead1)
 
 def objectiveFunction(currents_0_1, currents_0_2):
     vectors = []
@@ -68,7 +71,7 @@ def main():
     # main loop here
     #########################
 
-    ga.io.writer('output/currents.dat', '# Currents (lead1-spin-up, lead1-spin-down, lead2-spin-up, lead2-spin-down)\n', header=True)
+    ga.io.writer('output/currents.dat', '# Currents (lead1-k\', lead1-k, lead2-k\', lead2-k)\n', header=True)
 
     while ga.generationNumber() < parser.getNIterations():
 
@@ -85,8 +88,8 @@ def main():
             s.visualizeSystem(args={'file': 'output/gen_%i_struct_%i.png' % (ga.generationNumber(), i)})
 
         # calculate currents and write them out to disk
-        currents_0_1 = pool.map(threadedCall, structures, [0] * len(structures), [1] * len(structures))
-        currents_0_2 = pool.map(threadedCall, structures, [0] * len(structures), [2] * len(structures))
+        currents_0_1 = pool.map(getConductances, structures, [0] * len(structures), [1] * len(structures))
+        currents_0_2 = pool.map(getConductances, structures, [0] * len(structures), [2] * len(structures))
 
         for cs1, cs2 in zip(currents_0_1, currents_0_2):
             ga.io.writer('output/currents.dat', cs1 + cs2)
