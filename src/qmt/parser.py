@@ -143,7 +143,18 @@ class Parser:
         Function that parses the GA section of the input file.
         """
         self.n_structures = self.config['GA']['n_structures']
-        self.n_iterations = self.config['GA']['n_iterations']
+        self.n_iterations = self.config['GA']['n_iterations'] 
+
+    def getAnnParameters(self):
+        """
+        Returns
+        -------
+        The parameters for defining the ANN.
+        """
+        if self.config['GA']['ann']:
+            return self.config['GA']['ann-params']
+        else:
+            return None
 
     def getNStructures(self):
         """

@@ -24,7 +24,7 @@ System:
   phi: 0.0
 
   # bias applied to the system
-  bias: 2.7
+  bias: 0.5
 
   # Boltzmann constant times the temperature
   kb_T: 0.027
@@ -75,6 +75,32 @@ System:
 
 # Genetic algorithm
 GA:
+
+  # keep true for now
+  ann: true
+
+  # if ann is true, we use these parameters
+  ann-params: {
+    # parameters for constructing the neural networks
+    neurons: [10, 10, 10],
+
+    # we currently need an activation function defined from [0,1]
+    activation: 'sigmoid',
+
+    # parameters for mixing/tweaking the weights in the neural network
+    # randomly interchange a fraction of weights between neural networks
+    crossing-fraction: 0.2,
+    
+    # tweak a fraction of the weights after mixing
+    random-step: {
+      fraction: 0.2,
+
+      # serves a similar purpose to the learning rate in machine learning for updating weights:
+      #   w_new = w_old + np.random.uniform(-max_update_rate, max_update_rate) * w_old 
+      max-update-rate: 0.01
+
+    }
+  }
   # number of structures in the GA
   n_structures: 2
   # number of iterations to perform

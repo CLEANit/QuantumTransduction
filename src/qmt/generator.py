@@ -5,6 +5,9 @@ import coloredlogs, verboselogs
 import copy
 import numpy as np
 import random
+from sklearn.neural_network import MLPRegressor
+
+
 # create logger
 coloredlogs.install(level='INFO')
 logger = verboselogs.VerboseLogger(' <-- QMT: Generator --> ')
@@ -94,9 +97,13 @@ class Generator:
                         pass
         return new_config, clean_generation
 
-    def generate(self):
+    def generate(self, seed=None):
         """
         Generate a random structure based on the genes given in the output.
+
+        Parameters
+        ----------
+        seed : A random seed for setting the weights.
 
         Returns
         -------
@@ -107,24 +114,38 @@ class Generator:
 
         while not clean_generation:
             new_parser = copy.deepcopy(self.parser)
+
+            ann_params = self.parser.getAnnParameters()
+            ann = MLPRegressor(
+                    hidden_layer_sizes=tuple(ann_params['neurons']) + (len(self.parser.getGenes()),),
+                    activation=ann_params['activation']
+                )
+            layers = [ann_params['neurons'][0]] + ann_params['neurons']
+            input_vec = np.ones((1, ann_params['neurons'][0]))
+
+            ann._initialize(input_vec, layers)
+            ann._random_state = np.random.RandomState(seed)
+            ann.out_activation_ = ann_params['activation']
+
+            new_parser.ann = ann
+
+            outputs = new_parser.ann.predict(input_vec)
+
+
             old_config = self.parser.getConfig()
             new_config = new_parser.getConfig()
-            for gene in self.parser.getGenes():
+            for gene, output in zip(self.parser.getGenes(), outputs):
                 val = getFromDict(old_config, gene['path'])
-                new_val = copy.copy(val)
-                if 'range' in gene and 'shift' in gene:
-                    l = np.random.uniform(gene['range'][0], gene['range'][1])
-                    s = np.random.uniform(gene['shift'][0], gene['shift'][1])
-                    new_val[0] = - l / 2 + s
-                    new_val[1] =   l / 2 + s
-                elif 'range' in gene and 'shift' not in gene:
-                    new_val = np.random.uniform(gene['range'][0], gene['range'][1])
+                new_val = (gene['range'][1] - gene['range'][0]) * output + gene['range'][0]
                 setInDict(new_config, gene['path'], new_val)
                 new_config, clean_generation = self.checkAndUpdate(new_config, gene, val, new_val)
                 
         new_parser.updateConfig(new_config)
 
         return new_parser
+
+    def crossOver(self, structure1, structure2, seed=None):
+        pass
 
     def mutate(self, structure, seed=None):
         """
@@ -144,6 +165,9 @@ class Generator:
         old_config = structure.parser.getConfig()
         new_parser = copy.deepcopy(structure.parser)
         new_config = new_parser.getConfig()
+
+        ann = new_parser.ann
+
         # the gene we are modifying
         gene = random.choice(old_config['GA']['Genes'])
         
