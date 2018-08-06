@@ -85,7 +85,7 @@ GA:
     neurons: [10, 10, 10],
 
     # we currently need an activation function defined from [0,1]
-    activation: 'sigmoid',
+    activation: 'logistic',
 
     # parameters for mixing/tweaking the weights in the neural network
     # randomly interchange a fraction of weights between neural networks

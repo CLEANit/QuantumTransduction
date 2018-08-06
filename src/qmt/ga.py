@@ -53,6 +53,13 @@ class GA:
         """
         return self.current_structures
 
+    def rankGeneration(self):
+        all_objs = np.concatenate((self.past_objectives, self.current_objectives))
+        all_structs = self.past_generation + self.current_structures
+
+        return all_structs[np.argsort(all_objs)[:self.parser.getNStructures()]]
+
+
     def setNextGeneration(self, structures):
         """
         Update the current structures in the GA, set the previous structures to past generation.

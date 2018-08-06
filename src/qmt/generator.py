@@ -120,21 +120,21 @@ class Generator:
                     hidden_layer_sizes=tuple(ann_params['neurons']) + (len(self.parser.getGenes()),),
                     activation=ann_params['activation']
                 )
-            layers = [ann_params['neurons'][0]] + ann_params['neurons']
+            layers = [ann_params['neurons'][0]] + ann_params['neurons'] + [len(self.parser.getGenes())]
             input_vec = np.ones((1, ann_params['neurons'][0]))
-
-            ann._initialize(input_vec, layers)
+            output_vec = np.empty((1, len(self.parser.getGenes())))
             ann._random_state = np.random.RandomState(seed)
+
+            ann._initialize(output_vec, layers)
             ann.out_activation_ = ann_params['activation']
 
             new_parser.ann = ann
 
             outputs = new_parser.ann.predict(input_vec)
 
-
             old_config = self.parser.getConfig()
             new_config = new_parser.getConfig()
-            for gene, output in zip(self.parser.getGenes(), outputs):
+            for gene, output in zip(self.parser.getGenes(), outputs[0]):
                 val = getFromDict(old_config, gene['path'])
                 new_val = (gene['range'][1] - gene['range'][0]) * output + gene['range'][0]
                 setInDict(new_config, gene['path'], new_val)
@@ -145,7 +145,51 @@ class Generator:
         return new_parser
 
     def crossOver(self, structure1, structure2, seed=None):
-        pass
+        """
+        Crossover the structures genes randomly according to the input parameters.
+
+        Parameters
+        ----------
+        structure1 : A Structure class.
+        structure2 : Another Structure class. 
+        seed : A random seed to handle multithreading properly. Default: None.
+
+        Returns
+        -------
+        A new modified Structure class where the genes will be mixed from structure1 and structure2.
+        
+        """
+        ann_params = self.parser.getAnnParameters()
+        random.seed(seed)
+        np.random.seed(seed)        
+
+        input_vec = np.ones((1, ann_params['neurons'][0]))
+
+        # follow similar steps as when we generate a new structure
+        clean_generation = False
+
+        while not clean_generation:
+            old_config = structure.parser.getConfig()
+            new_parser = copy.deepcopy(structure1.parser)
+            new_config = new_parser.getConfig()
+
+            for layer in range(len(ann_params['neurons']) + 1):
+                total_weights = new_parser.ann.coefs_[layer].shape[0] * new_parser.ann.coefs_[layer].shape[1]
+                indices_to_update = np.array(list(zip(np.random.randint(0, new_parser.ann.coefs_[layer].shape[0], size=int(total_weights * ann_params['random-step']['fraction'])), np.random.randint(0, new_parser.ann.coefs_[layer].shape[1], size=int(total_weights * ann_params['random-step']['fraction'])))))
+
+                new_parser.ann.coefs_[indices_to_update[:,0], indices_to_update[:,1]] = structure2.parser.ann.coefs_[indices_to_update[:,0], indices_to_update[:,1]] 
+
+            outputs = new_parser.ann.predict(input_vec)
+        
+            for gene, output in zip(self.parser.getGenes(), outputs):
+                val = getFromDict(old_config, gene['path'])
+                new_val = (gene['range'][1] - gene['range'][0]) * output + gene['range'][0]
+                setInDict(new_config, gene['path'], new_val)
+                new_config, clean_generation = self.checkAndUpdate(new_config, gene, val, new_val)
+                
+        new_parser.updateConfig(new_config)
+                            
+        return Structure(new_parser)
 
     def mutate(self, structure, seed=None):
         """
@@ -160,34 +204,38 @@ class Generator:
         A new modified Structure class.
         
         """
+        ann_params = self.parser.getAnnParameters()
+        if ann_params['random-step']['fraction'] == 0.:
+            return structure
+
         random.seed(seed)
-        np.random.seed(seed)
-        old_config = structure.parser.getConfig()
-        new_parser = copy.deepcopy(structure.parser)
-        new_config = new_parser.getConfig()
+        np.random.seed(seed)        
 
-        ann = new_parser.ann
+        input_vec = np.ones((1, ann_params['neurons'][0]))
 
-        # the gene we are modifying
-        gene = random.choice(old_config['GA']['Genes'])
-        
         # follow similar steps as when we generate a new structure
         clean_generation = False
 
         while not clean_generation:
-            val = getFromDict(old_config, gene['path'])
-            new_val = copy.copy(val)
-            if type(val) == list:
-                l = np.random.uniform(gene['range'][0], gene['range'][1])
-                s = np.random.uniform(gene['shift'][0], gene['shift'][1])
-                new_val[0] = - l / 2 + s
-                new_val[1] =   l / 2 + s
-            elif type(val) == float:
-                new_val = np.random.uniform(gene['range'][0], gene['range'][1])
-            setInDict(new_config, gene['path'], new_val)
-            new_config, clean_generation = self.checkAndUpdate(new_config, gene, val, new_val)
-                            
+            old_config = structure.parser.getConfig()
+            new_parser = copy.deepcopy(structure.parser)
+            new_config = new_parser.getConfig()
+
+            for layer in range(len(ann_params['neurons']) + 1):
+                total_weights = new_parser.ann.coefs_[layer].shape[0] * new_parser.ann.coefs_[layer].shape[1]
+                indices_to_update = np.array(list(zip(np.random.randint(0, new_parser.ann.coefs_[layer].shape[0], size=int(total_weights * ann_params['random-step']['fraction'])), np.random.randint(0, new_parser.ann.coefs_[layer].shape[1], size=int(total_weights * ann_params['random-step']['fraction'])))))
+                new_parser.ann.coefs_[indices_to_update[:,0], indices_to_update[:,1]] += np.random.uniform(-ann_params['random-step']['max-update-rate'], ann_params['random-step']['max-update-rate']) * new_parser.ann.coefs_[indices_to_update[:,0], indices_to_update[:,1]] 
+
+            outputs = new_parser.ann.predict(input_vec)
+        
+            for gene, output in zip(self.parser.getGenes(), outputs):
+                val = getFromDict(old_config, gene['path'])
+                new_val = (gene['range'][1] - gene['range'][0]) * output + gene['range'][0]
+                setInDict(new_config, gene['path'], new_val)
+                new_config, clean_generation = self.checkAndUpdate(new_config, gene, val, new_val)
+                
         new_parser.updateConfig(new_config)
+                            
         return Structure(new_parser)
 
     def mutateAll(self, structures, pool=None, seeds=None):
@@ -198,16 +246,36 @@ class Generator:
         ----------
         structures : A list of structure classes that the mutate function will be called on.
         pool : A process pool so the mutations can be done in parallel. Default is None.
+        seeds : List of seeds to properly handle multithreading.
 
         Returns
         -------
-        A mutated structure class.
+        A list of mutated structure classes.
         """
         if pool is None:
             return [self.mutate(s) for s in structures]
         else:
             return pool.map(self.mutate, structures, seeds)
 
+    def crossOverAll(self, pairs_of_structures, pool=None, seeds=None):
+        """
+        Crossover all pairs of structures.
+
+        Parameters
+        ----------
+        pairs_of_structures : List of pairs of structures.
+        pool : A process pool so the crossovers can be done in parallel. Default is None.
+        seeds : List of seeds to properly handle multithreading.
+
+        Returns
+        -------
+        A list of new structure classes with genes crossed over from the pairs_of_structures.
+
+        """
+        if pool is None:
+            return [self.mutate(s) for s in structures]
+        else:
+            return pool.map(self.mutate, structures, seeds)
 
     def generateAll(self):
         """
