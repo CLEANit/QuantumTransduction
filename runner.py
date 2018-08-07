@@ -10,7 +10,6 @@ from src.qmt.timer import Timer
 from src.qmt.parser import Parser
 
 import numpy as np
-from scipy.interpolate import interp1d
 
 import multiprocessing
 from pathos.multiprocessing import ProcessingPool as Pool
@@ -26,17 +25,6 @@ logger = verboselogs.VerboseLogger('qmt::runner ')
 # def threadedCall(structure, lead0, lead1):
 #     return structure.getCurrent(lead0, lead1, avg_chem_pot=2.7)
 
-def is_pareto_efficient(costs):
-    """
-    :param costs: An (n_points, n_costs) array
-    :return: A (n_points, ) boolean array, indicating whether each point is Pareto efficient
-    """
-    is_efficient = np.ones(costs.shape[0], dtype = bool)
-    for i, c in enumerate(costs):
-        if is_efficient[i]:
-            is_efficient[is_efficient] = np.any(costs[is_efficient] >=c, axis=1)  # Remove dominated points
-    return is_efficient
-
 def getConductances(structure, lead0, lead1):
     return structure.getValleyPolarizedCurrent(lead0, lead1)
 
@@ -50,15 +38,8 @@ def objectiveFunction(currents_0_1, currents_0_2):
         vectors.append((np.abs((v1[0]) / (v1[0] + v1[1])), np.abs((v2[1]) / (v2[0] + v2[1]))))
 
     data = np.array(vectors).reshape(len(vectors), 2)
-    pareto_points = np.array(sorted(data[is_pareto_efficient(data)], key=lambda x: x[0]))
-    x = np.linspace(np.min(pareto_points[:,0]), np.max(pareto_points[:,0]), 512)
-    pareto_curve = interp1d(pareto_points[:,0], pareto_points[:,1])(x)
-    yd = (pareto_curve[:,None] - data[:,1])**2
-    xd = (x[:,None] - data[:,0])**2
-    r = np.sqrt(xd + yd)
-    objectives = np.min(r, axis=0)
 
-    return objectives, data
+    return data
 
 def main():
     total_timer = Timer()
@@ -117,15 +98,16 @@ def main():
         # calculate the objective function
         ga.calculate((currents_0_1, currents_0_2))
 
+        structures = ga.rankGeneration()
+
         # write gene variables and objective function parameters to file
         ga.writePhaseSpace(structures)
 
-        structures = ga.rankGeneration()
-
+        if parser.getAnnParameters()['crossing-fraction'] > 0.:
+            structures = g.crossOverAll(
+                                        zip(structures[:len(structures)//2], structures[:len(structures)//2]), pool=pool, seeds=np.random.random_integers(0, 2**32 - 1, len(structures)))
         # mutate the current generation
         structures = g.mutateAll(structures, pool=pool, seeds=np.random.random_integers(0, 2**32 - 1, len(structures)))
-        if parser.getAnnParameters()['crossing-fraction'] > 0.:
-            structures = g.crossOverAll(structures, pool=pool, seeds=np.random.random_integers(0, 2**32 - 1, len(structures)))
         
         ga.setNextGeneration(structures)
 

@@ -125,6 +125,7 @@ class Structure:
         self.pnj_config = self.parser.getPNJunction()
 
         if self.pnj_config['turn_on'] == True:
+            # print(self.pnj_config['points'])
             self.hull = ConvexHull(self.pnj_config['points'])
             
         self.attachLeads()

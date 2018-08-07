@@ -4,7 +4,10 @@ import numpy as np
 import subprocess
 import copy
 import os
+from scipy.interpolate import interp1d
+
 from .io import IO
+from .helper import isParetoEfficient
 
 import coloredlogs, verboselogs
 # create logger
@@ -23,10 +26,10 @@ class GA:
         self.generation_number = 0
         self.objective_function = objective_function
         self.io = IO()
-        self.past_objectives = []
-        self.past_vectors = []
+        # self.past_objectives = []
+        self.past_vectors = None
         self.current_objectives = []
-        self.current_vectors = []
+        self.current_vectors = None
 
         subprocess.run(['mkdir -p output'], shell=True)
         if os.path.isfile('output/phase_space.dat'):
@@ -54,9 +57,20 @@ class GA:
         return self.current_structures
 
     def rankGeneration(self):
-        all_objs = np.concatenate((self.past_objectives, self.current_objectives))
+        if self.past_vectors == None:
+            data = self.current_vectors
+        else:
+            data = np.vstack((self.past_vectors, self.current_vectors))
+        pareto_points = np.array(sorted(data[isParetoEfficient(data)], key=lambda x: x[0]))
+        x = np.linspace(np.min(pareto_points[:,0]), np.max(pareto_points[:,0]), 512)
+        pareto_curve = interp1d(pareto_points[:,0], pareto_points[:,1])(x)
+        yd = (pareto_curve[:,None] - data[:,1])**2
+        xd = (x[:,None] - data[:,0])**2
+        r = np.sqrt(xd + yd)
+        objectives = np.min(r, axis=0)
         all_structs = self.past_generation + self.current_structures
-        return [all_structs[elem] for elem in np.argsort(all_objs)[:self.parser.getNStructures()]]
+        self.current_objectives = np.sort(objectives)[:self.parser.getNStructures()]
+        return [all_structs[elem] for elem in np.argsort(objectives)[:self.parser.getNStructures()]]
 
 
     def setNextGeneration(self, structures):
@@ -121,7 +135,7 @@ class GA:
         args : Arguments that are passed into your objective function. This should be a tuple.
 
         """
-        self.past_objectives = copy.copy(self.current_objectives)
+        # self.past_objectives = copy.copy(self.current_objectives)
         self.past_vectors = copy.copy(self.current_vectors)
-        self.current_objectives, self.current_vectors = self.objective_function(*args)
+        self.current_vectors = self.objective_function(*args)
         self.step()

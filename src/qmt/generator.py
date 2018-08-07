@@ -144,7 +144,7 @@ class Generator:
 
         return new_parser
 
-    def crossOver(self, structure1, structure2, seed=None):
+    def crossOver(self, pair_of_structures, seed=None):
         """
         Crossover the structures genes randomly according to the input parameters.
 
@@ -159,6 +159,7 @@ class Generator:
         A new modified Structure class where the genes will be mixed from structure1 and structure2.
         
         """
+        structure1, structure2 = pair_of_structures
         ann_params = self.parser.getAnnParameters()
         random.seed(seed)
         np.random.seed(seed)        
@@ -169,7 +170,7 @@ class Generator:
         clean_generation = False
 
         while not clean_generation:
-            old_config = structure.parser.getConfig()
+            old_config = structure1.parser.getConfig()
             new_parser = copy.deepcopy(structure1.parser)
             new_config = new_parser.getConfig()
 
@@ -179,7 +180,7 @@ class Generator:
 
                 new_parser.ann.coefs_[layer][indices_to_update[:,0], indices_to_update[:,1]] = structure2.parser.ann.coefs_[layer][indices_to_update[:,0], indices_to_update[:,1]] 
 
-            outputs = new_parser.ann.predict(input_vec)
+            outputs = new_parser.ann.predict(input_vec)[0]
         
             for gene, output in zip(self.parser.getGenes(), outputs):
                 val = getFromDict(old_config, gene['path'])
@@ -226,7 +227,7 @@ class Generator:
                 indices_to_update = np.vstack((np.random.randint(0, new_parser.ann.coefs_[layer].shape[0], size=int(total_weights * ann_params['random-step']['fraction'])), np.random.randint(0, new_parser.ann.coefs_[layer].shape[1], size=int(total_weights * ann_params['random-step']['fraction'])))).T
                 new_parser.ann.coefs_[layer][indices_to_update[:,0], indices_to_update[:,1]] += np.random.uniform(-ann_params['random-step']['max-update-rate'], ann_params['random-step']['max-update-rate']) * new_parser.ann.coefs_[layer][indices_to_update[:,0], indices_to_update[:,1]] 
 
-            outputs = new_parser.ann.predict(input_vec)
+            outputs = new_parser.ann.predict(input_vec)[0]
         
             for gene, output in zip(self.parser.getGenes(), outputs):
                 val = getFromDict(old_config, gene['path'])
@@ -273,9 +274,9 @@ class Generator:
 
         """
         if pool is None:
-            return [self.mutate(s) for s in structures]
+            return [self.crossOver(s) for s in pairs_of_structures]
         else:
-            return pool.map(self.mutate, structures, seeds)
+            return pool.map(self.crossOver, pairs_of_structures, seeds)
 
     def generateAll(self):
         """
