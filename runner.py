@@ -103,9 +103,13 @@ def main():
         # write gene variables and objective function parameters to file
         ga.writePhaseSpace(structures)
 
+        pairs = []
+        for i, s1 in enumerate(structures):
+            for j, s2 in enumerate(structures):
+                if i != j:
+                    pairs.append((s1, s2))
         if parser.getAnnParameters()['crossing-fraction'] > 0.:
-            structures = g.crossOverAll(
-                                        zip(structures[:len(structures)//2], structures[:len(structures)//2]), pool=pool, seeds=np.random.random_integers(0, 2**32 - 1, len(structures)))
+            structures = g.crossOverAll(pairs, pool=pool, seeds=np.random.random_integers(0, 2**32 - 1, len(structures)))
         # mutate the current generation
         structures = g.mutateAll(structures, pool=pool, seeds=np.random.random_integers(0, 2**32 - 1, len(structures)))
         
