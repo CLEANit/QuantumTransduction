@@ -47,15 +47,16 @@ def objectiveFunction(currents_0_1, currents_0_2):
         objective = []
         objective.append((v1[0]) / (v1[0] + v1[1]) - 1)
         objective.append((v2[1]) / (v2[0] + v2[1]) - 1)
-        vectors.append([np.abs((v1[0]) / (v1[0] + v1[1])), np.abs((v2[1]) / (v2[0] + v2[1]))])
-        data = np.array(vectors)
-        pareto_points = np.array(sorted(data[is_pareto_efficient(data)], key=lambda x: x[0]))
-        x = np.linspace(np.min(pareto_points[:,0]), np.max(pareto_points[:,0]), 512)
-        pareto_curve = interp1d(pareto_points[:,0], pareto_points[:,1])(x)
-        yd = (interp(x)[:,None] - data[:,1])**2
-        xd = (x[:,None] - data[:,0])**2
-        r = np.sqrt(xd + yd)
-        objectives = np.min(r, axis=0)
+        vectors.append((np.abs((v1[0]) / (v1[0] + v1[1])), np.abs((v2[1]) / (v2[0] + v2[1]))))
+
+    data = np.array(vectors).reshape(len(vectors), 2)
+    pareto_points = np.array(sorted(data[is_pareto_efficient(data)], key=lambda x: x[0]))
+    x = np.linspace(np.min(pareto_points[:,0]), np.max(pareto_points[:,0]), 512)
+    pareto_curve = interp1d(pareto_points[:,0], pareto_points[:,1])(x)
+    yd = (pareto_curve[:,None] - data[:,1])**2
+    xd = (x[:,None] - data[:,0])**2
+    r = np.sqrt(xd + yd)
+    objectives = np.min(r, axis=0)
 
     return objectives, data
 

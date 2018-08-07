@@ -19,7 +19,7 @@ class GA:
         self.parser = parser
         self.initial_generation = structures
         self.current_structures = structures
-        self.past_generation = None
+        self.past_generation = []
         self.generation_number = 0
         self.objective_function = objective_function
         self.io = IO()
@@ -56,8 +56,7 @@ class GA:
     def rankGeneration(self):
         all_objs = np.concatenate((self.past_objectives, self.current_objectives))
         all_structs = self.past_generation + self.current_structures
-
-        return all_structs[np.argsort(all_objs)[:self.parser.getNStructures()]]
+        return [all_structs[elem] for elem in np.argsort(all_objs)[:self.parser.getNStructures()]]
 
 
     def setNextGeneration(self, structures):

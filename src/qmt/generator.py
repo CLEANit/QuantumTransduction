@@ -175,9 +175,9 @@ class Generator:
 
             for layer in range(len(ann_params['neurons']) + 1):
                 total_weights = new_parser.ann.coefs_[layer].shape[0] * new_parser.ann.coefs_[layer].shape[1]
-                indices_to_update = np.array(list(zip(np.random.randint(0, new_parser.ann.coefs_[layer].shape[0], size=int(total_weights * ann_params['random-step']['fraction'])), np.random.randint(0, new_parser.ann.coefs_[layer].shape[1], size=int(total_weights * ann_params['random-step']['fraction'])))))
+                indices_to_update = np.vstack((np.random.randint(0, new_parser.ann.coefs_[layer].shape[0], size=int(total_weights * ann_params['random-step']['fraction'])), np.random.randint(0, new_parser.ann.coefs_[layer].shape[1], size=int(total_weights * ann_params['random-step']['fraction'])))).T
 
-                new_parser.ann.coefs_[indices_to_update[:,0], indices_to_update[:,1]] = structure2.parser.ann.coefs_[indices_to_update[:,0], indices_to_update[:,1]] 
+                new_parser.ann.coefs_[layer][indices_to_update[:,0], indices_to_update[:,1]] = structure2.parser.ann.coefs_[layer][indices_to_update[:,0], indices_to_update[:,1]] 
 
             outputs = new_parser.ann.predict(input_vec)
         
@@ -223,8 +223,8 @@ class Generator:
 
             for layer in range(len(ann_params['neurons']) + 1):
                 total_weights = new_parser.ann.coefs_[layer].shape[0] * new_parser.ann.coefs_[layer].shape[1]
-                indices_to_update = np.array(list(zip(np.random.randint(0, new_parser.ann.coefs_[layer].shape[0], size=int(total_weights * ann_params['random-step']['fraction'])), np.random.randint(0, new_parser.ann.coefs_[layer].shape[1], size=int(total_weights * ann_params['random-step']['fraction'])))))
-                new_parser.ann.coefs_[indices_to_update[:,0], indices_to_update[:,1]] += np.random.uniform(-ann_params['random-step']['max-update-rate'], ann_params['random-step']['max-update-rate']) * new_parser.ann.coefs_[indices_to_update[:,0], indices_to_update[:,1]] 
+                indices_to_update = np.vstack((np.random.randint(0, new_parser.ann.coefs_[layer].shape[0], size=int(total_weights * ann_params['random-step']['fraction'])), np.random.randint(0, new_parser.ann.coefs_[layer].shape[1], size=int(total_weights * ann_params['random-step']['fraction'])))).T
+                new_parser.ann.coefs_[layer][indices_to_update[:,0], indices_to_update[:,1]] += np.random.uniform(-ann_params['random-step']['max-update-rate'], ann_params['random-step']['max-update-rate']) * new_parser.ann.coefs_[layer][indices_to_update[:,0], indices_to_update[:,1]] 
 
             outputs = new_parser.ann.predict(input_vec)
         
