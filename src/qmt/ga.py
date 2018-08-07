@@ -57,7 +57,7 @@ class GA:
         return self.current_structures
 
     def rankGeneration(self):
-        if self.past_vectors == None:
+        if self.past_vectors is None:
             data = self.current_vectors
         else:
             data = np.vstack((self.past_vectors, self.current_vectors))
