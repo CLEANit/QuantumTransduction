@@ -194,6 +194,22 @@
 </dd></dl>
 
 <dl class="function">
+<dt id="qmt.helper.isParetoEfficient">
+<code class="descclassname">qmt.helper.</code><code class="descname">isParetoEfficient</code><span class="sig-paren">(</span><em>costs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/helper.html#isParetoEfficient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.helper.isParetoEfficient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the points of a pareto frontier. Taken from a Stackover Flow post.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>costs</strong> : An (n_points, n_costs) array</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A (n_points, ) boolean array, indicating whether each point is Pareto efficient</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="qmt.helper.orthogVecSlope">
 <code class="descclassname">qmt.helper.</code><code class="descname">orthogVecSlope</code><span class="sig-paren">(</span><em>vec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/helper.html#orthogVecSlope"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.helper.orthogVecSlope" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function finds a (2D) orthogonal vector, and then returns the slope of that vector.</p>
@@ -204,6 +220,26 @@
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>vec</strong> : A vector to which we want to find an othogonal vector to.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The slope of the orthogonal vector found.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="qmt.helper.pointInHull">
+<code class="descclassname">qmt.helper.</code><code class="descname">pointInHull</code><span class="sig-paren">(</span><em>point</em>, <em>hull</em>, <em>tol=1e-12</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/helper.html#pointInHull"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.helper.pointInHull" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if a point is inside of a convex hull.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>points</strong> : A 2D point that is to be checked.</p>
+<p><strong>hull</strong> : A convex hull that is to be checked against.</p>
+<p><strong>tol</strong> : A numerical tolerance in the check.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if the point is in the hull, False if not.</p>
+</td>
 </tr>
 </tbody>
 </table>

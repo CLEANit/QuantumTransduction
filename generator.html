@@ -173,14 +173,56 @@ tweaks it, and allows it to be ready to perform calculations on.</p>
 </table>
 <p class="rubric">Methods</p>
 <dl class="method">
+<dt id="qmt.generator.Generator.crossOver">
+<code class="descname">crossOver</code><span class="sig-paren">(</span><em>pair_of_structures</em>, <em>seed=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/generator.html#Generator.crossOver"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.generator.Generator.crossOver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Crossover the structures genes randomly according to the input parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>structure1</strong> : A Structure class.</p>
+<p><strong>structure2</strong> : Another Structure class.</p>
+<p><strong>seed</strong> : A random seed to handle multithreading properly. Default: None.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A new modified Structure class where the genes will be mixed from structure1 and structure2.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.generator.Generator.crossOverAll">
+<code class="descname">crossOverAll</code><span class="sig-paren">(</span><em>pairs_of_structures</em>, <em>pool=None</em>, <em>seeds=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/generator.html#Generator.crossOverAll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.generator.Generator.crossOverAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Crossover all pairs of structures.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>pairs_of_structures</strong> : List of pairs of structures.</p>
+<p><strong>pool</strong> : A process pool so the crossovers can be done in parallel. Default is None.</p>
+<p><strong>seeds</strong> : List of seeds to properly handle multithreading.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A list of new structure classes with genes crossed over from the pairs_of_structures.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="qmt.generator.Generator.generate">
-<code class="descname">generate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/generator.html#Generator.generate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.generator.Generator.generate" title="Permalink to this definition">¶</a></dt>
+<code class="descname">generate</code><span class="sig-paren">(</span><em>seed=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/generator.html#Generator.generate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.generator.Generator.generate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a random structure based on the genes given in the output.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A Parser class that can be passed to the structure class.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>seed</strong> : A random seed for setting the weights.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A Parser class that can be passed to the structure class.</td>
 </tr>
 </tbody>
 </table>
@@ -226,9 +268,10 @@ tweaks it, and allows it to be ready to perform calculations on.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>structures</strong> : A list of structure classes that the mutate function will be called on.</p>
 <p><strong>pool</strong> : A process pool so the mutations can be done in parallel. Default is None.</p>
+<p><strong>seeds</strong> : List of seeds to properly handle multithreading.</p>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A mutated structure class.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A list of mutated structure classes.</p>
 </td>
 </tr>
 </tbody>

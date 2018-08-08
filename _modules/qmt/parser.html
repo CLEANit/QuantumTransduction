@@ -194,6 +194,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">n_iterations</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parseGA</span><span class="p">()</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkConfig</span><span class="p">()</span>
+
     <span class="k">def</span> <span class="nf">updateConfig</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="kc">None</span>
@@ -205,7 +207,22 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">n_structures</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_iterations</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parseGA</span><span class="p">()</span>
+        <span class="c1"># self.checkConfig()</span>
 
+<div class="viewcode-block" id="Parser.checkConfig"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.checkConfig">[docs]</a>    <span class="k">def</span> <span class="nf">checkConfig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check some parameters and let the user know if anything is odd.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># check the magnetic field strength</span>
+        <span class="n">phi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getPhi</span><span class="p">()</span>
+        <span class="n">lattice_vectors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLatticeVectors</span><span class="p">()</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="n">phi</span> <span class="o">/</span> <span class="p">(</span><span class="n">lattice_vectors</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">lattice_vectors</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">lattice_vectors</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">lattice_vectors</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">B_in_T</span> <span class="o">=</span> <span class="mf">6.62607004e-34</span> <span class="o">*</span> <span class="n">B</span> <span class="o">*</span> <span class="mf">10e20</span> <span class="o">/</span> <span class="mf">1.60217662e-19</span>
+        <span class="k">if</span> <span class="n">B_in_T</span> <span class="o">&gt;</span> <span class="mf">100.</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Your magnetic field is very large: </span><span class="si">%1.5e</span><span class="s1"> T. I hope you know what you are doing.&#39;</span> <span class="o">%</span> <span class="n">B_in_T</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Your magnetic field strength is: </span><span class="si">%1.5e</span><span class="s1"> T&#39;</span> <span class="o">%</span> <span class="n">B_in_T</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Parser.parseModel"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.parseModel">[docs]</a>    <span class="k">def</span> <span class="nf">parseModel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -224,6 +241,10 @@
         <span class="n">offsets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">body</span><span class="p">[</span><span class="s1">&#39;offset&#39;</span><span class="p">])</span>
         <span class="n">pots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">body</span><span class="p">[</span><span class="s1">&#39;potential&#39;</span><span class="p">])</span>
 
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pn_junction</span> <span class="o">=</span> <span class="n">body</span><span class="p">[</span><span class="s1">&#39;pn-junction&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pn_junction</span> <span class="o">=</span> <span class="kc">None</span>
         
         <span class="k">for</span> <span class="n">js</span> <span class="ow">in</span> <span class="n">channels</span><span class="p">:</span>
             <span class="n">shapes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">whatShape</span><span class="p">(</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;shape&#39;</span><span class="p">]),</span> <span class="o">**</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;args&#39;</span><span class="p">]))</span>
@@ -256,6 +277,14 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">pass</span></div>
 
+<div class="viewcode-block" id="Parser.getPNJunction"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.getPNJunction">[docs]</a>    <span class="k">def</span> <span class="nf">getPNJunction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        The configuration of the PN junction</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pn_junction</span></div>
+
 <div class="viewcode-block" id="Parser.getConfig"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.getConfig">[docs]</a>    <span class="k">def</span> <span class="nf">getConfig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns</span>
@@ -269,7 +298,18 @@
 <span class="sd">        Function that parses the GA section of the input file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_structures</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;GA&#39;</span><span class="p">][</span><span class="s1">&#39;n_structures&#39;</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_iterations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;GA&#39;</span><span class="p">][</span><span class="s1">&#39;n_iterations&#39;</span><span class="p">]</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_iterations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;GA&#39;</span><span class="p">][</span><span class="s1">&#39;n_iterations&#39;</span><span class="p">]</span> </div>
+
+<div class="viewcode-block" id="Parser.getAnnParameters"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.getAnnParameters">[docs]</a>    <span class="k">def</span> <span class="nf">getAnnParameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        The parameters for defining the ANN.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;GA&#39;</span><span class="p">][</span><span class="s1">&#39;ann&#39;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;GA&#39;</span><span class="p">][</span><span class="s1">&#39;ann-params&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="Parser.getNStructures"><a class="viewcode-back" href="../../parser.html#qmt.parser.Parser.getNStructures">[docs]</a>    <span class="k">def</span> <span class="nf">getNStructures</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>

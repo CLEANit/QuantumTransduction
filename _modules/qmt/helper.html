@@ -159,6 +159,24 @@
 <span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">reduce</span>
 <span class="kn">import</span> <span class="nn">operator</span>
 
+<div class="viewcode-block" id="isParetoEfficient"><a class="viewcode-back" href="../../helper.html#qmt.helper.isParetoEfficient">[docs]</a><span class="k">def</span> <span class="nf">isParetoEfficient</span><span class="p">(</span><span class="n">costs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the points of a pareto frontier. Taken from a Stackover Flow post.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    costs : An (n_points, n_costs) array</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">     A (n_points, ) boolean array, indicating whether each point is Pareto efficient</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">is_efficient</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">costs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">costs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">is_efficient</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+            <span class="n">is_efficient</span><span class="p">[</span><span class="n">is_efficient</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">costs</span><span class="p">[</span><span class="n">is_efficient</span><span class="p">]</span> <span class="o">&gt;=</span><span class="n">c</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Remove dominated points</span>
+    <span class="k">return</span> <span class="n">is_efficient</span></div>
+
 <div class="viewcode-block" id="rot"><a class="viewcode-back" href="../../helper.html#qmt.helper.rot">[docs]</a><span class="k">def</span> <span class="nf">rot</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This is a function that rotates a vector about a certain angle.</span>
@@ -238,6 +256,24 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">getFromDict</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span> <span class="n">listed_keys</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])[</span><span class="n">listed_keys</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="pointInHull"><a class="viewcode-back" href="../../helper.html#qmt.helper.pointInHull">[docs]</a><span class="k">def</span> <span class="nf">pointInHull</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">hull</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if a point is inside of a convex hull.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    points : A 2D point that is to be checked.</span>
+<span class="sd">    hull : A convex hull that is to be checked against.</span>
+<span class="sd">    tol : A numerical tolerance in the check.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    True if the point is in the hull, False if not.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="nb">all</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">eq</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">point</span><span class="p">)</span> <span class="o">+</span> <span class="n">eq</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">tol</span> <span class="k">for</span> <span class="n">eq</span> <span class="ow">in</span> <span class="n">hull</span><span class="o">.</span><span class="n">equations</span><span class="p">])</span></div>
 </pre></div>
 
            </div>

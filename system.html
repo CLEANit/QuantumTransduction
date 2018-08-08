@@ -192,14 +192,14 @@
 
 <dl class="method">
 <dt id="qmt.system.Structure.getConductance">
-<code class="descname">getConductance</code><span class="sig-paren">(</span><em>lead1_id</em>, <em>lead2_id</em>, <em>energies=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/system.html#Structure.getConductance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.system.Structure.getConductance" title="Permalink to this definition">¶</a></dt>
+<code class="descname">getConductance</code><span class="sig-paren">(</span><em>lead_in</em>, <em>lead_out</em>, <em>energies=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/system.html#Structure.getConductance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.system.Structure.getConductance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the conductance between 2 leads.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>lead1_id</strong> : The id of the lead you are injecting electrons.</p>
-<p><strong>lead2_id</strong> : The id of the lead you would like to find the transmission through.</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>lead_in</strong> : The id of the lead you would like to inject electrons.</p>
+<p><strong>lead_out</strong> : The id of the lead you measuring the transmission through.</p>
 <p><strong>energies</strong> : The range of energies that must be integrated over. By default, the energies are found from the minimum and maximum values in the band structure.</p>
 </td>
 </tr>
@@ -215,14 +215,14 @@
 
 <dl class="method">
 <dt id="qmt.system.Structure.getCurrent">
-<code class="descname">getCurrent</code><span class="sig-paren">(</span><em>lead1</em>, <em>lead2</em>, <em>avg_chem_pot=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/system.html#Structure.getCurrent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.system.Structure.getCurrent" title="Permalink to this definition">¶</a></dt>
+<code class="descname">getCurrent</code><span class="sig-paren">(</span><em>lead_in</em>, <em>lead_out</em>, <em>avg_chem_pot=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/system.html#Structure.getCurrent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.system.Structure.getCurrent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the current between 2 leads.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>lead1_id</strong> : The id of the lead you are injecting electrons.</p>
-<p><strong>lead2_id</strong> : The id of the lead you would like to find the transmission through.</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>lead_in</strong> : The id of the lead you are injecting electrons.</p>
+<p><strong>lead_out</strong> : The id of the lead you would like to find the transmission through.</p>
 <p><strong>avg_chem_pot</strong> : The average chemical potential difference. Default: 1.0. It is common practice to set this to the hopping energy.</p>
 </td>
 </tr>
@@ -237,6 +237,22 @@
 </dd></dl>
 
 <dl class="method">
+<dt id="qmt.system.Structure.getDOS">
+<code class="descname">getDOS</code><span class="sig-paren">(</span><em>energies=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/system.html#Structure.getDOS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.system.Structure.getDOS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the density of states for the system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>energies</strong> : An array of energies that we would like to calculate the LDOS at. Default is the minimum and maximum found from the bandstructure.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Energies and DOS in the form of a tuple. If spin-dependent calculations are specified, it returns energies, DOS for spin up, DOS for spin down.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="qmt.system.Structure.getEnergyRange">
 <code class="descname">getEnergyRange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/system.html#Structure.getEnergyRange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.system.Structure.getEnergyRange" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the energy range that must be integrated over to calcuate the current.</p>
@@ -245,6 +261,68 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A list of length 2 with the zeroth element being the minimum and the first element being the maximum.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.system.Structure.getValleyPolarizedConductance">
+<code class="descname">getValleyPolarizedConductance</code><span class="sig-paren">(</span><em>energy</em>, <em>lead_start=0</em>, <em>lead_end=1</em>, <em>K_prime_range=(-inf</em>, <em>-1e-08)</em>, <em>K_range=(0</em>, <em>inf)</em>, <em>velocities='out_going'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/system.html#Structure.getValleyPolarizedConductance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.system.Structure.getValleyPolarizedConductance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the valley-polarized conductances for a given energy between two leads. Note: This function only makes sense when
+the bandstructure has two valleys in it. An example is zig-zag edged graphene nanoribbons.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>energy</strong> : A value of energy.</p>
+<p><strong>lead_start</strong> : An integer of the lead where electrons are injected.</p>
+<p><strong>lead_end</strong> : An integer of the lead where electrons are transmitting through.</p>
+<p><strong>K_prime_range</strong> : A tuple of length 2 which defines the range where K’ would be the polarization. Default: (-np.inf, -1e-8)</p>
+<p><strong>K_range</strong> : A tuple of length 2 which defines the range where K would be the polarization. Default (0, np.inf)</p>
+<p><strong>velocities</strong> : If ‘out_going’, we only consider velocities &lt;= 0. If ‘in_coming’, velocities &gt; 0. Default: ‘out_going’</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A tuple of length 2. First element is for K’, second for K.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.system.Structure.getValleyPolarizedCurrent">
+<code class="descname">getValleyPolarizedCurrent</code><span class="sig-paren">(</span><em>lead_start=0</em>, <em>lead_end=1</em>, <em>K_prime_range=(-inf</em>, <em>-1e-08)</em>, <em>K_range=(0</em>, <em>inf)</em>, <em>velocities='out_going'</em>, <em>avg_chem_pot=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/system.html#Structure.getValleyPolarizedCurrent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.system.Structure.getValleyPolarizedCurrent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the valley-polarized currents between two leads. Note: This function only makes sense when
+the bandstructure has two valleys in it. An example is zig-zag edged graphene nanoribbons.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>lead_start</strong> : An integer of the lead where electrons are injected.</p>
+<p><strong>lead_end</strong> : An integer of the lead where electrons are transmitting through.</p>
+<p><strong>K_prime_range</strong> : A tuple of length 2 which defines the range where K’ would be the polarization. Default: (-np.inf, -1e-8)</p>
+<p><strong>K_range</strong> : A tuple of length 2 which defines the range where K would be the polarization. Default (0, np.inf)</p>
+<p><strong>velocities</strong> : If ‘out_going’, we only consider velocities &lt;= 0. If ‘in_coming’, velocities &gt; 0. Default: ‘out_going’</p>
+<p><strong>avg_chem_pot</strong> : The average of the chemical potentials between two leads. Default: 1.0.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A tuple of length 2. First element is for K’, second for K.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.system.Structure.visualizeSystem">
+<code class="descname">visualizeSystem</code><span class="sig-paren">(</span><em>args={}</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/system.html#Structure.visualizeSystem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.system.Structure.visualizeSystem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a plot to visualize the constructed system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A pyplot object.</td>
 </tr>
 </tbody>
 </table>
@@ -276,7 +354,7 @@
 
 <dl class="function">
 <dt id="qmt.system.onSiteFunction">
-<code class="descclassname">qmt.system.</code><code class="descname">onSiteFunction</code><span class="sig-paren">(</span><em>self</em>, <em>pot</em>, <em>spin</em>, <em>phi</em>, <em>site</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/system.html#onSiteFunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.system.onSiteFunction" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">qmt.system.</code><code class="descname">onSiteFunction</code><span class="sig-paren">(</span><em>self</em>, <em>pot</em>, <em>spin</em>, <em>phi</em>, <em>lead</em>, <em>site</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/qmt/system.html#onSiteFunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.system.onSiteFunction" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is a function which returns the on-site potential when a magnetic field is being applied.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
