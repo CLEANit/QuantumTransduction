@@ -352,14 +352,14 @@ class Structure:
             for energy in energies:
                 smatrix_up = kwant.smatrix(self.system_up, energy)
                 smatrix_down = kwant.smatrix(self.system_down, energy)
-                data_up.append(smatrix_up.transmission(lead_in, lead_out))
-                data_down.append(smatrix_down.transmission(lead_in, lead_out))
+                data_up.append(smatrix_up.transmission(lead_out, lead_in))
+                data_down.append(smatrix_down.transmission(lead_out, lead_in))
             return energies, data_up, data_down
         else:
             data = []
             for energy in energies:
                 smatrix = kwant.smatrix(self.system, energy)
-                data.append(smatrix.transmission(lead_in, lead_out))
+                data.append(smatrix.transmission(lead_out, lead_in))
             return energies, data
 
     def getCurrent(self, lead_in, lead_out, avg_chem_pot=1.0):
@@ -430,6 +430,7 @@ class Structure:
         else:
             bands = kwant.physics.Bands(self.system.leads[lead_id])
             energies = [bands(k) for k in momenta]
+            self.bands = energies
             return momenta, energies
 
     def getEnergyRange(self):
@@ -440,6 +441,9 @@ class Structure:
         -------
         A list of length 2 with the zeroth element being the minimum and the first element being the maximum.
         """
+
+        # try to avoid a calculation and return what was computed before
+
         if self.spin_dep:
             mins = []
             maxs = []
@@ -449,7 +453,8 @@ class Structure:
                 maxs.append(np.max(np.array(e_up).flatten()))
                 mins.append(np.min(np.array(e_down).flatten()))
                 maxs.append(np.max(np.array(e_down).flatten()))
-            return [min(mins), max(maxs)]
+                self.energy_range = [min(mins), max(maxs)]
+            return self.energy_range
         else:
             mins = []
             maxs = []
@@ -457,7 +462,8 @@ class Structure:
                 m, e = self.getBandStructure(i)
                 mins.append(np.min(np.array(e).flatten()))
                 maxs.append(np.max(np.array(e).flatten()))
-            return [min(mins), max(maxs)]
+                self.energy_range = [min(mins), max(maxs)]
+            return self.energy_range
 
     def getDOS(self, energies=None):
         """

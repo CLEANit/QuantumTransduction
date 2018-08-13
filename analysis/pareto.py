@@ -3,6 +3,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
+import sys
+
 def is_pareto_efficient(costs):
     """
     :param costs: An (n_points, n_costs) array
@@ -15,8 +17,8 @@ def is_pareto_efficient(costs):
     return is_efficient
 
 
-data = np.loadtxt('output/phase_space.dat')[:,-3:-1]
-# print(data)
+data = np.loadtxt(sys.argv[1])[:,:-1]
+print(data)
 
 pareto = np.array(sorted(data[is_pareto_efficient(data)], key=lambda x: x[0]))
 interp = interp1d(pareto[:,0], pareto[:,1], fill_value='extrapolate')
