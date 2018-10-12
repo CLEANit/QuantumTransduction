@@ -289,6 +289,30 @@ class Structure:
         else:
             return self.system
 
+    def getBinaryRepresentation(self):
+        """
+        Return a binary image that describes the pn-junction in image form.
+        """
+        tags = []
+        positions = []
+        for s, v in self.pre_system.site_value_pairs():
+            tags.append(s.tag)
+            positions.append(s.pos)
+        tags = np.array(tags)
+        positions = np.array(positions)
+        
+        min_tag_sx = np.min(tags[:,0])
+        min_tag_sy = np.min(tags[:,1])
+        max_tag_sx = np.max(tags[:,0])
+        max_tag_sy = np.max(tags[:,1])
+
+        image = np.zeros((max_tag_sx - min_tag_sx, max_tag_sy - min_tag_sy))
+
+        for t, p in zip(tags, positions):
+            if pointInHull(p, self.hull):
+                image[t[0] + min_tag_sx][t[1] + min_tag_sy] = 1
+        return image       
+
     def visualizeSystem(self, args={}):
         """
         Create a plot to visualize the constructed system.
