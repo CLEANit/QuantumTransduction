@@ -50,9 +50,9 @@ System:
 
         pn-junction: {
           turn_on: true,
-          n-potential: -0.2,
-          p-potential: 0.2,
-          points : [[-32, 32], [32, 32], [50, 0], [-32, -32], [32, -32]]
+          n-potential: 0.2,
+          p-potential: -0.2,
+          points : [[-32, 32], [32, 32], [50, 0], [-32, -32], [32, -32], [-50, 0]]
 
         }
       }
@@ -102,9 +102,9 @@ GA:
     }
   }
   # number of structures in the GA
-  n_structures: 4
+  n_structures: 2
   # number of iterations to perform
-  n_iterations: 100
+  n_iterations: 1
 
   Genes:
     # - { 
@@ -163,6 +163,11 @@ GA:
         path: ['System', 'Junction', 'body', 'pn-junction', 'points', 1, 0],
         range: [0, 32]
       }
+
+      - {
+        path: ['System', 'Junction', 'body', 'pn-junction', 'points', 2, 0],
+        range: [10, 50]
+      }
       
       - {
         path: ['System', 'Junction', 'body', 'pn-junction', 'points', 2, 1],
@@ -177,4 +182,14 @@ GA:
       - {
         path: ['System', 'Junction', 'body', 'pn-junction', 'points', 4, 0],
         range: [0, 32]
+      }
+
+      - {
+        path: ['System', 'Junction', 'body', 'pn-junction', 'points', 5, 0],
+        range: [-50, -10]
+      }
+      
+      - {
+        path: ['System', 'Junction', 'body', 'pn-junction', 'points', 5, 1],
+        range: [-32, 32]
       }
