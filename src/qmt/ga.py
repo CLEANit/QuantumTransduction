@@ -4,7 +4,7 @@ import numpy as np
 import subprocess
 import copy
 import os
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d, griddata
 
 from .io import IO
 from .helper import isParetoEfficient
@@ -57,20 +57,51 @@ class GA:
         return self.current_structures
 
     def rankGeneration(self):
+        """
+        Rank the current structures. We rank based on the euclidean distance
+        between the vector and the pareto front.
+
+        Returns
+        -------
+        A list of structures ordered by their distances to the pareto front.
+        
+        """
         if self.past_vectors is None:
             data = self.current_vectors
         else:
             data = np.vstack((self.past_vectors, self.current_vectors))
-        pareto_points = np.array(sorted(data[isParetoEfficient(data)], key=lambda x: x[0]))
-        x = np.linspace(np.min(pareto_points[:,0]), np.max(pareto_points[:,0]), 512)
-        pareto_curve = interp1d(pareto_points[:,0], pareto_points[:,1])(x)
-        yd = (pareto_curve[:,None] - data[:,1])**2
-        xd = (x[:,None] - data[:,0])**2
-        r = np.sqrt(xd + yd)
-        objectives = np.min(r, axis=0)
-        all_structs = self.past_generation + self.current_structures
-        self.current_objectives = np.sort(objectives)[:self.parser.getNStructures()]
-        return [all_structs[elem] for elem in np.argsort(objectives)[:self.parser.getNStructures()]]
+
+        # if we're working in 2D
+        if data.shape[1] == 2:
+            pareto_points = np.array(sorted(data[isParetoEfficient(data)], key=lambda x: x[0]))
+            x = np.linspace(np.min(pareto_points[:,0]), np.max(pareto_points[:,0]), 512)
+            pareto_curve = interp1d(pareto_points[:,0], pareto_points[:,1])(x)
+            yd = (pareto_curve[:,None] - data[:,1])**2
+            xd = (x[:,None] - data[:,0])**2
+            r = np.sqrt(xd + yd)
+            objectives = np.min(r, axis=0)
+            all_structs = self.past_generation + self.current_structures
+            self.current_objectives = np.sort(objectives)[:self.parser.getNStructures()]
+            return [all_structs[elem] for elem in np.argsort(objectives)[:self.parser.getNStructures()]]
+
+        # if we're working in 3D
+        if data.shape[1] == 3:
+            pareto_points = np.array(sorted(data[isParetoEfficient(data)], key=lambda x: x[0]))
+            x = np.linspace(np.min(pareto_points[:,0]), np.max(pareto_points[:,0]), 512)
+            y = np.linspace(np.min(pareto_points[:,1]), np.max(pareto_points[:,1]), 512)
+            X, Y = np.meshgrid(x, y)
+            interp = griddata(pareto_points[:,:-1], pareto_points[:,2], (X, Y))
+
+            xd = np.min((x[:,None] - data[:,0])**2, axis=0)
+            yd = np.min((y[:,None] - data[:,1])**2, axis=0)
+            interp_wout_nan = interp[~np.isnan(interp)]
+            zd = np.min((interp_wout_nan.flatten()[:,None] - data[:,2])**2, axis=0)
+            objectives = np.sqrt(xd + yd + zd)
+            all_structs = self.past_generation + self.current_structures
+            self.current_objectives = np.sort(objectives)[:self.parser.getNStructures()]
+            return [all_structs[elem] for elem in np.argsort(objectives)[:self.parser.getNStructures()]]
+        else:
+            logger.error('Error in ranking structures, you seem to be using an objective function that is not 2D nor 3D.')
 
 
     def setNextGeneration(self, structures):

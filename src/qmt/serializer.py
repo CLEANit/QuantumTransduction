@@ -6,7 +6,7 @@ import coloredlogs, verboselogs
 
 
 coloredlogs.install(level='INFO')
-logger = verboselogs.VerboseLogger('QMT::serializer')
+logger = verboselogs.VerboseLogger('qmt:: serializer')
 
 
 class Serializer:
