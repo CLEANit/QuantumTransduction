@@ -14,11 +14,35 @@ from pathos.multiprocessing import ProcessingPool as Pool
 import coloredlogs, verboselogs
 import copy
 import matplotlib.pyplot as plt
+import scipy
+import progressbar
 # create logger
 coloredlogs.install(level='INFO')
-
+bar = progressbar.ProgressBar()
 logger = verboselogs.VerboseLogger('qmt::autoecoder ')
 
+
+def convertToImages(structures):
+    for s in structures:
+        im = s.getBinaryRepresentation()
+        print (im.shape)
+        plt.imshow(im)
+        plt.show()
+
+def writeAdjacencyMatrixAndFeatures(structures):
+    Hs = []
+    features = []
+    for s in bar(structures):
+        H = s.system.hamiltonian_submatrix(sparse=True).astype(np.float32)
+        feature = H.diagonal()
+        H.setdiag(np.zeros(H.shape[0]))
+        H /= s.parser.config['System']['Junction']['body']['hopping']
+        Hs.append(H)
+        features.append(feature)
+    Hs = scipy.sparse.block_diag(Hs)
+    features = scipy.sparse.block_diag(features).T
+    scipy.sparse.save_npz('systems.npz', Hs)
+    scipy.sparse.save_npz('features.npz', features)
 
 def main():
     total_timer = Timer()
@@ -39,9 +63,14 @@ def main():
 
     logger.success('Structures generated/loaded. Elapsed time: %s' % (short_timer.stop()))
 
-    logger.info('Serializing structures.')
-    short_timer.start()
-    dill.dump(structures, open('structures.dill', 'wb'))
+
+    writeAdjacencyMatrixAndFeatures(structures)
+
+
+
+    # logger.info('Serializing structures.')
+    # short_timer.start()
+    # dill.dump(structures, open('structures.dill', 'wb'))
 
     logger.success('Structures serialized. Elapsed time: %s' % (total_timer.stop()))
         
