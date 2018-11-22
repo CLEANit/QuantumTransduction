@@ -35,9 +35,9 @@ def objectiveFunction(currents_0_1, currents_0_2):
         objective = []
         objective.append((v1[0]) / (v1[0] + v1[1]) - 1)
         objective.append((v2[1]) / (v2[0] + v2[1]) - 1)
-        vectors.append((np.abs((v1[0]) / (v1[0] + v1[1])), np.abs((v2[1]) / (v2[0] + v2[1]))))
+        vectors.append((np.abs((v1[0]) / (v1[0] + v1[1])), np.abs((v2[1]) / (v2[0] + v2[1])), v1[0] + v2[1]))
 
-    data = np.array(vectors).reshape(len(vectors), 2)
+    data = np.array(vectors).reshape(len(vectors), 3)
 
     return data
 
