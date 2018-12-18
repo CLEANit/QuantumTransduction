@@ -134,6 +134,8 @@ class Structure:
 
         self.finalize()
 
+        self.finished_calculations = dict()
+
     def build(self):
         # first construct the lattice
         lattice_type = self.parser.getLatticeType()
@@ -306,11 +308,13 @@ class Structure:
         max_tag_sx = np.max(tags[:,0])
         max_tag_sy = np.max(tags[:,1])
 
-        image = np.zeros((max_tag_sx - min_tag_sx, max_tag_sy - min_tag_sy))
+        image = np.zeros((max_tag_sx - min_tag_sx + 1, max_tag_sy - min_tag_sy + 1))
 
         for t, p in zip(tags, positions):
             if pointInHull(p, self.hull):
-                image[t[0] + min_tag_sx][t[1] + min_tag_sy] = 1
+                image[t[0] - min_tag_sx][t[1] - min_tag_sy] = self.parser.config['System']['Junction']['body']['pn-junction']['n-potential']
+            else:
+                image[t[0] - min_tag_sx][t[1] - min_tag_sy] = self.parser.config['System']['Junction']['body']['pn-junction']['p-potential']
         return image       
 
     def visualizeSystem(self, args={}):
@@ -408,24 +412,32 @@ class Structure:
 
         """
 
+
         bias = self.parser.getBias()
         kb_T = self.parser.getKBT()
 
         if self.spin_dep:
+            if 'current_up' in self.finished_calculations.keys() and 'current_down' in self.finished_calculations.keys():
+                return self.finished_calculations['current_up'], self.finished_calculations['current_down']
             e, cond_up, cond_down = self.getConductance(lead_in, lead_out)
             de = e[1] - e[0]
             mu_left = bias / 2.0 + avg_chem_pot
             mu_right = -bias / 2.0 + avg_chem_pot
             diff_fermi = vectorizedFermi(e, mu_left, kb_T) - vectorizedFermi(e, mu_right, kb_T)
-            return de * np.sum(cond_up * diff_fermi), de * np.sum(cond_down * diff_fermi)
+            self.finished_calculations['current_up'] = de * np.sum(cond_up * diff_fermi)
+            self.finished_calculations['current_down'] = de * np.sum(cond_down * diff_fermi)
+            return self.finished_calculations['current_up'], self.finished_calculations['current_down']
 
         else:
+            if 'current' in self.finished_calculations.keys():
+                return self.finished_calculations['current']
             e, cond = self.getConductance(lead_in, lead_out)
             de = e[1] - e[0]
             mu_left = bias / 2.0 + avg_chem_pot
             mu_right = -bias / 2.0 + avg_chem_pot
             diff_fermi = vectorizedFermi(e, mu_left, kb_T) - vectorizedFermi(e, mu_right, kb_T)
-            return de * np.sum(cond * diff_fermi)
+            self.finished_calculations['current'] = de * np.sum(cond * diff_fermi)
+            return self.finished_calculations['current']
 
 
 
@@ -446,14 +458,23 @@ class Structure:
             momenta = np.linspace(-np.pi, np.pi, self.grid_size)
 
         if self.spin_dep:
+            if 'momenta' in self.finished_calculations.keys() and 'energies_up' in self.finished_calculations.keys() and 'energies_down' in self.finished_calculations.keys():
+                return self.finished_calculations['momenta'], self.finished_calculations['energies_up'], self.finished_calculations['energies_down']
             bands_up = kwant.physics.Bands(self.system_up.leads[lead_id])
             bands_down = kwant.physics.Bands(self.system_down.leads[lead_id])
             energies_up = [bands_up(k) for k in momenta]
             energies_down = [bands_down(k) for k in momenta]
+            self.finished_calculations['momenta'] = momenta
+            self.finished_calculations['energies_up'] = energies_up
+            self.finished_calculations['energies_down'] = energies_down
             return momenta, energies_up, energies_down         
         else:
+            if 'momenta' in self.finished_calculations.keys() and 'energies' in self.finished_calculations.keys():
+                return self.finished_calculations['momenta'], self.finished_calculations['energies']
             bands = kwant.physics.Bands(self.system.leads[lead_id])
             energies = [bands(k) for k in momenta]
+            self.finished_calculations['momenta'] = momenta
+            self.finished_calculations['energies'] = energies
             self.bands = energies
             return momenta, energies
 
@@ -467,7 +488,9 @@ class Structure:
         """
 
         # try to avoid a calculation and return what was computed before
-
+        if 'energy_range' in self.finished_calculations['energy_range']:
+            return self.finished_calculations['energy_range']
+        
         if self.spin_dep:
             mins = []
             maxs = []
@@ -478,6 +501,7 @@ class Structure:
                 mins.append(np.min(np.array(e_down).flatten()))
                 maxs.append(np.max(np.array(e_down).flatten()))
                 self.energy_range = [min(mins), max(maxs)]
+                self.finished_calculations['energy_range'] = self.energy_range
             return self.energy_range
         else:
             mins = []
@@ -487,6 +511,7 @@ class Structure:
                 mins.append(np.min(np.array(e).flatten()))
                 maxs.append(np.max(np.array(e).flatten()))
                 self.energy_range = [min(mins), max(maxs)]
+                self.finished_calculations['energy_range'] = self.energy_range
             return self.energy_range
 
     def getDOS(self, energies=None):
@@ -506,6 +531,8 @@ class Structure:
             energies = np.linspace(energy_range[0], energy_range[1], self.grid_size)
 
         if self.spin_dep:
+            if 'energies_DOS' in self.finished_calculations.keys() and 'DOS_up' in self.finished_calculations.keys() and 'DOS_down' in self.finished_calculations.keys():
+                return self.finished_calculations['energies_DOS'], self.finished_calculations['DOS_up'], self.finished_calculations['DOS_down']
             es, DOS_up, DOS_down = [], [], []
             for e in energies:
                 # sometimes the ldos function returns an error for a certain value of energy
@@ -519,8 +546,13 @@ class Structure:
                     DOS_down.append(np.sum(LDOS_down))
                 except:
                     pass
+            self.finished_calculations['energies_DOS'] = es
+            self.finished_calculations['DOS_up'] = DOS_up
+            self.finished_calculations['DOS_down'] = DOS_down
             return es, DOS_up, DOS_down
         else:
+            if 'energies_DOS' in self.finished_calculations.keys() and 'DOS' in self.finished_calculations.keys():
+                return self.finished_calculations['energies_DOS'], self.finished_calculations['DOS']
             es, DOS = [], []
             for e in energies:
                 # sometimes the ldos function returns an error for a certain value of energy
@@ -532,6 +564,8 @@ class Structure:
                 DOS.append(np.sum(LDOS))
                 # except:
                 #     pass
+            self.finished_calculations['energies_DOS'] = es
+            self.finished_calculations['DOS'] = DOS
             return es, DOS
 
     def getValleyPolarizedConductance(self, energy, lead_start=0, lead_end=1, K_prime_range=(-np.inf, -1e-8), K_range=(0, np.inf), velocities='out_going'):
@@ -554,8 +588,11 @@ class Structure:
         """
 
         if self.spin_dep:
-            logger.error('You are trying to compute the Valley Conductances for Spin-Polarized calculations. This is currently not supported.')
+            logger.error('You are trying to compute the valley conductances for Spin-Polarized calculations. This is currently not supported.')
             exit(-1)
+
+        if 'k_prime_conductance' in self.finished_calculations.keys() and 'k_conductance' in self.finished_calculations.keys():
+            return self.finished_calculations['k_prime_conductance'], self.finished_calculations['k_conductance']
 
         smatrix = kwant.smatrix(self.system, energy)
         if velocities == 'out_going':
@@ -572,6 +609,8 @@ class Structure:
         submatrix = smatrix.submatrix(lead_end, lead_start)
         K_prime_T = np.sum(np.absolute(submatrix[:, K_prime_indices])**2) 
         K_T = np.sum(np.absolute(submatrix[:, K_indices])**2)
+        self.finished_calculations['k_prime_conductance'] = K_prime_T
+        self.finished_calculations['k_conductance'] = K_T
         return (K_prime_T, K_T)
 
     def getValleyPolarizedCurrent(self, lead_start=0, lead_end=1, K_prime_range=(-np.inf, -1e-8), K_range=(0, np.inf), velocities='out_going', avg_chem_pot=0.0):
@@ -599,25 +638,31 @@ class Structure:
         if self.spin_dep:
             logger.error('Cannot calculate valley dependent currents for spin-dependent systems.')
             exit(-1)
-        else:
-            energy_range = self.getEnergyRange()
-            energies = np.linspace(energy_range[0], energy_range[1], self.grid_size)
-            
-            KPs = []
-            Ks = []
-            for e in energies:
-                vals = self.getValleyPolarizedConductance(e, lead_start, lead_end, K_prime_range, K_range, velocities)
-                KPs.append(vals[0])
-                Ks.append(vals[1])
 
-            KPs = np.array(KPs)
-            Ks = np.array(Ks)
+        if 'k_prime_current' in self.finished_calculations.keys() and 'k_current' in self.finished_calculations.keys():
+            return self.finished_calculations['k_prime_current'], self.finished_calculations['k_current']
 
-            de = energies[1] - energies[0]
-            mu_left = bias / 2.0 + avg_chem_pot
-            mu_right = -bias / 2.0 + avg_chem_pot
-            diff_fermi = vectorizedFermi(energies, mu_left, kb_T) - vectorizedFermi(energies, mu_right, kb_T)
-            return de * np.sum(KPs * diff_fermi), de * np.sum(Ks * diff_fermi)
+        energy_range = self.getEnergyRange()
+        energies = np.linspace(energy_range[0], energy_range[1], self.grid_size)
+        
+        KPs = []
+        Ks = []
+        for e in energies:
+            vals = self.getValleyPolarizedConductance(e, lead_start, lead_end, K_prime_range, K_range, velocities)
+            KPs.append(vals[0])
+            Ks.append(vals[1])
+
+        KPs = np.array(KPs)
+        Ks = np.array(Ks)
+
+        de = energies[1] - energies[0]
+        mu_left = bias / 2.0 + avg_chem_pot
+        mu_right = -bias / 2.0 + avg_chem_pot
+        diff_fermi = vectorizedFermi(energies, mu_left, kb_T) - vectorizedFermi(energies, mu_right, kb_T)
+        self.finished_calculations['k_prime_current'] = de * np.sum(KPs * diff_fermi)
+        self.finished_calculations['k_current'] = de * np.sum(Ks * diff_fermi)
+
+        return self.finished_calculations['k_prime_current'], self.finished_calculations['k_current']
 
 
     def getWaveFunction(self, lead_id, energy=-1):
