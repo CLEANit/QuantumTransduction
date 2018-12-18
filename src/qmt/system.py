@@ -488,7 +488,7 @@ class Structure:
         """
 
         # try to avoid a calculation and return what was computed before
-        if 'energy_range' in self.finished_calculations['energy_range']:
+        if 'energy_range' in self.finished_calculations.keys():
             return self.finished_calculations['energy_range']
         
         if self.spin_dep:
