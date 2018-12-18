@@ -591,8 +591,14 @@ class Structure:
             logger.error('You are trying to compute the valley conductances for Spin-Polarized calculations. This is currently not supported.')
             exit(-1)
 
-        if 'k_prime_conductance' in self.finished_calculations.keys() and 'k_conductance' in self.finished_calculations.keys():
-            return self.finished_calculations['k_prime_conductance'], self.finished_calculations['k_conductance']
+        keys = [
+            'k_prime_conductance_' + str(lead_start) + '_' + str(lead_end) + '_' + str(energy),
+            'k_conductance_' + str(lead_start) + '_' + str(lead_end) + '_' + str(energy)
+        ]
+
+
+        if set(keys).issubset(self.finished_calculations.keys()):
+            return self.finished_calculations[keys[0]], self.finished_calculations[keys[1]]
 
         smatrix = kwant.smatrix(self.system, energy)
         if velocities == 'out_going':
@@ -609,8 +615,8 @@ class Structure:
         submatrix = smatrix.submatrix(lead_end, lead_start)
         K_prime_T = np.sum(np.absolute(submatrix[:, K_prime_indices])**2) 
         K_T = np.sum(np.absolute(submatrix[:, K_indices])**2)
-        self.finished_calculations['k_prime_conductance'] = K_prime_T
-        self.finished_calculations['k_conductance'] = K_T
+        self.finished_calculations[keys[0]] = K_prime_T
+        self.finished_calculations[keys[1]] = K_T
         return (K_prime_T, K_T)
 
     def getValleyPolarizedCurrent(self, lead_start=0, lead_end=1, K_prime_range=(-np.inf, -1e-8), K_range=(0, np.inf), velocities='out_going', avg_chem_pot=0.0):
@@ -639,8 +645,14 @@ class Structure:
             logger.error('Cannot calculate valley dependent currents for spin-dependent systems.')
             exit(-1)
 
-        if 'k_prime_current' in self.finished_calculations.keys() and 'k_current' in self.finished_calculations.keys():
-            return self.finished_calculations['k_prime_current'], self.finished_calculations['k_current']
+        keys = [
+            'k_prime_current_' + str(lead_start) + '_' + str(lead_end),
+            'k_current_' + str(lead_start) + '_' + str(lead_end)
+        ]
+
+
+        if set(keys).issubset(self.finished_calculations.keys()):
+            return self.finished_calculations[keys[0]], self.finished_calculations[keys[1]]
 
         energy_range = self.getEnergyRange()
         energies = np.linspace(energy_range[0], energy_range[1], self.grid_size)
@@ -659,10 +671,10 @@ class Structure:
         mu_left = bias / 2.0 + avg_chem_pot
         mu_right = -bias / 2.0 + avg_chem_pot
         diff_fermi = vectorizedFermi(energies, mu_left, kb_T) - vectorizedFermi(energies, mu_right, kb_T)
-        self.finished_calculations['k_prime_current'] = de * np.sum(KPs * diff_fermi)
-        self.finished_calculations['k_current'] = de * np.sum(Ks * diff_fermi)
+        self.finished_calculations[keys[0]] = de * np.sum(KPs * diff_fermi)
+        self.finished_calculations[keys[1]] = de * np.sum(Ks * diff_fermi)
 
-        return self.finished_calculations['k_prime_current'], self.finished_calculations['k_current']
+        return self.finished_calculations[keys[0]], self.finished_calculations[keys[1]]
 
 
     def getWaveFunction(self, lead_id, energy=-1):

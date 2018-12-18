@@ -28,6 +28,9 @@ logger = verboselogs.VerboseLogger('qmt::runner ')
 def getConductances(structure, lead0, lead1):
     return structure.getValleyPolarizedCurrent(lead0, lead1)
 
+def getNewStructure(parser):
+    return Structure(parser)
+
 def objectiveFunction(currents_0_1, currents_0_2):
     vectors = []
     objectives = []
@@ -63,7 +66,7 @@ def main():
         short_timer.start()
         parsers = g.generateAll()
         # structures = [Structure(parser) for parser in parsers]
-        structures = pool.map(Structure, parsers)
+        structures = pool.map(getNewStructure, parsers)
         logger.success('Initial structures generated. Elapsed time: %s' % (short_timer.stop()))
         
         ga = GA(parser, structures, objective_function=objectiveFunction)
