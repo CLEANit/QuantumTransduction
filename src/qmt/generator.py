@@ -239,6 +239,51 @@ class Generator:
                             
         return Structure(new_parser)
 
+    def mutateAllWeights(self, structure, seed=None):
+        """
+        Mutate the structures gene in some way.
+
+        Parameters
+        ----------
+        A Structure class.
+
+        Returns
+        -------
+        A new modified Structure class.
+        
+        """
+        ann_params = self.parser.getAnnParameters()
+        if ann_params['random-step']['fraction'] == 0.:
+            return structure
+
+        random.seed(seed)
+        np.random.seed(seed)        
+
+        input_vec = np.ones((1, ann_params['neurons'][0]))
+
+        # follow similar steps as when we generate a new structure
+        clean_generation = False
+
+        while not clean_generation:
+            old_config = structure.parser.getConfig()
+            new_parser = copy.deepcopy(structure.parser)
+            new_config = new_parser.getConfig()
+
+            for layer in range(len(ann_params['neurons']) + 1):
+                new_parser.ann.coefs_[layer] += ann_params['random-step']['max-update-rate'] * np.random.normal((new_parser.ann.coefs_[layer].shape))
+
+            outputs = new_parser.ann.predict(input_vec)[0]
+        
+            for gene, output in zip(self.parser.getGenes(), outputs):
+                val = getFromDict(old_config, gene['path'])
+                new_val = (gene['range'][1] - gene['range'][0]) * output + gene['range'][0]
+                setInDict(new_config, gene['path'], new_val)
+                new_config, clean_generation = self.checkAndUpdate(new_config, gene, val, new_val)
+                
+        new_parser.updateConfig(new_config)
+                            
+        return Structure(new_parser)
+
     def mutateAll(self, structures, pool=None, seeds=None):
         """
         Mutate all structures. Possibly in parallel.

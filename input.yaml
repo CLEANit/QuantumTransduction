@@ -93,6 +93,7 @@ GA:
     
     # tweak a fraction of the weights after mixing
     random-step: {
+      keep-best: 8,
       fraction: 0.2,
 
       # serves a similar purpose to the learning rate in machine learning for updating weights:
@@ -102,7 +103,7 @@ GA:
     }
   }
   # number of structures in the GA
-  n_structures: 2
+  n_structures: 1
   # number of iterations to perform
   n_iterations: 1
 

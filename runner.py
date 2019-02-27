@@ -105,18 +105,24 @@ def main():
 
         # write gene variables and objective function parameters to file
         ga.writePhaseSpace(structures)
+        subset_limit = parser.config['GA']['ann-params']['random-step']['keep-best']
+        structures_subset = structures[:subset_limit]
+        new_structures = []
+        for i in range(len(structures)):
+            index = np.random.randint(subset_limit)
+            new_structures.append(g.mutateAllWeights(structures_subset[index]))
 
-        pairs = []
-        for i, s1 in enumerate(structures):
-            for j, s2 in enumerate(structures):
-                if i != j:
-                    pairs.append((s1, s2))
-        if parser.getAnnParameters()['crossing-fraction'] > 0.:
-            structures = g.crossOverAll(pairs, pool=pool, seeds=np.random.random_integers(0, 2**32 - 1, len(structures)))
-        # mutate the current generation
-        structures = g.mutateAll(structures, pool=pool, seeds=np.random.random_integers(0, 2**32 - 1, len(structures)))
+        # pairs = []
+        # for i, s1 in enumerate(structures):
+        #     for j, s2 in enumerate(structures):
+        #         if i != j:
+        #             pairs.append((s1, s2))
+        # if parser.getAnnParameters()['crossing-fraction'] > 0.:
+        #     structures = g.crossOverAll(pairs, pool=pool, seeds=np.random.random_integers(0, 2**32 - 1, len(structures)))
+        # # mutate the current generation
+        # structures = g.mutateAll(structures, pool=pool, seeds=np.random.random_integers(0, 2**32 - 1, len(structures)))
         
-        ga.setNextGeneration(structures)
+        ga.setNextGeneration(new_structures)
 
         # print how long it took and serialize the current GA
         logger.info('Calculations finished. Elapsed time: %s' % (short_timer.stop()))
