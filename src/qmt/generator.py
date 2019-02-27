@@ -270,7 +270,7 @@ class Generator:
             new_config = new_parser.getConfig()
 
             for layer in range(len(ann_params['neurons']) + 1):
-                new_parser.ann.coefs_[layer] += ann_params['random-step']['max-update-rate'] * np.random.normal((new_parser.ann.coefs_[layer].shape))
+                new_parser.ann.coefs_[layer] += ann_params['random-step']['max-update-rate'] * np.random.normal(size=new_parser.ann.coefs_[layer].shape)
 
             outputs = new_parser.ann.predict(input_vec)[0]
         
