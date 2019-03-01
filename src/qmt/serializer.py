@@ -40,9 +40,11 @@ class Serializer:
         try:
             with open(self.fname, 'rb') as f:
                 ga = dill.load(f)
-                if self.parser.getConfig() != ga.parser.getConfig():
-                    logger.warning('The YAML configuration has changed, starting fresh...')
-                    return None
+
+                if not self.parser.config['GA']['ignore-restart-warning']:
+                    if self.parser.getConfig() != ga.parser.getConfig():
+                        logger.warning('The YAML configuration has changed, starting fresh...')
+                        return None
 
                 return ga
         except:
