@@ -97,6 +97,35 @@ class Generator:
                         pass
         return new_config, clean_generation
 
+    def generateRandom(self, seed=None):
+        """
+        Generate a random structure based on the genes given in the output. To be more clear, the genes are generated from a completely uniform random distribution rather than an ANN.
+
+        Parameters
+        ----------
+        seed : A random seed for setting the weights.
+
+        Returns
+        -------
+        A Parser class that can be passed to the structure class.
+        """
+        # we want to make sure our generated structure is good
+        clean_generation = False
+
+        while not clean_generation:
+            new_parser = copy.deepcopy(self.parser)
+
+            for gene in self.parser.getGenes():
+                val = getFromDict(old_config, gene['path'])
+                new_val = (gene['range'][1] - gene['range'][0]) * np.random.uniform() + gene['range'][0]
+                setInDict(new_config, gene['path'], new_val)
+                new_config, clean_generation = self.checkAndUpdate(new_config, gene, val, new_val)
+                
+        new_parser.updateConfig(new_config)
+
+        return new_parser
+
+
     def generate(self, seed=None):
         """
         Generate a random structure based on the genes given in the output.
@@ -333,3 +362,14 @@ class Generator:
 
         """
         return [self.generate() for i in range(self.parser.getNStructures())]
+
+    def generateAllRandom(self):
+        """
+        Generates all of the structures specified in the input file. NOTE: This uniformly samples the entire space, and there is no ANN used here.
+
+        Returns
+        -------
+        A list of Parser classes that can be handed to Structure classes.
+
+        """
+        return [self.generateRandom() for i in range(self.parser.getNStructures())]
