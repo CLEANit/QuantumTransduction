@@ -145,6 +145,18 @@ class Parser:
         self.n_structures = self.config['GA']['n_structures']
         self.n_iterations = self.config['GA']['n_iterations'] 
 
+    def getGAParameters(self):
+        """
+        Returns
+        -------
+        The parameters defining the GA.
+        """
+        if self.config['GA']:
+            return self.config['GA']
+        else:
+            return None
+
+
     def getAnnParameters(self):
         """
         Returns
