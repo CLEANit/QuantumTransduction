@@ -98,7 +98,7 @@ class Generator:
         return new_config, clean_generation
 
 
-    def generate(self, seed=None, ann=True):
+    def generate(self, seed=None):
         """
         Generate a random structure based on the genes given in the output.
 
@@ -111,6 +111,9 @@ class Generator:
         A Parser class that can be passed to the structure class.
         """
         # we want to make sure our generated structure is good
+
+        ann = self.parser.getGAParameters()['ann']
+
         if ann:
             clean_generation = False
 
@@ -151,7 +154,8 @@ class Generator:
 
             while not clean_generation:
                 new_parser = copy.deepcopy(self.parser)
-
+                old_config = self.parser.getConfig()
+                new_config = new_parser.getConfig()
                 for gene in self.parser.getGenes():
                     val = getFromDict(old_config, gene['path'])
                     new_val = (gene['range'][1] - gene['range'][0]) * np.random.uniform() + gene['range'][0]
@@ -162,7 +166,7 @@ class Generator:
 
             return new_parser
 
-    def crossOver(self, pair_of_structures, seed=None, ann=True):
+    def crossOver(self, pair_of_structures, seed=None):
         """
         Crossover the structures genes randomly according to the input parameters.
 
@@ -178,6 +182,7 @@ class Generator:
         A new modified Structure class where the genes will be mixed from structure1 and structure2.
         
         """
+        ann = self.parser.getGAParameters()['ann']
 
         if ann:
             structure1, structure2 = pair_of_structures
@@ -228,12 +233,12 @@ class Generator:
                 new_parser = copy.deepcopy(structure1.parser)
                 new_config = new_parser.getConfig()
             
-                outputs = zip(structure1.parser.getPNJunction()['points'], structure2.parser.getPNJunction()['points'])
+                outputs = list(zip(structure1.parser.getPNJunction()['points'], structure2.parser.getPNJunction()['points']))
                 for gene, output in zip(self.parser.getGenes(), outputs):
                     if np.random.uniform() < ga_params['crossing-fraction']:
                         val = getFromDict(old_config, gene['path'])
                         index = gene['path'][-2:]
-                        new_val = np.mean([output[0, index[0], index[1]], output[0, index[0], index[1]]])
+                        new_val = np.mean([outputs[index[0]][0][index[1]], outputs[index[0]][1][index[1]]])
                         setInDict(new_config, gene['path'], new_val)
                         new_config, clean_generation = self.checkAndUpdate(new_config, gene, val, new_val)
                     
@@ -243,7 +248,7 @@ class Generator:
 
 
 
-    def mutate(self, structure, seed=None, ann=True):
+    def mutate(self, structure, seed=None):
         """
         Mutate the structures gene in some way.
 
@@ -256,6 +261,7 @@ class Generator:
         A new modified Structure class.
         
         """
+        ann = self.parser.getGAParameters()['ann']
 
         if ann:
             ann_params = self.parser.getAnnParameters()
@@ -293,7 +299,33 @@ class Generator:
                                 
             return Structure(new_parser)
         else:
-            pass
+            ga_params = self.parser.getGAParameters()
+            if ga_params['random-step']['fraction'] == 0.:
+                return structure
+
+            random.seed(seed)
+            np.random.seed(seed)        
+
+            # follow similar steps as when we generate a new structure
+            clean_generation = False
+
+            while not clean_generation:
+                old_config = structure.parser.getConfig()
+                new_parser = copy.deepcopy(structure.parser)
+                new_config = new_parser.getConfig()
+
+                outputs = structure.parser.getPNJunction()['points']
+            
+                for gene, output in zip(self.parser.getGenes(), outputs):
+                    if np.random.uniform() < ga_params['random-step']['fraction']:
+                        val = getFromDict(old_config, gene['path'])
+                        new_val = val + ga_params['random-step']['max-update-rate'] * np.random.uniform()
+                        setInDict(new_config, gene['path'], new_val)
+                        new_config, clean_generation = self.checkAndUpdate(new_config, gene, val, new_val)
+                    
+            new_parser.updateConfig(new_config)
+                                
+            return Structure(new_parser)
 
     def mutateAllWeights(self, structure, seed=None):
         """
