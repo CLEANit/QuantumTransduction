@@ -326,7 +326,7 @@ class Structure:
         A pyplot object.
         """
         if self.spin_dep:
-            return kwant.plot(self.pre_system_up, site_lw=0.1, colorbar=False, **args, show=False)
+            return kwant.plot(self.pre_system_up, site_lw=0.1, colorbar=False, show=False, **args)
         else:
 
             if self.pnj_config['turn_on'] == True:
@@ -338,7 +338,7 @@ class Structure:
                         return 'b'
                 return kwant.plot(self.pre_system, site_lw=0.1, lead_site_lw=0, colorbar=False, site_color=siteColours, show=True, **args)
             else:
-                return kwant.plot(self.pre_system, site_lw=0.1, colorbar=False, **args, show=False)
+                return kwant.plot(self.pre_system, site_lw=0.1, colorbar=False, show=False, **args)
 
     def diagonalize(self, args={}):
         # Compute some eigenvalues of the closed system

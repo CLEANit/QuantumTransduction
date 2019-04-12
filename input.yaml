@@ -77,7 +77,7 @@ System:
 GA:
 
   # keep true for now
-  ann: true
+  ann: false
 
   # if ann is true, we use these parameters
   ann-params: {
@@ -85,27 +85,26 @@ GA:
     neurons: [10, 10, 10],
 
     # we currently need an activation function defined from [0,1]
-    activation: 'logistic',
+    activation: 'logistic'
+  }
 
-    # parameters for mixing/tweaking the weights in the neural network
-    # randomly interchange a fraction of weights between neural networks
-    crossing-fraction: 0.2,
-    
-    # tweak a fraction of the weights after mixing
-    random-step: {
-      keep-best: 8,
-      fraction: 0.2,
+  # randomly cross
+  crossing-fraction: 0.2
+  
+  # tweak a fraction of the weights after mixing
+  random-step: {
+    keep-best: 4,
+    fraction: 0.2,
 
-      # serves a similar purpose to the learning rate in machine learning for updating weights:
-      #   w_new = w_old + np.random.uniform(-max_update_rate, max_update_rate) * w_old 
-      max-update-rate: 0.01
+    # serves a similar purpose to the learning rate in machine learning for updating weights:
+    #   w_new = w_old + np.random.uniform(-max_update_rate, max_update_rate) * w_old 
+    max-update-rate: 0.1
 
-    }
   }
   # number of structures in the GA
-  n_structures: 1
+  n_structures: 8
   # number of iterations to perform
-  n_iterations: 1
+  n_iterations: 2
 
   Genes:
     # - { 
