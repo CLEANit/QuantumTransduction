@@ -32,10 +32,6 @@ class GA:
         self.current_vectors = None
 
         subprocess.run(['mkdir -p output'], shell=True)
-        if os.path.isfile('output/phase_space.dat'):
-            self.phase_space = open('output/phase_space.dat', 'a')
-        else:
-            self.phase_space = open('output/phase_space.dat', 'w')
 
     def summarizeGeneration(self):
         """
@@ -141,7 +137,8 @@ class GA:
         structures : The structures that contain the information necessary to write out to the file.
     
         """
-        self.phase_space.write('# Generation number: %i\n' % self.generationNumber())
+        self.phase_space = open('output/phase_space_gen_' + str(self.generationNumber() - 1) + '.dat', 'w')
+        self.phase_space.write('# Generation number: %i\n' % self.generationNumber() - 1)
         for i, s in enumerate(structures):
             c = s.getChromosome()
             for val in c:

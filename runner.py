@@ -59,12 +59,11 @@ def main():
     if ga is not None:
         # continue from before
         logger.success('Successfully loaded previous GA. Will continue previous calculation.')
-        ga.io.reInit()
     else:
         logger.info('GA starting from scratch.')
         logger.info('Generating initial structures...')
         short_timer.start()
-        parsers = g.generateAll(ann=parser.config['GA']['ann'])
+        parsers = g.generateAll()
         # structures = [Structure(parser) for parser in parsers]
         structures = pool.map(getNewStructure, parsers)
         logger.success('Initial structures generated. Elapsed time: %s' % (short_timer.stop()))
@@ -75,7 +74,6 @@ def main():
     # main loop here
     #########################
 
-    ga.io.writer('output/currents.dat', '# Currents (lead1-k\', lead1-k, lead2-k\', lead2-k)\n', header=True)
 
     while ga.generationNumber() < parser.getNIterations():
 
@@ -95,8 +93,9 @@ def main():
         currents_0_1 = pool.map(getConductances, structures, [0] * len(structures), [1] * len(structures))
         currents_0_2 = pool.map(getConductances, structures, [0] * len(structures), [2] * len(structures))
 
+        ga.io.writer('output/currents_gen_' + str(ga.generationNumber()) + '.dat', '# Currents (lead1-k\', lead1-k, lead2-k\', lead2-k)\n', header=True)
         for cs1, cs2 in zip(currents_0_1, currents_0_2):
-            ga.io.writer('output/currents.dat', cs1 + cs2)
+            ga.io.writer('output/currents_gen_' + str(ga.generationNumber()) + '.dat', cs1 + cs2)
 
         # calculate the objective function
         ga.calculate((currents_0_1, currents_0_2))

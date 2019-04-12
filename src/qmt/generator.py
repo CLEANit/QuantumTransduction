@@ -411,7 +411,7 @@ class Generator:
         else:
             return pool.map(self.crossOver, pairs_of_structures, seeds)
 
-    def generateAll(self, ann=True):
+    def generateAll(self):
         """
         Generates all of the structures specified in the input file.
 

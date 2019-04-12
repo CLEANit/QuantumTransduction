@@ -78,7 +78,10 @@ GA:
 
   # keep true for now
   ann: false
-
+  
+  # if the yaml config has changed, but you still want to continue
+  # then set to true
+  ignore-restart-warning: false
   # if ann is true, we use these parameters
   ann-params: {
     # parameters for constructing the neural networks
@@ -97,14 +100,14 @@ GA:
     fraction: 0.2,
 
     # serves a similar purpose to the learning rate in machine learning for updating weights:
-    #   w_new = w_old + np.random.uniform(-max_update_rate, max_update_rate) * w_old 
+    #   w_new = w_old + np.random.uniform() * max-update-rate 
     max-update-rate: 0.1
 
   }
   # number of structures in the GA
   n_structures: 8
   # number of iterations to perform
-  n_iterations: 2
+  n_iterations: 10
 
   Genes:
     # - { 
