@@ -1,0 +1,198 @@
+############
+#### Input file for runner!!
+############
+
+System:
+
+  # right now only general
+  lattice_type: 'general'
+
+  # lattice constant for the crystal
+  lattice_constant: 1.42
+
+  # zig-zag leads
+  lattice_vectors: [[1.22975607, 2.13], [-1.22975607, 2.13]]
+  lattice_basis: [[0.0, 0.0], [0.0, -1.42]]
+
+  # number of orbitals
+  n_orbitals: 1
+
+  # do we want to do spin polarized or not
+  spin_dependent: false
+
+  # magnetic flux through a unit cell
+  phi: 0.0
+
+  # bias applied to the system
+  bias: 0.5
+
+  # Boltzmann constant times the temperature
+  kb_T: 0.027
+
+  Junction:
+    # the main body
+    # the main body needs an id so we know where to apply the mask
+    body: {
+        # shape of the junction
+        shape: 'rectangle', 
+        
+        # args passed to the shape function
+        args: {xcoords: [-64, 64], ycoords: [-32, 32], angle: 0.0, shift: [-0.75, -0.75]},
+
+        # on-site energy
+        potential: 0.0,
+        
+        # hopping energy
+        hopping: -2.7,
+
+        # offset when kwant uses the food-fill algorithm
+        offset: [0, 0],
+
+        pn-junction: {
+          turn_on: true,
+          n-potential: 0.2,
+          p-potential: -0.2,
+          points : [[-32, 32], [32, 32], [50, 0], [-32, -32], [32, -32], [-50, 0]]
+
+        }
+      }
+    
+    channels:
+      - {shape: 'rectangle', args: {xcoords: [-96, -64], ycoords: [-16, 16], angle: 0., shift: [-0.75, -0.75]}, potential: 0.0, hopping: -2.7, offset: [-70, 0], direction: [-1, 0]}
+      # Right upper channel
+      - {shape: 'rectangle', args: {xcoords: [64, 96], ycoords: [16, 32], angle: 0., shift: [-0.75, -0.75]}, potential: 0.0, hopping: -2.7, offset: [70, 30], direction: [1, 0]}
+      # Right lower channel
+      - {shape: 'rectangle', args: {xcoords: [64, 96], ycoords: [-32, -16], angle: 0., shift: [-0.75, -0.75]}, potential: 0.0, hopping: -2.7, offset: [70, -30], direction: [1, 0]}
+
+  Masks:
+      # Let's place a rectangle
+    # - {name: 'rectangle', args: {xcoords: [-8, 8], ycoords: [-8, 8]}}
+
+  Leads:
+    - {range: [-16, 16], symmetry: [-1, 1], shift: [-0.75, -0.75], offset: [0, 0], potential: 0.0, hopping: -2.7, reverse: False, direction: [-1, 0]}
+    - {range: [16, 32], symmetry: [1, -1], shift: [-0.75, -0.75], offset: [0, 26], potential: 0.0, hopping: -2.7, reverse: False, direction: [1, 0]}
+    - {range: [-32, -16], symmetry: [1, -1], shift: [-0.75, -0.75], offset: [0, -26], potential: 0.0, hopping: -2.7, reverse: False, direction: [1, 0]}
+
+# Genetic algorithm
+GA:
+
+  # keep true for now
+  ann: true
+  
+  ignore-restart-warning: true
+
+  # if ann is true, we use these parameters
+  ann-params: {
+    # parameters for constructing the neural networks
+    neurons: [10, 10, 10],
+
+    # we currently need an activation function defined from [0,1]
+    activation: 'logistic',
+
+    # parameters for mixing/tweaking the weights in the neural network
+    # randomly interchange a fraction of weights between neural networks
+    crossing-fraction: 0.2,
+    
+    # tweak a fraction of the weights after mixing
+    random-step: {
+      keep-best: 4,
+      fraction: 0.2,
+
+      # serves a similar purpose to the learning rate in machine learning for updating weights:
+      #   w_new = w_old + np.random.uniform(-max_update_rate, max_update_rate) * w_old 
+      max-update-rate: 0.0
+
+    }
+  }
+  # number of structures in the GA
+  n_structures: 8
+  # number of iterations to perform
+  n_iterations: 3
+
+  Genes:
+    # - { 
+    #     path: ['System', 'Junction', 'body', 'args', 'xcoords'],
+    #     range: [100, 200],
+    #     shift: [0, 0]
+    #   }
+    
+    # - { 
+    #     path: ['System', 'Junction', 'body', 'args', 'ycoords'],
+    #     range: [100, 150],
+    #     shift: [0, 0]
+    #   }
+
+    # - { 
+    #     path: ['System', 'Junction', 'channels', 0, 'args', 'ycoords'],
+    #     range: [8, 8],
+    #     shift: [-28, 28]
+    #   }
+
+    # - { 
+    #     path: ['System', 'Junction', 'channels', 1, 'args', 'ycoords'],
+    #     range: [8, 8],
+    #     shift: [-20, 28]
+    #   }
+
+    # - { 
+    #     path: ['System', 'Junction', 'channels', 2, 'args', 'ycoords'],
+    #     range: [8, 8],
+    #     shift: [-28, 20]
+    #   }
+
+    # - {
+    #     path: ['System', 'Masks', 0, 'args', 'xcoords'],
+    #     range: [16, 16],
+    #     shift: [-20, 20]
+    #   }
+
+    # - {
+    #     path: ['System', 'Masks', 0, 'args', 'ycoords'],
+    #     range: [16, 16],
+    #     shift: [-20, 20]
+    #   }
+
+    # - {
+    #     path: ['System', 'phi'],
+    #     range: [0.05, 0.1],
+    #   }
+
+      - {
+        path: ['System', 'Junction', 'body', 'pn-junction', 'points', 0, 0],
+        range: [-32, 0]
+      }
+
+      - {
+        path: ['System', 'Junction', 'body', 'pn-junction', 'points', 1, 0],
+        range: [0, 32]
+      }
+
+      - {
+        path: ['System', 'Junction', 'body', 'pn-junction', 'points', 2, 0],
+        range: [10, 50]
+      }
+      
+      - {
+        path: ['System', 'Junction', 'body', 'pn-junction', 'points', 2, 1],
+        range: [-32, 32]
+      }
+
+      - {
+        path: ['System', 'Junction', 'body', 'pn-junction', 'points', 3, 0],
+        range: [-32, 0]
+      }
+
+      - {
+        path: ['System', 'Junction', 'body', 'pn-junction', 'points', 4, 0],
+        range: [0, 32]
+      }
+
+      - {
+        path: ['System', 'Junction', 'body', 'pn-junction', 'points', 5, 0],
+        range: [-50, -10]
+      }
+      
+      - {
+        path: ['System', 'Junction', 'body', 'pn-junction', 'points', 5, 1],
+        range: [-32, 32]
+      }
