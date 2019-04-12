@@ -320,6 +320,15 @@ class Generator:
                     if np.random.uniform() < ga_params['random-step']['fraction']:
                         val = getFromDict(old_config, gene['path'])
                         new_val = val + ga_params['random-step']['max-update-rate'] * np.random.uniform()
+
+                        # check to make sure we are in the range, if not, wrap the value 
+                        if new_val < gene['range'][0]:
+                            new_val += (gene['range'][1] - gene['range'][0])
+                        elif new_val > gene['range'][1]:
+                            new_val -= (gene['range'][1] - gene['range'][0])
+                        else:
+                            # we're within the defined range
+                            pass
                         setInDict(new_config, gene['path'], new_val)
                         new_config, clean_generation = self.checkAndUpdate(new_config, gene, val, new_val)
                     
