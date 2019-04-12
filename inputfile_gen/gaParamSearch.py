@@ -3,8 +3,9 @@
 import yaml
 import os
 import numpy as np
+import sys
 
-config = yaml.load(open('../input.yaml', 'r'))
+config = yaml.load(open(sys.argv[1], 'r'))
 
 os.mkdir('with_ann')
 os.mkdir('without_ann')
