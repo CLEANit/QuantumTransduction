@@ -23,11 +23,11 @@ logger = verboselogs.VerboseLogger('qmt::autoecoder ')
 
 
 def convertToImages(structures):
+    ims = []
     for s in structures:
         im = s.getBinaryRepresentation()
-        print (im.shape)
-        plt.imshow(im)
-        plt.show()
+        ims.append(im)
+    return np.array(ims)
 
 def writeAdjacencyMatrixAndFeatures(structures):
     Hs = []
@@ -64,9 +64,9 @@ def main():
     logger.success('Structures generated/loaded. Elapsed time: %s' % (short_timer.stop()))
 
 
-    writeAdjacencyMatrixAndFeatures(structures)
-
-
+    # writeAdjacencyMatrixAndFeatures(structures)
+    ims = convertToImages(structures)
+    np.save('structures.npy', ims)
 
     # logger.info('Serializing structures.')
     # short_timer.start()
