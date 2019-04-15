@@ -148,7 +148,7 @@ class Generator:
                     
             new_parser.updateConfig(new_config)
 
-            return new_parser
+            return Structure(new_parser)
         else:
             clean_generation = False
 
