@@ -30,4 +30,4 @@ for cf in x:
 		config['GA']['crossing-fraction'] = cf
 		config['GA']['random-step']['fraction'] = rsf
 		os.mkdir('with_ann/cross_fraction_' + str(cf) + '_random_step_fraction_' + str(rsf))
-		yaml.dump(config, open('without_ann/cross_fraction_' + str(cf) + '_random_step_fraction_' + str(rsf) + '/input.yaml', 'w'))
+		yaml.dump(config, open('with_ann/cross_fraction_' + str(cf) + '_random_step_fraction_' + str(rsf) + '/input.yaml', 'w'))
