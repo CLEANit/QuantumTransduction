@@ -285,7 +285,7 @@ class Generator:
                 for layer in range(len(ann_params['neurons']) + 1):
                     total_weights = new_parser.ann.coefs_[layer].shape[0] * new_parser.ann.coefs_[layer].shape[1]
                     indices_to_update = np.vstack((np.random.randint(0, new_parser.ann.coefs_[layer].shape[0], size=int(total_weights * ga_params['random-step']['fraction'])), np.random.randint(0, new_parser.ann.coefs_[layer].shape[1], size=int(total_weights * ga_params['random-step']['fraction'])))).T
-                    new_parser.ann.coefs_[layer][indices_to_update[:,0], indices_to_update[:,1]] += ga_params['random-step']['max-update-rate'] * np.random.uniform(size=indices_to_update.shape)
+                    new_parser.ann.coefs_[layer][indices_to_update[:,0], indices_to_update[:,1]] += ga_params['random-step']['max-update-rate'] * np.random.uniform(size=indices_to_update.shape[0])
 
                 outputs = new_parser.ann.predict(input_vec)[0]
             

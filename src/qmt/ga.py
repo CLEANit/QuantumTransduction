@@ -138,7 +138,7 @@ class GA:
     
         """
         self.phase_space = open('output/phase_space_gen_' + str(self.generationNumber() - 1) + '.dat', 'w')
-        self.phase_space.write('# Generation number: %i\n' % self.generationNumber() - 1)
+        self.phase_space.write('# Generation number: %i\n' % (self.generationNumber() - 1))
         for i, s in enumerate(structures):
             c = s.getChromosome()
             for val in c:
