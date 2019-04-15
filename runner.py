@@ -86,15 +86,15 @@ def main():
 
         # plot the systems and save image to disk
         for i, s in enumerate(structures):
-            s.visualizeSystem(args={'file': 'output/gen_%i_struct_%i.png' % (ga.generationNumber(), i)})
+            s.visualizeSystem(args={'file': 'output/gen_%03i_struct_%03i.png' % (ga.generationNumber(), i)})
 
         # calculate currents and write them out to disk
         currents_0_1 = pool.map(getConductances, structures, [0] * len(structures), [1] * len(structures))
         currents_0_2 = pool.map(getConductances, structures, [0] * len(structures), [2] * len(structures))
 
-        ga.io.writer('output/currents_gen_' + str(ga.generationNumber()) + '.dat', '# Currents (lead1-k\', lead1-k, lead2-k\', lead2-k)\n', header=True)
+        ga.io.writer('output/currents_gen_' + str(ga.generationNumber()).zfill(3) + '.dat', '# Currents (lead1-k\', lead1-k, lead2-k\', lead2-k)\n', header=True)
         for cs1, cs2 in zip(currents_0_1, currents_0_2):
-            ga.io.writer('output/currents_gen_' + str(ga.generationNumber()) + '.dat', cs1 + cs2)
+            ga.io.writer('output/currents_gen_' + str(ga.generationNumber()).zfill(3) + '.dat', cs1 + cs2)
 
         # calculate the objective function
         ga.calculate((currents_0_1, currents_0_2))

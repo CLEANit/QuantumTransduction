@@ -137,20 +137,21 @@ class GA:
         structures : The structures that contain the information necessary to write out to the file.
     
         """
-        self.phase_space = open('output/phase_space_gen_' + str(self.generationNumber() - 1) + '.dat', 'w')
+        self.phase_space = open('output/phase_space_gen_' + str(self.generationNumber() - 1).zfill(3) + '.dat', 'w')
         self.phase_space.write('# Generation number: %i\n' % (self.generationNumber() - 1))
         for i, s in enumerate(structures):
-            c = s.getChromosome()
-            for val in c:
-                if type(val) == list:
-                    self.phase_space.write('%1.20e\t' % (np.mean(val)))
-                elif type(val) == float:
-                    self.phase_space.write('%1.20e\t' % (val))
+            # c = s.getChromosome()
+            # for val in c:
+            #     if type(val) == list:
+            #         self.phase_space.write('%1.20e\t' % (np.mean(val)))
+            #     elif type(val) == float:
+            #         self.phase_space.write('%1.20e\t' % (val))
             for elem in self.current_vectors[i]:
                 self.phase_space.write('%1.20e\t' % elem)
             self.phase_space.write('%1.20e\n' % (self.current_objectives[i]))
         self.phase_space.write('\n')
         self.phase_space.flush()
+        self.phase_space.close()
 
     def calculate(self, args):
         """

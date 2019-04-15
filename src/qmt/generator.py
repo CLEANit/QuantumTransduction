@@ -25,6 +25,7 @@ class Generator:
     def __init__(self, parser):
         self.parser = parser
         self.known_genes = ['bodyLength', 'bodyWidth', 'channelWidth', 'channelShift', 'magneticField']
+        self.n_generated = 0
 
     def checkAndUpdate(self, new_config, gene, val, new_val):
         # if we modify the body, we must update the channels
@@ -148,7 +149,11 @@ class Generator:
                     
             new_parser.updateConfig(new_config)
 
-            return Structure(new_parser)
+            identifier = self.n_generated
+            history = [[self.n_generated]]
+            s = Structure(new_parser, identifier, history)
+            self.n_generated += 1
+            return s
         else:
             clean_generation = False
 
@@ -164,7 +169,11 @@ class Generator:
                     
             new_parser.updateConfig(new_config)
 
-            return new_parser
+            identifier = self.n_generated
+            history = [[self.n_generated]]
+            s = Structure(new_parser, identifier, history)
+            self.n_generated += 1
+            return s
 
     def crossOver(self, pair_of_structures, seed=None):
         """
@@ -216,8 +225,16 @@ class Generator:
                     new_config, clean_generation = self.checkAndUpdate(new_config, gene, val, new_val)
                     
             new_parser.updateConfig(new_config)
-                                
-            return Structure(new_parser)
+            
+            identifier = self.n_generated
+            history = []
+            for h1, h2 in zip(structure1.history, structure2.history):
+                history.append([h1, h2])
+            history.append([structure1.identifier, structure2.identifier])
+            s = Structure(new_parser, identifier, history)
+            self.n_generated += 1
+
+            return s
 
         else:
             structure1, structure2 = pair_of_structures
@@ -244,7 +261,15 @@ class Generator:
                     
             new_parser.updateConfig(new_config)
                                 
-            return Structure(new_parser)
+            identifier = self.n_generated
+            history = []
+            for h1, h2 in zip(structure1.history, structure2.history):
+                history.append([h1, h2])
+            history.append([structure1.identifier, structure2.identifier])
+            s = Structure(new_parser, identifier, history)
+            self.n_generated += 1
+
+            return s
 
 
 
@@ -296,8 +321,14 @@ class Generator:
                     new_config, clean_generation = self.checkAndUpdate(new_config, gene, val, new_val)
                     
             new_parser.updateConfig(new_config)
-                                
-            return Structure(new_parser)
+            
+            identifier = self.n_generated
+            history = copy.copy(structure.history)
+            history.append([structure.identifier])
+            s = Structure(new_parser, identifier, history)
+            self.n_generated += 1
+
+            return s
         else:
             ga_params = self.parser.getGAParameters()
             if ga_params['random-step']['fraction'] == 0.:
@@ -334,7 +365,13 @@ class Generator:
                     
             new_parser.updateConfig(new_config)
                                 
-            return Structure(new_parser)
+            identifier = self.n_generated
+            history = copy.copy(structure.history)
+            history.append([structure.identifier])
+            s = Structure(new_parser, identifier, history)
+            self.n_generated += 1
+
+            return s
 
     def mutateAllWeights(self, structure, seed=None):
         """

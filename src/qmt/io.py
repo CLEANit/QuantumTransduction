@@ -37,6 +37,7 @@ class IO:
             for elem in data:
                 self.files[filename].write('%1.20e\t' % (elem))
         self.files[filename].write('\n')
+        
         self.files[filename].flush()
 
     def __del__(self):
