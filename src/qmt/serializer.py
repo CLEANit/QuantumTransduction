@@ -3,7 +3,7 @@
 import dill
 import subprocess
 import coloredlogs, verboselogs
-
+import sys
 
 coloredlogs.install(level='INFO')
 logger = verboselogs.VerboseLogger('qmt:: serializer')
@@ -28,6 +28,8 @@ class Serializer:
         """
         with open(self.fname, 'wb') as f:
             dill.dump(ga, f)
+        sys.stdout.flush()
+
 
     def deserialize(self):
         """
@@ -49,3 +51,5 @@ class Serializer:
                 return ga
         except:
             return None
+    
+

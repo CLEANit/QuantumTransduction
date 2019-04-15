@@ -81,7 +81,7 @@ GA:
   
   # if the yaml config has changed, but you still want to continue
   # then set to true
-  ignore-restart-warning: false
+  ignore-restart-warning: true
   # if ann is true, we use these parameters
   ann-params: {
     # parameters for constructing the neural networks
