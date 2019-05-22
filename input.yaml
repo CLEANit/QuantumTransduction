@@ -4,6 +4,9 @@
 
 System:
 
+  # can do: graphene, MoS2, None
+  pre_defined: 'MoS2'
+
   # right now only general
   lattice_type: 'general'
 
@@ -69,9 +72,9 @@ System:
     # - {name: 'rectangle', args: {xcoords: [-8, 8], ycoords: [-8, 8]}}
 
   Leads:
-    - {range: [-16, 16], symmetry: [-1, 1], shift: [-0.75, -0.75], offset: [0, 0], potential: 0.0, hopping: -2.7, reverse: False, direction: [-1, 0]}
-    - {range: [16, 32], symmetry: [1, -1], shift: [-0.75, -0.75], offset: [0, 26], potential: 0.0, hopping: -2.7, reverse: False, direction: [1, 0]}
-    - {range: [-32, -16], symmetry: [1, -1], shift: [-0.75, -0.75], offset: [0, -26], potential: 0.0, hopping: -2.7, reverse: False, direction: [1, 0]}
+    - {range: [-16, 16], symmetry: [-1, 0], shift: [-0.75, -0.75], offset: [0, 0], potential: 0.0, hopping: -2.7, reverse: False, direction: [-1, 0]}
+    - {range: [16, 32], symmetry: [1, 0], shift: [-0.75, -0.75], offset: [0, 26], potential: 0.0, hopping: -2.7, reverse: False, direction: [1, 0]}
+    - {range: [-32, -16], symmetry: [1, 0], shift: [-0.75, -0.75], offset: [0, -26], potential: 0.0, hopping: -2.7, reverse: False, direction: [1, 0]}
 
 # Genetic algorithm
 GA:

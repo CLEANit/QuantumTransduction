@@ -119,3 +119,51 @@ def pointInHull(point, hull, tol=1e-12):
     """
 
     return all([np.dot(eq[:-1], point) + eq[-1] <= tol for eq in hull.equations])
+
+def simTransformX(theta, matrix):
+    rotx = np.array([
+                        [1, 0, 0],
+                        [0, np.cos(theta), -np.sin(theta)],
+                        [0, np.sin(theta), np.cos(theta)]
+                    ])
+    return np.matmul(np.matmul(rotx, matrix), np.matrix(rotx).H)
+
+def simTransformY(theta, matrix):
+    roty = np.array([
+                        [np.cos(theta), 0, -np.sin(theta)],
+                        [0,1,0],
+                        [np.sin(theta),0, np.cos(theta)]
+                    ])
+    return np.matmul(np.matmul(roty, matrix), np.matrix(roty).H)
+
+def simTransformZ(theta, matrix):
+    rotz = np.array([
+                        [np.cos(theta), -np.sin(theta), 0],
+                        [np.sin(theta), np.cos(theta), 0],
+                        [0, 0, 1]
+                    ])
+    return np.matmul(np.matmul(rotz, matrix), np.matrix(rotz).H)
+
+def reflectZ(matrix):
+    refz = np.array([
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, -1]
+    ])
+    return np.matmul(np.matmul(refz, matrix), refz.T)
+
+def reflectY(matrix):
+    refy = np.array([
+        [1, 0, 0],
+        [0, -1, 0],
+        [0, 0, 1]
+    ])
+    return np.matmul(np.matmul(refy, matrix), refy.T)
+
+def reflectX(matrix):
+    refx = np.array([
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, -1]
+    ])
+    return np.matmul(np.matmul(refx, matrix), refx.T)

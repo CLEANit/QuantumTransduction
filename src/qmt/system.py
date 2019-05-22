@@ -8,6 +8,7 @@ from functools import partial
 import cmocean
 from scipy.spatial import ConvexHull
 import matplotlib.pyplot as plt
+import tinyarray as ta
 
 from .helper import *
 import coloredlogs, verboselogs
@@ -141,79 +142,135 @@ class Structure:
         self.finished_calculations = dict()
 
     def build(self):
-        # first construct the lattice
-        lattice_type = self.parser.getLatticeType()
-        lattice_constant =  self.parser.getLatticeConstant()
-        lattice_vectors = self.parser.getLatticeVectors()
-        lattice_basis = self.parser.getLatticeBasis()
-        norbs = self.parser.getNumOrbitals()
 
-        if lattice_type == 'general':
-            self.lattice = kwant.lattice.general(lattice_vectors, lattice_basis, norbs=norbs)
-            if self.spin_dep:
-                self.system_up = kwant.Builder()
-                self.system_down = kwant.Builder()
-            else:
-                self.system = kwant.Builder()
+        if self.parser.config['System']['pre_defined'] == 'MoS2':
 
-        else:
-            logger.error('Sorry, we do not support the lattice type: %s' % (lattice_type))
-            exit(-1)
+            # lattice constant
+            a = 3.19
+            # hopping energy
+            eps_1 = 1.046
+            eps_2 = 2.104
+            t0 = -0.184
+            t1 = 0.401
+            t2 = 0.507
+            t11 = 0.218
+            t12 = 0.338
+            t22 = 0.057
+            rt3 = np.sqrt(3)
 
+            h0 = ta.array([[eps_1,0,0],[0,eps_2,0],[0,0,eps_2]])
 
-        for shape, offset, hopping, potential, direction in zip(self.device['shapes'], self.device['offsets'], self.device['hoppings'], self.device['potentials'], self.device['directions']):
+            h1 = ta.array([[ t0, -t1,   t2],
+                  [ t1, t11, -t12],
+                  [ t2, t12,  t22]])
+
+            h2 = ta.array([[                    t0,     1/2 * t1 + rt3/2 * t2,     rt3/2 * t1 - 1/2 * t2],
+                  [-1/2 * t1 + rt3/2 * t2,     1/4 * t11 + 3/4 * t22, rt3/4 * (t11 - t22) - t12],
+                  [-rt3/2 * t1 - 1/2 * t2, rt3/4 * (t11 - t22) + t12,     3/4 * t11 + 1/4 * t22]])
+
+            h3 = ta.array([[                    t0,    -1/2 * t1 - rt3/2 * t2,     rt3/2 * t1 - 1/2 * t2],
+                  [ 1/2 * t1 - rt3/2 * t2,     1/4 * t11 + 3/4 * t22, rt3/4 * (t22 - t11) + t12],
+                  [-rt3/2 * t1 - 1/2 * t2, rt3/4 * (t22 - t11) - t12,     3/4 * t11 + 1/4 * t22]])
             
-            # if we want to consider spin dependent transport
-            if self.spin_dep:
-                self.system_up[self.lattice.shape(shape, offset)] = partial(onSiteFunction, self, potential, 1/2, self.parser.getPhi(), False)
-                self.system_down[self.lattice.shape(shape, offset)] = partial(onSiteFunction, self, potential, -1/2, self.parser.getPhi(), False)
-                
-                self.neighbors = self.lattice.neighbors()
-                
-                self.system_up[self.neighbors] = partial(hoppingFunction, self, hopping, self.parser.getPhi(), direction)
-                self.system_down[self.neighbors] = partial(hoppingFunction, self, hopping, self.parser.getPhi(), direction)
+            v2 = np.array((a / 2., np.sqrt(3.) * a / 2.0))
+            v1 = np.array((a,0))
+            self.lattice = kwant.lattice.general([v1, v2], [(0, 0)], norbs=1 )
+            lat = self.lattice.sublattices[0]
 
-            else:
-                self.system[self.lattice.shape(shape, offset)] = partial(onSiteFunction, self, potential, 0., self.parser.getPhi(), False)
-                self.neighbors = self.lattice.neighbors()
-                self.system[self.neighbors] = partial(hoppingFunction, self, hopping, self.parser.getPhi(), direction)
+            self.system = kwant.Builder()
 
-        if self.spin_dep:
-            self.system_up.eradicate_dangling()
-            self.system_down.eradicate_dangling()
-        else:
+            for shape, offset, hopping, potential, direction in zip(self.device['shapes'], self.device['offsets'], self.device['hoppings'], self.device['potentials'], self.device['directions']):
+                
+                # if we want to consider spin dependent transport
+                self.system[self.lattice.shape(shape, offset)] = partial(onSiteFunction, self, h0, 0., self.parser.getPhi(), False)
+                self.system[kwant.builder.HoppingKind((1,0), lat, lat)] =  h1
+                self.system[kwant.builder.HoppingKind((0,-1), lat, lat)] = simTransformX(4 * np.pi / 3, h1)
+                self.system[kwant.builder.HoppingKind((1,-1), lat, lat)] = reflectZ(simTransformX(np.pi / 3, h1))
+                
+
             self.system.eradicate_dangling()
 
+
+        elif self.parser.config['System']['pre_defined'] == 'graphene':
+            pass
+
+        elif self.parser.config['System']['pre_defined'] == None:
+
+            # first construct the lattice
+            lattice_type = self.parser.getLatticeType()
+            lattice_constant =  self.parser.getLatticeConstant()
+            lattice_vectors = self.parser.getLatticeVectors()
+            lattice_basis = self.parser.getLatticeBasis()
+            norbs = self.parser.getNumOrbitals()
+
+            if lattice_type == 'general':
+                self.lattice = kwant.lattice.general(lattice_vectors, lattice_basis, norbs=norbs)
+                if self.spin_dep:
+                    self.system_up = kwant.Builder()
+                    self.system_down = kwant.Builder()
+                else:
+                    self.system = kwant.Builder()
+
+            else:
+                logger.error('Sorry, we do not support the lattice type: %s' % (lattice_type))
+                exit(-1)
+
+
+            for shape, offset, hopping, potential, direction in zip(self.device['shapes'], self.device['offsets'], self.device['hoppings'], self.device['potentials'], self.device['directions']):
+                
+                # if we want to consider spin dependent transport
+                if self.spin_dep:
+                    self.system_up[self.lattice.shape(shape, offset)] = partial(onSiteFunction, self, potential, 1/2, self.parser.getPhi(), False)
+                    self.system_down[self.lattice.shape(shape, offset)] = partial(onSiteFunction, self, potential, -1/2, self.parser.getPhi(), False)
+                    
+                    self.neighbors = self.lattice.neighbors()
+                    
+                    self.system_up[self.neighbors] = partial(hoppingFunction, self, hopping, self.parser.getPhi(), direction)
+                    self.system_down[self.neighbors] = partial(hoppingFunction, self, hopping, self.parser.getPhi(), direction)
+
+                else:
+                    self.system[self.lattice.shape(shape, offset)] = partial(onSiteFunction, self, potential, 0., self.parser.getPhi(), False)
+                    self.neighbors = self.lattice.neighbors()
+                    self.system[self.neighbors] = partial(hoppingFunction, self, hopping, self.parser.getPhi(), direction)
+
+            if self.spin_dep:
+                self.system_up.eradicate_dangling()
+                self.system_down.eradicate_dangling()
+            else:
+                self.system.eradicate_dangling()
+
     def attachLeads(self):
-        if self.spin_dep:
-            for l in self.leads:
-                lead_range = l['range']
-                lead_vector = l['symmetry']
-                lead_offset = l['offset']
-                lead_pot = l['potential']
-                lead_hopping = l['hopping']
-                lead_r = l['reverse']
-                lead_shift = l['shift']
-                lead_direction = l['direction']
-                sym = kwant.TranslationalSymmetry(self.lattice.vec(lead_vector))
-                a = orthogVecSlope(self.lattice.vec(lead_vector))
-                lead_up = kwant.Builder(sym)
-                lead_down = kwant.Builder(sym)
-                lead_up[self.lattice.shape(lambda pos: lead_range[0]  <= pos[1] - lead_shift[1] + (pos[0] - lead_shift[0]) * a <= lead_range[1], lead_offset)] = partial(onSiteFunction, self, lead_pot, 1/2, self.parser.getPhi(), True)
-                lead_down[self.lattice.shape(lambda pos: lead_range[0]  <= pos[1] - lead_shift[1] + (pos[0] - lead_shift[0]) * a <= lead_range[1], lead_offset)] = partial(onSiteFunction, self, lead_pot, -1/2, self.parser.getPhi(), True)
-                lead_up[self.neighbors] = partial(hoppingFunction, self, lead_hopping, self.parser.getPhi(), lead_direction)
-                lead_down[self.neighbors] = partial(hoppingFunction, self, lead_hopping, self.parser.getPhi(), lead_direction)            
-                lead_up.eradicate_dangling()
-                lead_down.eradicate_dangling()
 
-                self.system_up.attach_lead(lead_up)
-                self.system_down.attach_lead(lead_down)
+        if self.parser.config['System']['pre_defined'] == 'MoS2':
 
-                if lead_r:
-                    self.system_up.attach_lead(lead_up.reversed())
-                    self.system_down.attach_lead(lead_down.reversed())
+            # lattice constant
+            a = 3.19
+            # hopping energy
+            eps_1 = 1.046
+            eps_2 = 2.104
+            t0 = -0.184
+            t1 = 0.401
+            t2 = 0.507
+            t11 = 0.218
+            t12 = 0.338
+            t22 = 0.057
+            rt3 = np.sqrt(3)
 
-        else:
+            h0 = ta.array([[eps_1,0,0],[0,eps_2,0],[0,0,eps_2]])
+
+            h1 = ta.array([[ t0, -t1,   t2],
+                  [ t1, t11, -t12],
+                  [ t2, t12,  t22]])
+
+            h2 = ta.array([[                    t0,     1/2 * t1 + rt3/2 * t2,     rt3/2 * t1 - 1/2 * t2],
+                  [-1/2 * t1 + rt3/2 * t2,     1/4 * t11 + 3/4 * t22, rt3/4 * (t11 - t22) - t12],
+                  [-rt3/2 * t1 - 1/2 * t2, rt3/4 * (t11 - t22) + t12,     3/4 * t11 + 1/4 * t22]])
+
+            h3 = ta.array([[                    t0,    -1/2 * t1 - rt3/2 * t2,     rt3/2 * t1 - 1/2 * t2],
+                  [ 1/2 * t1 - rt3/2 * t2,     1/4 * t11 + 3/4 * t22, rt3/4 * (t22 - t11) + t12],
+                  [-rt3/2 * t1 - 1/2 * t2, rt3/4 * (t22 - t11) - t12,     3/4 * t11 + 1/4 * t22]])
+            lat = self.lattice.sublattices[0]
+
             for l in self.leads:
                 lead_range = l['range']
                 lead_vector = l['symmetry']
@@ -226,13 +283,65 @@ class Structure:
                 sym = kwant.TranslationalSymmetry(self.lattice.vec(lead_vector))
                 a = orthogVecSlope(self.lattice.vec(lead_vector))
                 lead = kwant.Builder(sym)
-                lead[self.lattice.shape(lambda pos: lead_range[0]  <= pos[1] - lead_shift[1] + (pos[0] - lead_shift[0]) * a <= lead_range[1], lead_offset)] = partial(onSiteFunction, self, lead_pot, 0., self.parser.getPhi(), True)
-                lead[self.neighbors] = partial(hoppingFunction, self, lead_hopping, self.parser.getPhi(), lead_direction)
+                lead[self.lattice.shape(lambda pos: lead_range[0]  <= pos[1] - lead_shift[1] + (pos[0] - lead_shift[0]) * a <= lead_range[1], lead_offset)] = partial(onSiteFunction, self, h0, 0., self.parser.getPhi(), False)
+                lead[kwant.builder.HoppingKind((1,0), lat, lat)] =  h1
+                lead[kwant.builder.HoppingKind((0,-1), lat, lat)] = simTransformX(4 * np.pi / 3, h1)
+                lead[kwant.builder.HoppingKind((1,-1), lat, lat)] = reflectZ(simTransformX(np.pi / 3, h1))
+
                 lead.eradicate_dangling()
                 self.system.attach_lead(lead)
 
                 if lead_r:
-                    self.system.attach_lead(lead.reversed())
+                    self.system.attach_lead(lead.reversed())        
+        else:
+            if self.spin_dep:
+                for l in self.leads:
+                    lead_range = l['range']
+                    lead_vector = l['symmetry']
+                    lead_offset = l['offset']
+                    lead_pot = l['potential']
+                    lead_hopping = l['hopping']
+                    lead_r = l['reverse']
+                    lead_shift = l['shift']
+                    lead_direction = l['direction']
+                    sym = kwant.TranslationalSymmetry(self.lattice.vec(lead_vector))
+                    a = orthogVecSlope(self.lattice.vec(lead_vector))
+                    lead_up = kwant.Builder(sym)
+                    lead_down = kwant.Builder(sym)
+                    lead_up[self.lattice.shape(lambda pos: lead_range[0]  <= pos[1] - lead_shift[1] + (pos[0] - lead_shift[0]) * a <= lead_range[1], lead_offset)] = partial(onSiteFunction, self, lead_pot, 1/2, self.parser.getPhi(), True)
+                    lead_down[self.lattice.shape(lambda pos: lead_range[0]  <= pos[1] - lead_shift[1] + (pos[0] - lead_shift[0]) * a <= lead_range[1], lead_offset)] = partial(onSiteFunction, self, lead_pot, -1/2, self.parser.getPhi(), True)
+                    lead_up[self.neighbors] = partial(hoppingFunction, self, lead_hopping, self.parser.getPhi(), lead_direction)
+                    lead_down[self.neighbors] = partial(hoppingFunction, self, lead_hopping, self.parser.getPhi(), lead_direction)            
+                    lead_up.eradicate_dangling()
+                    lead_down.eradicate_dangling()
+
+                    self.system_up.attach_lead(lead_up)
+                    self.system_down.attach_lead(lead_down)
+
+                    if lead_r:
+                        self.system_up.attach_lead(lead_up.reversed())
+                        self.system_down.attach_lead(lead_down.reversed())
+
+            else:
+                for l in self.leads:
+                    lead_range = l['range']
+                    lead_vector = l['symmetry']
+                    lead_offset = l['offset']
+                    lead_pot = l['potential']
+                    lead_hopping = l['hopping']
+                    lead_r = l['reverse']
+                    lead_shift = l['shift']
+                    lead_direction = l['direction']
+                    sym = kwant.TranslationalSymmetry(self.lattice.vec(lead_vector))
+                    a = orthogVecSlope(self.lattice.vec(lead_vector))
+                    lead = kwant.Builder(sym)
+                    lead[self.lattice.shape(lambda pos: lead_range[0]  <= pos[1] - lead_shift[1] + (pos[0] - lead_shift[0]) * a <= lead_range[1], lead_offset)] = partial(onSiteFunction, self, lead_pot, 0., self.parser.getPhi(), True)
+                    lead[self.neighbors] = partial(hoppingFunction, self, lead_hopping, self.parser.getPhi(), lead_direction)
+                    lead.eradicate_dangling()
+                    self.system.attach_lead(lead)
+
+                    if lead_r:
+                        self.system.attach_lead(lead.reversed())
 
 
     def applyMask(self, mask, system):
