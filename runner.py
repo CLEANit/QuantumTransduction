@@ -86,7 +86,7 @@ def main():
 
         # plot the systems and save image to disk
         for i, s in enumerate(structures):
-            s.visualizeSystem(args={'file': 'output/gen_%03i_struct_%03i.png' % (ga.generationNumber(), i)})
+            s.visualizeSystem(args={'dpi': 600, 'file': 'output/gen_%03i_struct_%03i.png' % (ga.generationNumber(), i)})
 
         # calculate currents and write them out to disk
         currents_0_1 = pool.map(getConductances, structures, [0] * len(structures), [1] * len(structures))

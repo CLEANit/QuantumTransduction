@@ -446,9 +446,9 @@ class Structure:
                 def siteColours(site):
                     # print(list(self.pre_system.sites())[site])
                     if pointInHull(site.pos, self.hull):
-                        return 'r'
+                        return cmocean.cm.deep(0.9)
                     else:
-                        return 'b'
+                        return cmocean.cm.deep(0.1)
                 return kwant.plot(self.pre_system, site_lw=0.1, lead_site_lw=0, colorbar=False, site_color=siteColours, show=True, **args)
             else:
                 return kwant.plot(self.pre_system, site_lw=0.1, colorbar=False, show=False, **args)
