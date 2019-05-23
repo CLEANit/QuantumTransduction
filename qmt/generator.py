@@ -150,7 +150,7 @@ class Generator:
             new_parser.updateConfig(new_config)
 
             identifier = self.n_generated
-            history = [[self.n_generated]]
+            history = [self.n_generated]
             s = Structure(new_parser, identifier, history)
             self.n_generated += 1
             return s
@@ -170,8 +170,7 @@ class Generator:
             new_parser.updateConfig(new_config)
 
             identifier = self.n_generated
-            history = [[self.n_generated]]
-            s = Structure(new_parser, identifier, history)
+            s = Structure(new_parser, identifier, [])
             self.n_generated += 1
             return s
 
@@ -227,11 +226,11 @@ class Generator:
             new_parser.updateConfig(new_config)
             
             identifier = self.n_generated
-            history = []
-            for h1, h2 in zip(structure1.history, structure2.history):
-                history.append([h1, h2])
-            history.append([structure1.identifier, structure2.identifier])
-            s = Structure(new_parser, identifier, history)
+            # history = []
+            # for h1, h2 in zip(structure1.history, structure2.history):
+            #     history.append([h1, h2])
+            # history.append([structure1.identifier, structure2.identifier])
+            s = Structure(new_parser, identifier, [structure1.identifier, structure2.identifier])
             self.n_generated += 1
 
             return s
@@ -262,11 +261,11 @@ class Generator:
             new_parser.updateConfig(new_config)
                                 
             identifier = self.n_generated
-            history = []
-            for h1, h2 in zip(structure1.history, structure2.history):
-                history.append([h1, h2])
-            history.append([structure1.identifier, structure2.identifier])
-            s = Structure(new_parser, identifier, history)
+            # history = []
+            # for h1, h2 in zip(structure1.history, structure2.history):
+            #     history.append([h1, h2])
+            # history.append([structure1.identifier, structure2.identifier])
+            s = Structure(new_parser, identifier, [structure1.identifier, structure2.identifier])
             self.n_generated += 1
 
             return s
@@ -322,11 +321,11 @@ class Generator:
                     
             new_parser.updateConfig(new_config)
             
-            identifier = self.n_generated
-            history = copy.copy(structure.history)
-            history.append([structure.identifier])
-            s = Structure(new_parser, identifier, history)
-            self.n_generated += 1
+            # identifier = self.n_generated
+            # # history = copy.copy(structure.history)
+            # # history.append(structure.identifier)
+            s = Structure(new_parser, structure.identifier, structure.parents)
+            # self.n_generated += 1
 
             return s
         else:
@@ -365,11 +364,11 @@ class Generator:
                     
             new_parser.updateConfig(new_config)
                                 
-            identifier = self.n_generated
-            history = copy.copy(structure.history)
-            history.append([structure.identifier])
-            s = Structure(new_parser, identifier, history)
-            self.n_generated += 1
+            # identifier = self.n_generated
+            # # history = copy.copy(structure.history)
+            # # history.append(structure.identifier)
+            s = Structure(new_parser, structure.identifier, structure.parents)
+            # self.n_generated += 1
 
             return s
 
@@ -452,10 +451,10 @@ class Generator:
         A list of new structure classes with genes crossed over from the pairs_of_structures.
 
         """
-        if pool is None:
-            return [self.crossOver(s) for s in pairs_of_structures]
-        else:
-            return pool.map(self.crossOver, pairs_of_structures, seeds)
+        # if pool is None:
+        return [self.crossOver(s) for s in pairs_of_structures]
+        # else:
+        #     return pool.map(self.crossOver, pairs_of_structures, seeds)
 
     def generateAll(self):
         """

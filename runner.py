@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 
 
-from src.qmt.system import Structure
-from src.qmt.generator import Generator
-from src.qmt.ga import GA
-from src.qmt.serializer import Serializer
-from src.qmt.parser import Parser
-from src.qmt.timer import Timer
-from src.qmt.parser import Parser
+from qmt.system import Structure
+from qmt.generator import Generator
+from qmt.ga import GA
+from qmt.serializer import Serializer
+from qmt.parser import Parser
+from qmt.timer import Timer
+from qmt.parser import Parser
 
 import numpy as np
+import os
 
 import multiprocessing
 from pathos.multiprocessing import ProcessingPool as Pool
@@ -17,6 +18,8 @@ from pathos.multiprocessing import ProcessingPool as Pool
 import coloredlogs, verboselogs
 import copy
 import matplotlib.pyplot as plt
+import pickle
+
 # create logger
 coloredlogs.install(level='INFO')
 
@@ -50,10 +53,9 @@ def main():
     total_timer.start()
     pool = Pool()
 
-    logger.success(' --- Welcome to the Kwantum transmission device optimizer --- ')
+    logger.success(' --- Welcome to the Kwantum Transmission Device Optimizer --- ')
 
     parser = Parser()
-    g = Generator(parser)
     serializer = Serializer(parser)
     ga = serializer.deserialize()
     if ga is not None:
@@ -63,11 +65,12 @@ def main():
         logger.info('GA starting from scratch.')
         logger.info('Generating initial structures...')
         short_timer.start()
-        structures = g.generateAll()
 
         logger.success('Initial structures generated. Elapsed time: %s' % (short_timer.stop()))
         
-        ga = GA(parser, structures, objective_function=objectiveFunction)
+        ga = GA(parser, objective_function=objectiveFunction)
+        structures = ga.generator.generateAll()
+        ga.setNextGeneration(structures)
 
     #########################
     # main loop here
@@ -85,8 +88,14 @@ def main():
         structures = ga.getCurrentGeneration()
 
         # plot the systems and save image to disk
+
+        try:
+            os.mkdir('output/gen_' + str(ga.generationNumber()).zfill(3))
+        except FileExistsError:
+            pass
+
         for i, s in enumerate(structures):
-            s.visualizeSystem(args={'dpi': 600, 'file': 'output/gen_%03i_struct_%03i.png' % (ga.generationNumber(), i)})
+            s.visualizeSystem(args={'dpi': 600, 'file': 'output/' + 'gen_' + str(ga.generationNumber()).zfill(3) + '/gen_%03i_struct_%03i.png' % (ga.generationNumber(), i)})
 
         # calculate currents and write them out to disk
         currents_0_1 = pool.map(getConductances, structures, [0] * len(structures), [1] * len(structures))
@@ -112,20 +121,23 @@ def main():
 
         pairs = []
         for i, s1 in enumerate(structures):
-            for j, s2 in enumerate(structures):
+            for j in range(parser.getGAParameters()['n_children']):
                 if i != j:
-                    pairs.append((s1, s2))
+                    pairs.append((s1, structures[j]))
 
-        if parser.getGAParameters()['crossing-fraction'] > 0.:
-            structures = g.crossOverAll(pairs, pool=pool, seeds=np.random.random_integers(0, 2**32 - 1, len(structures)))
-        # mutate the current generation
-        structures = g.mutateAll(structures, pool=pool, seeds=np.random.random_integers(0, 2**32 - 1, len(structures)))
+        pairs = pairs[:len(structures)]
         
+        if parser.getGAParameters()['crossing-fraction'] > 0.:
+            structures = ga.generator.crossOverAll(pairs, pool=pool, seeds=np.random.randint(0, 2**32 - 1, len(structures)))
+        # mutate the current generation
+        structures = ga.generator.mutateAll(structures, pool=pool, seeds=np.random.randint(0, 2**32 - 1, len(structures)))
+
         ga.setNextGeneration(structures)
 
         # print how long it took and serialize the current GA
         logger.info('Calculations finished. Elapsed time: %s' % (short_timer.stop()))
         serializer.serialize(ga)
+        pickle.dump(ga.history, open('output/history.pkl', 'w'))
         logger.success('Generation %i completed. Elapsed time: %s' % (ga.generationNumber(), short_timer.stop()))
 
     logger.success(' --- Elapsed time: %s ---' % (total_timer.stop()))

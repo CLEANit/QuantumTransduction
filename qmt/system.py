@@ -102,7 +102,7 @@ class Structure:
     def __init__(   self,
                     parser,
                     identifier,
-                    history
+                    parents
                  ):
         # define the class parameters
         self.parser = parser
@@ -112,7 +112,7 @@ class Structure:
         self.body = self.device['body']
         self.spin_dep = parser.spinDependent()
         self.identifier = identifier
-        self.history = history
+        self.parents = parents
 
         self.build()
 

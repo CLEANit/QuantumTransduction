@@ -5,6 +5,7 @@ import subprocess
 import copy
 import os
 from scipy.interpolate import interp1d, griddata
+from .generator import Generator
 
 from .io import IO
 from .helper import isParetoEfficient
@@ -18,10 +19,9 @@ class GA:
     """
     Genetic algorithm class. This class holds the structures, creates child configurations based on parents.
     """
-    def __init__(self, parser, structures, objective_function=None, fresh=False):
+    def __init__(self, parser, objective_function=None, fresh=False):
         self.parser = parser
-        self.initial_generation = structures
-        self.current_structures = structures
+        self.current_structures = None
         self.past_generation = []
         self.generation_number = 0
         self.objective_function = objective_function
@@ -30,6 +30,8 @@ class GA:
         self.past_vectors = None
         self.current_objectives = []
         self.current_vectors = None
+        self.generator = Generator(parser)
+        self.history = {}
 
         subprocess.run(['mkdir -p output'], shell=True)
 
@@ -38,7 +40,9 @@ class GA:
         Print out the average and standard deviation of the number of orbitals we are currently investigating.
         """
         n_sites = []
+        self.history[self.generation_number] = {}
         for s in self.current_structures:
+            self.history[self.generation_number][s.identifier] = s.parents
             n_sites.append(s.getNSites())
         logger.info('Average number of orbitals: %0.2f +/- %0.2f' % (np.mean(n_sites), np.std(n_sites)))
 
@@ -62,10 +66,10 @@ class GA:
         A list of structures ordered by their distances to the pareto front.
         
         """
-        if self.past_vectors is None:
-            data = self.current_vectors
-        else:
-            data = np.vstack((self.past_vectors, self.current_vectors))
+        # if self.past_vectors is None:
+        data = self.current_vectors
+        # else:
+        #     data = np.vstack((self.past_vectors, self.current_vectors))
 
         # if we're working in 2D
         if data.shape[1] == 2:
@@ -76,7 +80,7 @@ class GA:
             xd = (x[:,None] - data[:,0])**2
             r = np.sqrt(xd + yd)
             objectives = np.min(r, axis=0)
-            all_structs = self.past_generation + self.current_structures
+            all_structs = self.current_structures
             self.current_objectives = np.sort(objectives)[:self.parser.getNStructures()]
             return [all_structs[elem] for elem in np.argsort(objectives)[:self.parser.getNStructures()]]
 
@@ -93,7 +97,7 @@ class GA:
             interp_wout_nan = interp[~np.isnan(interp)]
             zd = np.min((interp_wout_nan.flatten()[:,None] - data[:,2])**2, axis=0)
             objectives = np.sqrt(xd + yd + zd)
-            all_structs = self.past_generation + self.current_structures
+            all_structs = self.current_structures
             self.current_objectives = np.sort(objectives)[:self.parser.getNStructures()]
             return [all_structs[elem] for elem in np.argsort(objectives)[:self.parser.getNStructures()]]
         else:

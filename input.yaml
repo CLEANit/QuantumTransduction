@@ -96,6 +96,7 @@ GA:
 
   # randomly cross
   crossing-fraction: 0.2
+  n_children: 8
   
   # tweak a fraction of the weights after mixing
   random-step: {
