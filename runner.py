@@ -137,7 +137,7 @@ def main():
         # print how long it took and serialize the current GA
         logger.info('Calculations finished. Elapsed time: %s' % (short_timer.stop()))
         serializer.serialize(ga)
-        pickle.dump(ga.history, open('output/history.pkl', 'w'))
+        pickle.dump(ga.history, open('output/history.pkl', 'wb'))
         logger.success('Generation %i completed. Elapsed time: %s' % (ga.generationNumber(), short_timer.stop()))
 
     logger.success(' --- Elapsed time: %s ---' % (total_timer.stop()))
