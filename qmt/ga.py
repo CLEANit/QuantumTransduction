@@ -31,7 +31,7 @@ class GA:
         self.current_objectives = []
         self.current_vectors = None
         self.generator = Generator(parser)
-        self.history = {}
+        self.history = []
 
         subprocess.run(['mkdir -p output'], shell=True)
 
@@ -40,10 +40,13 @@ class GA:
         Print out the average and standard deviation of the number of orbitals we are currently investigating.
         """
         n_sites = []
-        self.history[self.generation_number] = {}
+        local_hist = {}
         for s in self.current_structures:
-            self.history[self.generation_number][s.identifier] = s.parents
+            local_hist[s.identifier] = s.parents
             n_sites.append(s.getNSites())
+        
+        self.history.append(local_hist)
+
         logger.info('Average number of orbitals: %0.2f +/- %0.2f' % (np.mean(n_sites), np.std(n_sites)))
 
     def getCurrentGeneration(self):
