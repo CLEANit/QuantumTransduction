@@ -58,14 +58,14 @@ def onSiteFunction(self, pot, spin, phi, lead, site):
     The hopping parameter with a magnetic field being applied.
     """
     pnj_config = self.parser.getPNJunction()
-    on_site = 0.
+    pot = np.array(pot)
     if pnj_config['turn_on'] == True and lead == False:
         # pn-junction stuff
         ###################################################
         if pointInHull(site.pos, self.hull):
-            on_site += pnj_config['p-potential']
+            np.fill_diagonal(pot , pot.diagonal() + pnj_config['p-potential'])
         else:
-            on_site += pnj_config['n-potential']
+            np.fill_diagonal(pot , pot.diagonal() + pnj_config['n-potential'])
         ###################################################
 
 
@@ -77,10 +77,10 @@ def onSiteFunction(self, pot, spin, phi, lead, site):
         B = phi / (lattice_vectors[0][0] * lattice_vectors[1][1] - lattice_vectors[0][1] * lattice_vectors[1][0])
         B_in_T = 6.62607004e-34 * B * 10e20 / 1.60217662e-19
         B_in_G = B_in_T * 1e4
-        on_site += pot + 2.0 * 0.579e-8 * spin * B_in_G
+        np.fill_diagonal(pot, pot.diagonal() + 2.0 * 0.579e-8 * spin * B_in_G)
         ###################################################
 
-        return on_site
+        return ta.array(pot)
     
     else:
         lattice_vectors = self.parser.getLatticeVectors()
@@ -88,7 +88,9 @@ def onSiteFunction(self, pot, spin, phi, lead, site):
         B = phi / (lattice_vectors[0][0] * lattice_vectors[1][1] - lattice_vectors[0][1] * lattice_vectors[1][0])
         B_in_T = 6.62607004e-34 * B * 10e20 / 1.60217662e-19
         B_in_G = B_in_T * 1e4
-        return pot + 2.0 * 0.579e-8 * spin * B_in_G
+        np.fill_diagonal(pot, pot.diagonal() + 2.0 * 0.579e-8 * spin * B_in_G)
+
+        return pot 
 
 class Structure:
     """
@@ -113,6 +115,7 @@ class Structure:
         self.spin_dep = parser.spinDependent()
         self.identifier = identifier
         self.parents = parents
+        self.og_parents = og_parents
 
         self.build()
 
@@ -158,7 +161,7 @@ class Structure:
             t22 = 0.057
             rt3 = np.sqrt(3)
 
-            h0 = ta.array([[eps_1,0,0],[0,eps_2,0],[0,0,eps_2]])
+            h0 = np.array([[eps_1,0,0],[0,eps_2,0],[0,0,eps_2]])
 
             h1 = ta.array([[ t0, -t1,   t2],
                   [ t1, t11, -t12],
@@ -256,7 +259,7 @@ class Structure:
             t22 = 0.057
             rt3 = np.sqrt(3)
 
-            h0 = ta.array([[eps_1,0,0],[0,eps_2,0],[0,0,eps_2]])
+            h0 = np.array([[eps_1,0,0],[0,eps_2,0],[0,0,eps_2]])
 
             h1 = ta.array([[ t0, -t1,   t2],
                   [ t1, t11, -t12],
