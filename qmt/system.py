@@ -115,7 +115,6 @@ class Structure:
         self.spin_dep = parser.spinDependent()
         self.identifier = identifier
         self.parents = parents
-        self.og_parents = og_parents
 
         self.build()
 
