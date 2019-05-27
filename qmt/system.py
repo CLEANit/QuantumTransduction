@@ -58,7 +58,12 @@ def onSiteFunction(self, pot, spin, phi, lead, site):
     The hopping parameter with a magnetic field being applied.
     """
     pnj_config = self.parser.getPNJunction()
-    pot = np.array(pot)
+    
+    if type(pot) == float:
+        pot = np.array([[pot]])
+    else:
+        pot = np.array(pot)
+
     if pnj_config['turn_on'] == True and lead == False:
         # pn-junction stuff
         ###################################################
