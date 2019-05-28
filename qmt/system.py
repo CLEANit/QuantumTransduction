@@ -822,9 +822,5 @@ class Structure:
             return len(list(self.pre_system.sites()))
 
     def getChromosome(self):
-        chromosome = []
-        for gene in self.parser.getGenes():
-            val = getFromDict(self.parser.getConfig(), gene['path'])
-            chromosome.append(val)
-        return chromosome
+        return self.parser.getPNJunction()['points']
 

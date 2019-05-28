@@ -63,4 +63,5 @@ axes[1].set_ylabel('Current [$e \pi^{-1} \hbar^{-1}$]')
 
 axes[1].legend()
 plt.tight_layout()
-plt.show()
+plt.savefig('purity_current.pdf')
+# plt.show()

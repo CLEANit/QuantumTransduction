@@ -4,8 +4,8 @@
 
 System:
 
-  # can do: graphene, MoS2, None
-  pre_defined: 'MoS2'
+  # can do: graphene, MoS2, null
+  pre_defined: null
 
   # right now only general
   lattice_type: 'general'

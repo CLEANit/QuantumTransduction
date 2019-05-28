@@ -145,20 +145,32 @@ class GA:
     
         """
         self.phase_space = open('output/phase_space_gen_' + str(self.generationNumber() - 1).zfill(3) + '.dat', 'w')
+        self.chromosomes = open('output/chromosomes_gen_' + str(self.generationNumber() - 1).zfill(3) + '.dat', 'w')
         self.phase_space.write('# Generation number: %i\n' % (self.generationNumber() - 1))
+        self.chromosomes.write('# Generation number: %i\n' % (self.generationNumber() - 1))
         for i, s in enumerate(structures):
-            # c = s.getChromosome()
-            # for val in c:
-            #     if type(val) == list:
-            #         self.phase_space.write('%1.20e\t' % (np.mean(val)))
-            #     elif type(val) == float:
-            #         self.phase_space.write('%1.20e\t' % (val))
+            
+            c = s.getChromosome()
+            
+            for val in c:
+                if type(val) == list:
+                    for v in val:
+                        self.chromosomes.write('%1.20e\t' % (v))
+                elif type(val) == float:
+                    self.chromosomes.write('%1.20e\t' % (val))
+            self.chromosomes.write('\n')
+            
             for elem in self.current_vectors[i]:
                 self.phase_space.write('%1.20e\t' % elem)
             self.phase_space.write('%1.20e\n' % (self.current_objectives[i]))
+        
         self.phase_space.write('\n')
         self.phase_space.flush()
         self.phase_space.close()
+
+        self.chromosomes.write('\n')
+        self.chromosomes.flush()
+        self.chromosomes.close()
 
     def calculate(self, args):
         """
