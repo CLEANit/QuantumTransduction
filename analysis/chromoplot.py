@@ -5,7 +5,7 @@ import matplotlib.gridspec as gridspec
 import numpy as np
 import cmocean.cm as cm
 import subprocess as sbp
-
+import os
 
 out = [elem.decode('utf-8') for elem in sbp.check_output('find . -name chromosomes*', shell=True).split()]
 
@@ -47,26 +47,30 @@ all_scatter_data_stds = np.array(all_scatter_data_stds)
 
 x = np.arange(len(ds))
 
-fig = plt.figure(figsize=(20,10))
-outer = gridspec.GridSpec(1, 2)
-inner = gridspec.GridSpecFromSubplotSpec(ds[0].shape[1], 1, subplot_spec=outer[0])
+try:
+    os.mkdir('chromsomePlots')
+except FileExistsError:
+    pass
 
-for i in range(all_avgs.shape[0]):
-    ax = plt.Subplot(fig, inner[i])
-    ax.plot(x, all_avgs[i, :])
-    ax.errorbar(x, all_avgs[i, :], fmt='.', yerr=all_stds[i, :])
-    fig.add_subplot(ax)
+for gen in range(len(ds)):
+    fig = plt.figure(figsize=(20,10))
+    outer = gridspec.GridSpec(1, 2)
+    inner = gridspec.GridSpecFromSubplotSpec(ds[0].shape[1], 1, subplot_spec=outer[0])
 
-ax = plt.Subplot(fig, outer[1])
-for i, (sav, sd) in enumerate(zip(all_scatter_data_avgs, all_scatter_data_stds)):
-    ax.scatter(sav[:, 0], sav[:, 1], c=cm.deep(i / all_scatter_data.shape[0]))
-    ax.errorbar(sav[:, 0], sav[:, 1], fmt='.', yerr=sd[:, 1], xerr=sd[:, 0], c=cm.deep(i / all_scatter_data.shape[0] + 0.1))
-fig.add_subplot(ax)
+    ax_r = plt.Subplot(fig, outer[1])
+    for j in range(all_avgs.shape[0]):
+        ax_l = plt.Subplot(fig, inner[j])
+        ax_l.plot(x[:gen], all_avgs[j, :gen])
+        ax_l.errorbar(x[:gen], all_avgs[j, :gen], fmt='.', yerr=all_stds[j, :gen])
+        fig.add_subplot(ax_l)
+    for i, (sav, sd) in enumerate(zip(all_scatter_data_avgs[:gen], all_scatter_data_stds[:gen])):
+        ax_r.scatter(sav[:, 0], sav[:, 1], c=cm.curl(i / all_scatter_data.shape[0]))
+        ax_r.errorbar(sav[:, 0], sav[:, 1], fmt='.', yerr=sd[:, 1], xerr=sd[:, 0], c=cm.curl(i / all_scatter_data.shape[0] + 0.1))
 
-ax.legend(['Generation ' + str(i) for i in range(len(ds))])
+    fig.add_subplot(ax_r)
+    # plt.tight_layout()
+    plt.savefig('chromsomePlots/' + str(gen).zfill(3) + '.png', dpi=300)
 
-
-plt.show() 
 
 
 
