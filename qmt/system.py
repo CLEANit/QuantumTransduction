@@ -139,10 +139,10 @@ class Structure:
         if self.pnj_config['turn_on'] == True:
             # print(self.pnj_config['points'])
             self.hull = ConvexHull(self.pnj_config['points'])
-            
         self.attachLeads()
 
 
+        self.policyMask(self.system)
 
         self.finalize()
 
@@ -349,6 +349,19 @@ class Structure:
 
                     if lead_r:
                         self.system.attach_lead(lead.reversed())
+
+    def policyMask(self, system):
+        for s, v in system.site_value_pairs():
+            neighborhood = {}
+            for n in self.system.neighbors(s):
+                val = self.system[n]
+                neighborhood[n.index] = val
+                for nn in self.system.neighbors(n):
+                    val = self.system[nn]
+                    neighborhood[nn.index] = val(nn)
+            print(neighborhood)
+            print()
+            print()
 
 
     def applyMask(self, mask, system):
