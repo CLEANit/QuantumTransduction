@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import tinyarray as ta
 from sklearn.neural_network import MLPRegressor
 from scipy import signal
-from scipy.ndimage import measurements
+from scipy.ndimage import measurements, gaussian_filter
 
 from .helper import *
 import coloredlogs, verboselogs
@@ -144,7 +144,7 @@ class Structure:
             self.hull = ConvexHull(self.pnj_config['points'])
 
         if self.parser.getGenerator()['turn_on']:
-            self.policyMask(self.system)
+            self.system = self.policyMask(self.system)
 
         self.attachLeads()
 
@@ -372,6 +372,7 @@ class Structure:
 
                 neighborhoods.append((s, np.array(list(neighborhood.values()))))
                 nns.append(len(neighborhood))
+
         max_vec_size = np.max(nns)
 
         # get the ANN
@@ -390,7 +391,11 @@ class Structure:
 
                 self.system_colours[s] = choice
 
-                pot = np.array(self.system[s](s))
+                try:
+                    pot = np.array(system[s](s))
+                except:
+                    pot = np.array(system[s])
+
                 if choice:
                     np.fill_diagonal(pot , pot.diagonal() + pnj_config['p-potential'])
                 else:
@@ -398,15 +403,28 @@ class Structure:
 
                 system[s] = ta.array(pot)
 
-        # bin_rep = self.getBinaryRepresentation(system, policyMask=True)
+                for nn in self.system.neighbors(s):
+                    self.system_colours[nn] = choice
+                    system[nn] = ta.array(pot)
+
+                    for nnn in self.system.neighbors(nn):
+                        self.system_colours[nnn] = choice
+                        system[nnn] = ta.array(pot)
+
+        return system
+        # bin_rep = np.rot90(self.getBinaryRepresentation(system, policyMask=True))
+        # # bin_rep = gaussian_filter(bin_rep, 1)
         # bin_rep_fft = np.fft.fft2(bin_rep)
         # p_spec = np.absolute(bin_rep_fft)**2
         # labelled_arr, num_clusters = measurements.label(bin_rep)
-        # plt.imshow(np.rot90(bin_rep))
-        # plt.colorbar()
+        # kx = np.fft.fftfreq(bin_rep.shape[0], d=1 / bin_rep.shape[0])
+        # ky = np.fft.fftfreq(bin_rep.shape[1], d=1 / bin_rep.shape[1])
+        # k_x, k_y = np.meshgrid(kx, ky)
+        # plt.imshow(bin_rep)
+        # # plt.colorbar()
         # plt.show()
-        # plt.imshow(np.log(p_spec.T))
-        # plt.colorbar()
+        # plt.pcolormesh(k_x, k_y, np.log(p_spec.T))
+        # # plt.colorbar()
         # plt.show()
 
     def applyMask(self, mask, system):
