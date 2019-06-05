@@ -168,6 +168,14 @@ class Parser:
         else:
             return None
 
+    def getGenerator(self):
+        """
+        Returns
+        -------
+        The parameters for the generator.
+        """
+        return self.config['GA']['Generator']
+
     def getNStructures(self):
         """
         Returns
@@ -287,4 +295,12 @@ class Parser:
         The genes configuration
         """
         return self.config['GA']['Genes']
+
+    def getPolicyMask(self):
+        """
+        Returns
+        -------
+        The ANN that represents the policy mask. Note that the Parser class only has this attribute after going through a generation process with the Generator class.
+        """
+        return self.policy_mask
 

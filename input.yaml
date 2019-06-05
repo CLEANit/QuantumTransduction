@@ -79,6 +79,12 @@ System:
 # Genetic algorithm
 GA:
 
+  Generator: {
+    turn_on: true,
+    neurons: [100, 100]
+
+  }
+
   # keep true for now
   ann: false
   

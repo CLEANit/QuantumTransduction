@@ -9,6 +9,9 @@ import cmocean
 from scipy.spatial import ConvexHull
 import matplotlib.pyplot as plt
 import tinyarray as ta
+from sklearn.neural_network import MLPRegressor
+from scipy import signal
+from scipy.ndimage import measurements
 
 from .helper import *
 import coloredlogs, verboselogs
@@ -139,10 +142,11 @@ class Structure:
         if self.pnj_config['turn_on'] == True:
             # print(self.pnj_config['points'])
             self.hull = ConvexHull(self.pnj_config['points'])
+
+        if self.parser.getGenerator()['turn_on']:
+            self.policyMask(self.system)
+
         self.attachLeads()
-
-
-        self.policyMask(self.system)
 
         self.finalize()
 
@@ -351,18 +355,59 @@ class Structure:
                         self.system.attach_lead(lead.reversed())
 
     def policyMask(self, system):
-        for s, v in system.site_value_pairs():
-            neighborhood = {}
-            for n in self.system.neighbors(s):
-                val = self.system[n]
-                neighborhood[n.index] = val
-                for nn in self.system.neighbors(n):
-                    val = self.system[nn]
-                    neighborhood[nn.index] = val(nn)
-            print(neighborhood)
-            print()
-            print()
+        nns = []
+        neighborhoods = []
+        self.system_colours = {}
+        pnj_config = self.parser.getPNJunction()
 
+        for s, v in system.site_value_pairs():
+            if self.body(s.pos):
+                neighborhood = {}
+                for n in self.system.neighbors(s):
+                    val = self.system[n]
+                    neighborhood[n.index] = np.mean(val(n))
+                    for nn in self.system.neighbors(n):
+                        val = self.system[nn]
+                        neighborhood[nn.index] = np.mean(val(nn))
+
+                neighborhoods.append((s, np.array(list(neighborhood.values()))))
+                nns.append(len(neighborhood))
+        max_vec_size = np.max(nns)
+
+        # get the ANN
+        generator_params = self.parser.getGenerator()
+        self.parser.policy_mask = MLPRegressor(hidden_layer_sizes=[max_vec_size] + generator_params['neurons'] + [2])
+        self.parser.policy_mask._random_state = np.random.RandomState(None)
+        self.parser.policy_mask._initialize(np.empty((1, 2)), [max_vec_size, 128, 2])
+
+        for s, neighborhood in neighborhoods:
+            if self.body(s.pos):
+                input_vec = np.zeros((1, max_vec_size))
+                input_vec[0, :neighborhood.shape[0]] += neighborhood[:]
+                output_vec = self.parser.policy_mask.predict(input_vec)[0, :]
+                output_vec = np.exp(output_vec) / np.sum(np.exp(output_vec))
+                choice = np.random.choice([0, 1], p=output_vec)
+
+                self.system_colours[s] = choice
+
+                pot = self.system[s](s)
+                if choice:
+                    np.fill_diagonal(pot , pot.diagonal() + pnj_config['p-potential'])
+                else:
+                    np.fill_diagonal(pot , pot.diagonal() + pnj_config['n-potential'])
+
+                system[s] = pot
+
+        # bin_rep = self.getBinaryRepresentation(system, policyMask=True)
+        # bin_rep_fft = np.fft.fft2(bin_rep)
+        # p_spec = np.absolute(bin_rep_fft)**2
+        # labelled_arr, num_clusters = measurements.label(bin_rep)
+        # plt.imshow(np.rot90(bin_rep))
+        # plt.colorbar()
+        # plt.show()
+        # plt.imshow(np.log(p_spec.T))
+        # plt.colorbar()
+        # plt.show()
 
     def applyMask(self, mask, system):
         tags = []
@@ -424,31 +469,53 @@ class Structure:
         else:
             return self.system
 
-    def getBinaryRepresentation(self):
+    def getBinaryRepresentation(self, system, policyMask=False):
         """
         Return a binary image that describes the pn-junction in image form.
         """
-        tags = []
-        positions = []
-        for s, v in self.pre_system.site_value_pairs():
-            tags.append(s.tag)
-            positions.append(s.pos)
-        tags = np.array(tags)
-        positions = np.array(positions)
-        
-        min_tag_sx = np.min(tags[:,0])
-        min_tag_sy = np.min(tags[:,1])
-        max_tag_sx = np.max(tags[:,0])
-        max_tag_sy = np.max(tags[:,1])
+        if not policyMask:
+            tags = []
+            positions = []
+            for s, v in system.site_value_pairs():
+                tags.append(s.tag)
+                positions.append(s.pos)
+            tags = np.array(tags)
+            positions = np.array(positions)
+            
+            min_tag_sx = np.min(tags[:,0])
+            min_tag_sy = np.min(tags[:,1])
+            max_tag_sx = np.max(tags[:,0])
+            max_tag_sy = np.max(tags[:,1])
 
-        image = np.zeros((max_tag_sx - min_tag_sx + 1, max_tag_sy - min_tag_sy + 1))
+            image = np.zeros((max_tag_sx - min_tag_sx + 1, max_tag_sy - min_tag_sy + 1))
 
-        for t, p in zip(tags, positions):
-            if pointInHull(p, self.hull):
-                image[t[0] - min_tag_sx][t[1] - min_tag_sy] = self.parser.config['System']['Junction']['body']['pn-junction']['n-potential']
-            else:
-                image[t[0] - min_tag_sx][t[1] - min_tag_sy] = self.parser.config['System']['Junction']['body']['pn-junction']['p-potential']
-        return image       
+            for t, p in zip(tags, positions):
+                if pointInHull(p, self.hull):
+                    image[t[0] - min_tag_sx][t[1] - min_tag_sy] = self.parser.config['System']['Junction']['body']['pn-junction']['n-potential']
+                else:
+                    image[t[0] - min_tag_sx][t[1] - min_tag_sy] = self.parser.config['System']['Junction']['body']['pn-junction']['p-potential']
+            return image
+        else:
+            tags = []
+            for s, v in system.site_value_pairs():
+                if self.body(s.pos):
+                    tags.append(s.tag)
+            
+            tags = np.array(tags)
+            
+            min_tag_sx = np.min(tags[:,0])
+            min_tag_sy = np.min(tags[:,1])
+            max_tag_sx = np.max(tags[:,0])
+            max_tag_sy = np.max(tags[:,1])
+
+            image = np.zeros((max_tag_sx - min_tag_sx + 1, max_tag_sy - min_tag_sy + 1))
+
+            for s, v in system.site_value_pairs():
+                try:
+                    image[s.tag[0] + min_tag_sx][s.tag[1] + min_tag_sy] = self.system_colours[s]
+                except KeyError:
+                    pass
+            return image
 
     def visualizeSystem(self, args={}):
         """
@@ -470,6 +537,17 @@ class Structure:
                     else:
                         return cmocean.cm.deep(0.1)
                 return kwant.plot(self.pre_system, site_lw=0.1, lead_site_lw=0, colorbar=False, site_color=siteColours, show=True, **args)
+            elif self.parser.getGenerator()['turn_on']:
+                def siteColours(site):
+                    # print(list(self.pre_system.sites())[site])
+                    try:
+                        if self.system_colours[site]:
+                            return cmocean.cm.deep(0.9)
+                        else:
+                            return cmocean.cm.deep(0.1)
+                    except:
+                        return cmocean.cm.deep(0.5)
+                return kwant.plot(self.pre_system, site_lw=0.1, lead_site_lw=0, colorbar=False, site_color=siteColours, show=True, **args)            
             else:
                 return kwant.plot(self.pre_system, site_lw=0.1, colorbar=False, show=False, **args)
 

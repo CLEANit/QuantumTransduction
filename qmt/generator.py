@@ -123,6 +123,7 @@ class Generator:
 
                 ann_params = self.parser.getAnnParameters()
                 ga_params = self.parser.getGAParameters()
+
                 ann = MLPRegressor(
                         hidden_layer_sizes=tuple(ann_params['neurons']) + (len(self.parser.getGenes()),),
                         activation=ann_params['activation']
@@ -166,7 +167,7 @@ class Generator:
                     new_val = (gene['range'][1] - gene['range'][0]) * np.random.uniform() + gene['range'][0]
                     setInDict(new_config, gene['path'], new_val)
                     new_config, clean_generation = self.checkAndUpdate(new_config, gene, val, new_val)
-                    
+
             new_parser.updateConfig(new_config)
 
             identifier = self.n_generated
@@ -191,6 +192,39 @@ class Generator:
         
         """
         ann = self.parser.getGAParameters()['ann']
+
+        if self.parser.getGenerator()['turn_on']:
+            structure1, structure2 = pair_of_structures
+            ga_params = self.parser.getGAParameters()
+            generator_params = self.parser.getGenerator()
+            random.seed(seed)
+            np.random.seed(seed)        
+
+            # follow similar steps as when we generate a new structure
+            clean_generation = False
+
+            while not clean_generation:
+                old_config = structure1.parser.getConfig()
+                new_parser = copy.deepcopy(structure1.parser)
+                new_config = new_parser.getConfig()
+
+                for layer in range(len(generator_params['neurons']) + 1):
+                    total_weights = new_parser.policy_mask.coefs_[layer].shape[0] * new_parser.policy_mask.coefs_[layer].shape[1]
+                    indices_to_update = np.vstack((np.random.randint(0, new_parser.policy_mask.coefs_[layer].shape[0], size=int(total_weights * ga_params['random-step']['fraction'])), np.random.randint(0, new_parser.policy_mask.coefs_[layer].shape[1], size=int(total_weights * ga_params['random-step']['fraction'])))).T
+
+                    new_parser.policy_mask.coefs_[layer][indices_to_update[:,0], indices_to_update[:,1]] = structure2.parser.policy_mask.coefs_[layer][indices_to_update[:,0], indices_to_update[:,1]] 
+                    
+            new_parser.updateConfig(new_config)
+            
+            identifier = self.n_generated
+            # history = []
+            # for h1, h2 in zip(structure1.history, structure2.history):
+            #     history.append([h1, h2])
+            # history.append([structure1.identifier, structure2.identifier])
+            s = Structure(new_parser, identifier, [structure1.identifier, structure2.identifier])
+            self.n_generated += 1
+
+            return s
 
         if ann:
             structure1, structure2 = pair_of_structures
@@ -286,6 +320,38 @@ class Generator:
         
         """
         ann = self.parser.getGAParameters()['ann']
+
+        if self.parser.getGenerator()['turn_on']:
+            generator_params = self.parser.getGenerator()
+            ga_params = self.parser.getGAParameters()
+            if ga_params['random-step']['fraction'] == 0.:
+                return structure
+
+            random.seed(seed)
+            np.random.seed(seed)        
+
+            # follow similar steps as when we generate a new structure
+            clean_generation = False
+
+            while not clean_generation:
+                old_config = structure.parser.getConfig()
+                new_parser = copy.deepcopy(structure.parser)
+                new_config = new_parser.getConfig()
+
+                for layer in range(len(generator_params['neurons']) + 1):
+                    total_weights = new_parser.policy_mask.coefs_[layer].shape[0] * new_parser.policy_mask.coefs_[layer].shape[1]
+                    indices_to_update = np.vstack((np.random.randint(0, new_parser.policy_mask.coefs_[layer].shape[0], size=int(total_weights * ga_params['random-step']['fraction'])), np.random.randint(0, new_parser.policy_mask.coefs_[layer].shape[1], size=int(total_weights * ga_params['random-step']['fraction'])))).T
+                    new_parser.policy_mask.coefs_[layer][indices_to_update[:,0], indices_to_update[:,1]] += ga_params['random-step']['max-update-rate'] * np.random.uniform(size=indices_to_update.shape[0])
+                    
+            new_parser.updateConfig(new_config)
+            
+            # identifier = self.n_generated
+            # # history = copy.copy(structure.history)
+            # # history.append(structure.identifier)
+            s = Structure(new_parser, structure.identifier, structure.parents)
+            # self.n_generated += 1
+
+            return s
 
         if ann:
             ann_params = self.parser.getAnnParameters()
