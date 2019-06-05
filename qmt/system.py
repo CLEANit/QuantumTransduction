@@ -390,13 +390,13 @@ class Structure:
 
                 self.system_colours[s] = choice
 
-                pot = self.system[s](s)
+                pot = np.array(self.system[s](s))
                 if choice:
                     np.fill_diagonal(pot , pot.diagonal() + pnj_config['p-potential'])
                 else:
                     np.fill_diagonal(pot , pot.diagonal() + pnj_config['n-potential'])
 
-                system[s] = pot
+                system[s] = ta.array(pot)
 
         # bin_rep = self.getBinaryRepresentation(system, policyMask=True)
         # bin_rep_fft = np.fft.fft2(bin_rep)
