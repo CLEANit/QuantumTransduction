@@ -51,11 +51,12 @@ def main():
     total_timer = Timer()
     short_timer = Timer()
     total_timer.start()
-    pool = Pool()
 
     logger.success(' --- Welcome to the Kwantum Transmission Device Optimizer --- ')
 
     parser = Parser()
+    pool = Pool(nodes=parser.config['n_cpus'])
+
     serializer = Serializer(parser)
     ga = serializer.deserialize()
     if ga is not None:
@@ -66,11 +67,11 @@ def main():
         logger.info('Generating initial structures...')
         short_timer.start()
 
-        logger.success('Initial structures generated. Elapsed time: %s' % (short_timer.stop()))
         
         ga = GA(parser, objective_function=objectiveFunction)
-        structures = ga.generator.generateAll()
+        structures = ga.generator.generateAll(pool=pool, seeds=np.random.randint(0, 2**32 - 1, parser.config['GA']['n_structures']))
         ga.setNextGeneration(structures)
+        logger.success('Initial structures generated. Elapsed time: %s' % (short_timer.stop()))
 
     #########################
     # main loop here

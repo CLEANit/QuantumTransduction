@@ -2,6 +2,8 @@
 #### Input file for runner!!
 ############
 
+n_cpus: 2
+
 System:
 
   # can do: graphene, MoS2, null

@@ -114,6 +114,8 @@ class Generator:
         # we want to make sure our generated structure is good
 
         ann = self.parser.getGAParameters()['ann']
+        random.seed(seed)
+        np.random.seed(seed)
 
         if ann:
             clean_generation = False
@@ -517,18 +519,20 @@ class Generator:
         A list of new structure classes with genes crossed over from the pairs_of_structures.
 
         """
-        # if pool is None:
-        return [self.crossOver(s) for s in pairs_of_structures]
-        # else:
-        #     return pool.map(self.crossOver, pairs_of_structures, seeds)
+        if pool is None:
+            return [self.crossOver(s) for s in pairs_of_structures]
+        else:
+            return pool.map(self.crossOver, pairs_of_structures, seeds)
 
-    def generateAll(self):
+    def generateAll(self, pool=None, seeds=None):
         """
         Generates all of the structures specified in the input file.
 
         Returns
         -------
         A list of Parser classes that can be handed to Structure classes.
-
         """
-        return [self.generate() for i in range(self.parser.getNStructures())]
+        if pool is None:
+            return [self.generate() for i in range(self.parser.getNStructures())]
+        else:
+            return pool.map(self.generate, seeds)

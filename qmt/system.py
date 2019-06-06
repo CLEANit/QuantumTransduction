@@ -378,7 +378,7 @@ class Structure:
         # get the ANN
         generator_params = self.parser.getGenerator()
         self.parser.policy_mask = MLPRegressor(hidden_layer_sizes=[max_vec_size] + generator_params['neurons'] + [2])
-        self.parser.policy_mask._random_state = np.random.RandomState(None)
+        self.parser.policy_mask._random_state = np.random.RandomState(np.random.randint(2**32))
         self.parser.policy_mask._initialize(np.empty((1, 2)), [max_vec_size, 128, 2])
 
         for s, neighborhood in neighborhoods:
