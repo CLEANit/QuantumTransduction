@@ -111,7 +111,7 @@ def main():
         ga.calculate((currents_0_1, currents_0_2))
 
         structures = ga.rankGeneration()
-
+        logger.success('Calculations finished. Elapsed time: %s' % (short_timer.stop()))
         # write gene variables and objective function parameters to file
         ga.writePhaseSpace(structures)
         # subset_limit = parser.config['GA']['ann-params']['random-step']['keep-best']
@@ -121,6 +121,7 @@ def main():
         #     index = np.random.randint(subset_limit)
         #     new_structures.append(g.mutateAllWeights(structures_subset[index]))
 
+        short_timer.start()
         pairs = []
         for i, s1 in enumerate(structures):
             for j in range(parser.getGAParameters()['n_children']):
@@ -136,9 +137,9 @@ def main():
         structures = ga.generator.mutateAll(structures, pool=pool, seeds=np.random.randint(0, 2**32 - 1, len(structures)))
 
         ga.setNextGeneration(structures)
-
+        logger.success('Structures have been updated. Elapsed time: %s' % (short_timer.stop()))
         # print how long it took and serialize the current GA
-        logger.info('Calculations finished. Elapsed time: %s' % (short_timer.stop()))
+        short_timer.start()
         serializer.serialize(ga)
         pickle.dump(ga.history, open('output/history.pkl', 'wb'))
         logger.success('Generation %i completed. Elapsed time: %s' % (ga.generationNumber(), short_timer.stop()))
