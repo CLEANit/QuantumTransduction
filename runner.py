@@ -56,7 +56,8 @@ def main():
 
     parser = Parser()
     pool = Pool(nodes=parser.config['n_cpus'])
-
+    logger.info('Running calculations with ' + str(parser.config['n_cpus']) + ' workers.')
+    
     serializer = Serializer(parser)
     ga = serializer.deserialize()
     if ga is not None:

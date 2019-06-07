@@ -12,7 +12,7 @@ import tinyarray as ta
 from sklearn.neural_network import MLPRegressor
 from scipy import signal
 from scipy.ndimage import measurements, gaussian_filter
-
+import os
 from .helper import *
 import coloredlogs, verboselogs
 
@@ -867,6 +867,7 @@ class Structure:
         A tuple of length 2. First element is for K', second for K.
         """
 
+        pid = os.getpid()
         bias = self.parser.getBias()
         kb_T = self.parser.getKBT()
 
@@ -883,15 +884,19 @@ class Structure:
         if set(keys).issubset(self.finished_calculations.keys()):
             return self.finished_calculations[keys[0]], self.finished_calculations[keys[1]]
 
+
         energy_range = self.getEnergyRange()
         energies = np.linspace(energy_range[0], energy_range[1], self.grid_size)
         
+
         KPs = []
         Ks = []
         for e in energies:
             vals = self.getValleyPolarizedConductance(e, lead_start, lead_end, K_prime_range, K_range, velocities)
             KPs.append(vals[0])
             Ks.append(vals[1])
+        
+        logger.info('Process %i has calculated the conductances for structure %i.' % (pid, self.identifier))
 
         KPs = np.array(KPs)
         Ks = np.array(Ks)

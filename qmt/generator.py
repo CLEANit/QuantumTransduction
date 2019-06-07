@@ -209,8 +209,7 @@ class Generator:
                 old_config = structure1.parser.getConfig()
                 new_parser = copy.deepcopy(structure1.parser)
                 new_config = new_parser.getConfig()
-
-                for layer in range(len(generator_params['neurons']) + 1):
+                for layer in range(len(generator_params['neurons'])):
                     total_weights = new_parser.policy_mask.coefs_[layer].shape[0] * new_parser.policy_mask.coefs_[layer].shape[1]
                     indices_to_update = np.vstack((np.random.randint(0, new_parser.policy_mask.coefs_[layer].shape[0], size=int(total_weights * ga_params['random-step']['fraction'])), np.random.randint(0, new_parser.policy_mask.coefs_[layer].shape[1], size=int(total_weights * ga_params['random-step']['fraction'])))).T
 
