@@ -15,6 +15,7 @@ from scipy.ndimage import measurements, gaussian_filter
 import os
 from .helper import *
 import coloredlogs, verboselogs
+from skimage.morphology import binary_erosion, binary_dilation
 
 # create logger
 coloredlogs.install(level='INFO')
@@ -359,9 +360,12 @@ class Structure:
         neighborhoods = []
         self.system_colours = {}
         pnj_config = self.parser.getPNJunction()
-
+        tags = []
+        poss = []
         for s, v in system.site_value_pairs():
             if self.body(s.pos):
+                tags.append(s.tag)
+                poss.append(s.pos)
                 neighborhood = {}
                 for n in self.system.neighbors(s):
                     val = self.system[n]
@@ -391,6 +395,42 @@ class Structure:
 
                 self.system_colours[s] = choice
 
+                for nn in self.system.neighbors(s):
+                    self.system_colours[nn] = choice
+
+                    for nnn in self.system.neighbors(nn):
+                        self.system_colours[nnn] = choice
+
+        # return system
+        # import scipy
+        bin_rep = self.getBinaryRepresentation(system, policyMask=True)
+        bin_rep = gaussian_filter(bin_rep, 2)
+        bin_rep = np.round(bin_rep)
+        bin_rep = binary_erosion(bin_rep, selem=np.ones((3,3)))
+        bin_rep = binary_dilation(bin_rep, selem=np.ones((3,3)))
+
+        tags = np.array(tags)
+        poss = np.array(poss)
+
+        min_pos_sx = np.min(poss[:,0])
+        min_pos_sy = np.min(poss[:,1])
+        max_pos_sx = np.max(poss[:,0])
+        max_pos_sy = np.max(poss[:,1])
+        
+        min_tag_sx = np.min(tags[:,0])
+        min_tag_sy = np.min(tags[:,1])
+        max_tag_sx = np.max(tags[:,0])
+        max_tag_sy = np.max(tags[:,1])
+
+        image_size = (max_tag_sx - min_tag_sx + 1, max_tag_sy - min_tag_sy + 1)
+        dx = (max_pos_sx - min_pos_sx) / (image_size[0] - 1)
+        dy = (max_pos_sy - min_pos_sy) / (image_size[1] - 1)
+
+        for s, v in system.site_value_pairs():
+            if self.body(s.pos):
+                index_x = int((s.pos[0] - min_pos_sx) / dx)
+                index_y = int((s.pos[1] - min_pos_sy) / dy)
+                choice = bin_rep[index_x, index_y]
                 try:
                     pot = np.array(system[s](s))
                 except:
@@ -400,20 +440,13 @@ class Structure:
                     np.fill_diagonal(pot , pot.diagonal() + pnj_config['p-potential'])
                 else:
                     np.fill_diagonal(pot , pot.diagonal() + pnj_config['n-potential'])
-
+                self.system_colours[s] = choice
                 system[s] = ta.array(pot)
 
-                for nn in self.system.neighbors(s):
-                    self.system_colours[nn] = choice
-                    system[nn] = ta.array(pot)
-
-                    for nnn in self.system.neighbors(nn):
-                        self.system_colours[nnn] = choice
-                        system[nnn] = ta.array(pot)
-
+        # plt.imshow(np.rot90(bin_rep))
+        # # plt.colorbar()
+        # plt.show()
         return system
-        # bin_rep = np.rot90(self.getBinaryRepresentation(system, policyMask=True))
-        # # bin_rep = gaussian_filter(bin_rep, 1)
         # bin_rep_fft = np.fft.fft2(bin_rep)
         # p_spec = np.absolute(bin_rep_fft)**2
         # labelled_arr, num_clusters = measurements.label(bin_rep)
@@ -515,23 +548,38 @@ class Structure:
             return image
         else:
             tags = []
+            poss = []
             for s, v in system.site_value_pairs():
                 if self.body(s.pos):
                     tags.append(s.tag)
+                    poss.append(s.pos)
             
             tags = np.array(tags)
+            poss = np.array(poss)
+
+            min_pos_sx = np.min(poss[:,0])
+            min_pos_sy = np.min(poss[:,1])
+            max_pos_sx = np.max(poss[:,0])
+            max_pos_sy = np.max(poss[:,1])
             
             min_tag_sx = np.min(tags[:,0])
             min_tag_sy = np.min(tags[:,1])
             max_tag_sx = np.max(tags[:,0])
             max_tag_sy = np.max(tags[:,1])
 
-            image = np.zeros((max_tag_sx - min_tag_sx + 1, max_tag_sy - min_tag_sy + 1))
+            image_size = (max_tag_sx - min_tag_sx + 1, max_tag_sy - min_tag_sy + 1)
+            dx = (max_pos_sx - min_pos_sx) / image_size[0]
+            dy = (max_pos_sy - min_pos_sy) / image_size[1]
 
+            image = np.zeros(image_size)
             for s, v in system.site_value_pairs():
                 try:
-                    image[s.tag[0] + min_tag_sx][s.tag[1] + min_tag_sy] = self.system_colours[s]
+                    index_x = int((s.pos[0] - min_pos_sx) / dx)
+                    index_y = int((s.pos[1] - min_pos_sy) / dy)
+                    image[index_x, index_y] = self.system_colours[s]
                 except KeyError:
+                    pass
+                except IndexError:
                     pass
             return image
 

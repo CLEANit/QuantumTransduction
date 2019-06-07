@@ -513,7 +513,7 @@ class Generator:
 
         """
         if pool is None:
-            css =  [self.crossOver(s) for s in pairs_of_structures]
+            css =  [self.crossOver(s, i, i) for i, s in enumerate(pairs_of_structures)]
         else:
             css =  pool.map(self.crossOver, pairs_of_structures, seeds, range(len(pairs_of_structures)))
         self.n_generated += len(pairs_of_structures)
@@ -528,7 +528,7 @@ class Generator:
         A list of Parser classes that can be handed to Structure classes.
         """
         if pool is None:
-            ss = [self.generate() for i in range(self.parser.getNStructures())]
+            ss = [self.generate(i, i) for i in range(self.parser.getNStructures())]
         else:
             ss =  pool.map(self.generate, seeds, range(self.parser.getNStructures()))
         self.n_generated += self.parser.getNStructures()
