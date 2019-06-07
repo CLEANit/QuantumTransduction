@@ -945,7 +945,7 @@ class Structure:
             KPs.append(vals[0])
             Ks.append(vals[1])
         
-        logger.info('Conductance calculation summary: pid - %i, leads - (%i, %i), structure - %i, time - %i min' % (pid, lead_end, lead_start, self.identifier, float(time.time() - start)) / 60.)
+        # logger.info('Conductance calculation summary: pid - %i, leads - (%i, %i), structure - %i, time - %i min' % (pid, lead_end, lead_start, self.identifier, float(time.time() - start) / 60.))
 
         KPs = np.array(KPs)
         Ks = np.array(Ks)

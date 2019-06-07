@@ -102,7 +102,7 @@ def main():
         # calculate currents and write them out to disk
         currents_0_1 = pool.map(getConductances, structures, [0] * len(structures), [1] * len(structures))
         currents_0_2 = pool.map(getConductances, structures, [0] * len(structures), [2] * len(structures))
-
+        
         ga.io.writer('output/currents_gen_' + str(ga.generationNumber()).zfill(3) + '.dat', '# Currents (lead1-k\', lead1-k, lead2-k\', lead2-k)\n', header=True)
         for cs1, cs2 in zip(currents_0_1, currents_0_2):
             ga.io.writer('output/currents_gen_' + str(ga.generationNumber()).zfill(3) + '.dat', cs1 + cs2)
@@ -131,6 +131,7 @@ def main():
         
         if parser.getGAParameters()['crossing-fraction'] > 0.:
             structures = ga.generator.crossOverAll(pairs, pool=pool, seeds=np.random.randint(0, 2**32 - 1, len(structures)))
+        
         # mutate the current generation
         structures = ga.generator.mutateAll(structures, pool=pool, seeds=np.random.randint(0, 2**32 - 1, len(structures)))
 
