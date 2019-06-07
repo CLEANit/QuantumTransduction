@@ -18,7 +18,7 @@ import coloredlogs, verboselogs
 
 # create logger
 coloredlogs.install(level='INFO')
-logger = verboselogs.VerboseLogger('QMT::Structure ')
+logger = verboselogs.VerboseLogger('QMT::structure ')
 
 def hoppingFunction(self, t, phi, direction, site1, site2):
     """
@@ -891,12 +891,13 @@ class Structure:
 
         KPs = []
         Ks = []
+        start = time.clock()
         for e in energies:
             vals = self.getValleyPolarizedConductance(e, lead_start, lead_end, K_prime_range, K_range, velocities)
             KPs.append(vals[0])
             Ks.append(vals[1])
         
-        logger.info('Process %i has calculated the conductances for structure %i.' % (pid, self.identifier))
+        logger.info('Conductance calculation summary: pid - %i, leads - (%i, %i), structure - %i, time - .' % (pid, lead_end, lead_start, self.identifier, time.clock() - start))
 
         KPs = np.array(KPs)
         Ks = np.array(Ks)

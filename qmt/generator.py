@@ -99,7 +99,7 @@ class Generator:
         return new_config, clean_generation
 
 
-    def generate(self, seed=None):
+    def generate(self, seed=None, thread_num=None):
         """
         Generate a random structure based on the genes given in the output.
 
@@ -152,10 +152,9 @@ class Generator:
                     
             new_parser.updateConfig(new_config)
 
-            identifier = self.n_generated
+            identifier = self.n_generated + thread_num
             history = [self.n_generated]
             s = Structure(new_parser, identifier, history)
-            self.n_generated += 1
             return s
         else:
             clean_generation = False
@@ -172,12 +171,11 @@ class Generator:
 
             new_parser.updateConfig(new_config)
 
-            identifier = self.n_generated
+            identifier = self.n_generated + thread_num
             s = Structure(new_parser, identifier, [])
-            self.n_generated += 1
             return s
 
-    def crossOver(self, pair_of_structures, seed=None):
+    def crossOver(self, pair_of_structures, seed=None, thread_num=None):
         """
         Crossover the structures genes randomly according to the input parameters.
 
@@ -217,14 +215,12 @@ class Generator:
                     
             new_parser.updateConfig(new_config)
             
-            identifier = self.n_generated
+            identifier = self.n_generated + thread_num
             # history = []
             # for h1, h2 in zip(structure1.history, structure2.history):
             #     history.append([h1, h2])
             # history.append([structure1.identifier, structure2.identifier])
             s = Structure(new_parser, identifier, [structure1.identifier, structure2.identifier])
-            self.n_generated += 1
-
             return s
 
         if ann:
@@ -260,13 +256,12 @@ class Generator:
                     
             new_parser.updateConfig(new_config)
             
-            identifier = self.n_generated
+            identifier = self.n_generated + thread_num
             # history = []
             # for h1, h2 in zip(structure1.history, structure2.history):
             #     history.append([h1, h2])
             # history.append([structure1.identifier, structure2.identifier])
             s = Structure(new_parser, identifier, [structure1.identifier, structure2.identifier])
-            self.n_generated += 1
 
             return s
 
@@ -295,13 +290,12 @@ class Generator:
                     
             new_parser.updateConfig(new_config)
                                 
-            identifier = self.n_generated
+            identifier = self.n_generated + thread_num
             # history = []
             # for h1, h2 in zip(structure1.history, structure2.history):
             #     history.append([h1, h2])
             # history.append([structure1.identifier, structure2.identifier])
             s = Structure(new_parser, identifier, [structure1.identifier, structure2.identifier])
-            self.n_generated += 1
 
             return s
 
@@ -519,9 +513,11 @@ class Generator:
 
         """
         if pool is None:
-            return [self.crossOver(s) for s in pairs_of_structures]
+            css =  [self.crossOver(s) for s in pairs_of_structures]
         else:
-            return pool.map(self.crossOver, pairs_of_structures, seeds)
+            css =  pool.map(self.crossOver, pairs_of_structures, seeds, range(len(pairs_of_structures)))
+        self.n_generated += len(pairs_of_structures)
+        return css
 
     def generateAll(self, pool=None, seeds=None):
         """
@@ -532,6 +528,8 @@ class Generator:
         A list of Parser classes that can be handed to Structure classes.
         """
         if pool is None:
-            return [self.generate() for i in range(self.parser.getNStructures())]
+            ss = [self.generate() for i in range(self.parser.getNStructures())]
         else:
-            return pool.map(self.generate, seeds)
+            ss =  pool.map(self.generate, seeds, range(self.parser.getNStructures()))
+        self.n_generated += self.parser.getNStructures()
+        return ss
