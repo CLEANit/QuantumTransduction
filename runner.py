@@ -49,6 +49,7 @@ def objectiveFunction(currents_0_1, currents_0_2):
 
 def main():
     total_timer = Timer()
+    iteration_timer = Timer()
     short_timer = Timer()
     total_timer.start()
 
@@ -82,7 +83,7 @@ def main():
     while ga.generationNumber() < parser.getNIterations():
 
         short_timer.start()
-
+        iteration_timer.start()
         # print info about the upcoming calculation
         ga.summarizeGeneration()
 
@@ -142,7 +143,7 @@ def main():
         short_timer.start()
         serializer.serialize(ga)
         pickle.dump(ga.history, open('output/history.pkl', 'wb'))
-        logger.success('Generation %i completed. Elapsed time: %s' % (ga.generationNumber(), short_timer.stop()))
+        logger.success('Generation %i completed. Elapsed time: %s' % (ga.generationNumber(), iteration_timer.stop()))
 
     logger.success(' --- Elapsed time: %s ---' % (total_timer.stop()))
 
