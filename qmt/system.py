@@ -383,7 +383,9 @@ class Structure:
         generator_params = self.parser.getGenerator()
 
         # create the ANN if we need it
-        if self.parser.policy_mask is None:
+        try:
+            _ = self.parser.policy_mask
+        except AttributeError:
             self.parser.policy_mask = MLPRegressor(hidden_layer_sizes=[max_vec_size] + generator_params['neurons'] + [2])
             self.parser.policy_mask._random_state = np.random.RandomState(np.random.randint(2**32))
             self.parser.policy_mask._initialize(np.empty((1, 2)), [max_vec_size, 128, 2])
