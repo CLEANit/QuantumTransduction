@@ -90,7 +90,20 @@ def onSiteFunction(self, pot, spin, phi, lead, site):
         ###################################################
 
         return ta.array(pot)
-    
+
+    elif self.parser.getGenerator()['turn_on']:
+        if self.parser.getGenerator()['leads'] == 'p-doped':
+            np.fill_diagonal(pot , pot.diagonal() + pnj_config['p-potential'])
+        elif self.parser.getGenerator()['leads'] == 'n-doped':
+            np.fill_diagonal(pot , pot.diagonal() + pnj_config['n-potential'])
+        elif self.parser.getGenerator()['leads'] == 'undoped':
+            pass
+        else:
+            logger.error('Unknown setting for the potential of the leads in the Generator.')
+            exit(-1)
+
+        return ta.array(pot)
+
     else:
         lattice_vectors = self.parser.getLatticeVectors()
 
@@ -372,7 +385,7 @@ class Structure:
                     neighborhood[n.index] = np.mean(val(n))
                     for nn in self.system.neighbors(n):
                         val = self.system[nn]
-                        neighborhood[nn.index] = np.mean(val(nn))
+                        neighborhood[nn.index] = np.mean(np.array(val(nn)).diagonal())
 
                 neighborhoods.append((s, np.array(list(neighborhood.values()))))
                 nns.append(len(neighborhood))

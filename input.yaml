@@ -83,8 +83,8 @@ GA:
 
   Generator: {
     turn_on: true,
-    neurons: [100, 100]
-
+    neurons: [100, 100],
+    leads: 'p-doped'
   }
 
   # keep true for now
