@@ -630,7 +630,14 @@ class Structure:
                         else:
                             return cmocean.cm.deep(0.1)
                     except:
-                        return cmocean.cm.deep(0.5)
+                        if self.parser.getGenerator()['leads'] == 'p-doped':
+                            return cmocean.cm.deep(0.1)
+                        elif self.parser.getGenerator()['leads'] == 'n-doped':
+                            return cmocean.cm.deep(0.9)
+                        else:
+                            return cmocean.cm.deep(0.5)
+
+
                 return kwant.plot(self.pre_system, site_lw=0.1, lead_site_lw=0, colorbar=False, site_color=siteColours, show=True, **args)            
             else:
                 return kwant.plot(self.pre_system, site_lw=0.1, colorbar=False, show=False, **args)
@@ -905,7 +912,7 @@ class Structure:
 
         momentas = smatrix.lead_info[lead_start].momenta[positives]
         K_prime_indices = np.where(np.logical_and(momentas >= K_prime_range[0], momentas <= K_prime_range[1]))[0]
-        K_prime_indices = np.where(momentas < 0)
+        # K_prime_indices = np.where(momentas < 0)
         K_indices = np.where(np.logical_and(momentas >= K_range[0], momentas <= K_range[1]))[0]
         submatrix = smatrix.submatrix(lead_end, lead_start)
         K_prime_T = np.sum(np.absolute(submatrix[:, K_prime_indices])**2) 
