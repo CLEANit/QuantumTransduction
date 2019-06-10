@@ -107,6 +107,8 @@ def main():
         ga.io.writer('output/currents_gen_' + str(ga.generationNumber()).zfill(3) + '.dat', '# Currents (lead1-k\', lead1-k, lead2-k\', lead2-k)\n', header=True)
         for cs1, cs2 in zip(currents_0_1, currents_0_2):
             ga.io.writer('output/currents_gen_' + str(ga.generationNumber()).zfill(3) + '.dat', cs1 + cs2)
+        ga.io.close('output/currents_gen_' + str(ga.generationNumber()).zfill(3) + '.dat')
+
 
         # calculate the objective function
         ga.calculate((currents_0_1, currents_0_2))

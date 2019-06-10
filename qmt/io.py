@@ -40,6 +40,9 @@ class IO:
         
         self.files[filename].flush()
 
+    def close(self, filename):
+        self.files[filename].close()
+
     def __del__(self):
         for key in self.files:
             self.files[key].close()
