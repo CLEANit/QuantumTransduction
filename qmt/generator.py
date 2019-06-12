@@ -402,7 +402,7 @@ class Generator:
                 for gene, output in zip(self.parser.getGenes(), outputs):
                     if np.random.uniform() < ga_params['random-step']['fraction']:
                         val = getFromDict(old_config, gene['path'])
-                        new_val = val + ga_params['random-step']['max-update-rate'] * np.random.uniform()
+                        new_val = val + ga_params['random-step']['max-update-rate'] * np.random.uniform(low=-1, high=1)
 
                         # check to make sure we are in the range, if not, wrap the value 
                         if new_val < gene['range'][0]:
