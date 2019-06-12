@@ -4,6 +4,8 @@ import numpy as np
 import subprocess
 import copy
 import os
+import dill
+import sys
 from scipy.interpolate import interp1d, griddata
 from .generator import Generator
 
@@ -35,6 +37,14 @@ class GA:
 
         subprocess.run(['mkdir -p output'], shell=True)
 
+    def serializeStructures(self):
+        """
+        Write the list of structures to disk.
+        """
+        with open('output/structures_gen_' + str(self.generation_number).zfill(3) + '.dill', 'wb') as f:
+            dill.dump(self.getCurrentGeneration(), f)
+        sys.stdout.flush()
+        
     def summarizeGeneration(self):
         """
         Print out the average and standard deviation of the number of orbitals we are currently investigating.

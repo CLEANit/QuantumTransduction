@@ -133,6 +133,8 @@ def main():
 
         pairs = pairs[:len(structures)]
         
+        ga.serializeStructures()
+
         if parser.getGAParameters()['crossing-fraction'] > 0.:
             structures = ga.generator.crossOverAll(pairs, pool=pool, seeds=np.random.randint(0, 2**32 - 1, len(structures)))
         
