@@ -122,7 +122,7 @@ def main():
 
 
         short_timer.start()
-        subset_limit = parser.config['GA']['ann-params']['random-step']['keep-best']
+        subset_limit = parser.config['GA']['random-step']['keep-best']
         structures_subset = structures[:subset_limit]
         new_structures = []
         for i in range(len(structures)):
