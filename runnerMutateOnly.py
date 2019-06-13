@@ -71,7 +71,7 @@ def main():
 
         
         ga = GA(parser, objective_function=objectiveFunction)
-        structures = ga.generator.generateAll(pool=pool, seeds=np.random.randint(0, 2**32 - 1, parser.config['GA']['n_structures']))
+        structures = ga.generator.generateAll(pool=None, seeds=np.random.randint(0, 2**32 - 1, parser.config['GA']['n_structures']))
         ga.setNextGeneration(structures)
         logger.success('Initial structures generated. Elapsed time: %s' % (short_timer.stop()))
 

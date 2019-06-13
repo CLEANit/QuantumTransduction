@@ -422,11 +422,20 @@ class Structure:
         # return system
         # import scipy
         bin_rep = self.getBinaryRepresentation(system, policyMask=True)
+        # plt.imshow(bin_rep)
+        # plt.show()
         bin_rep = gaussian_filter(bin_rep, 2)
-        bin_rep = np.round(bin_rep)
+        bin_rep = np.where(bin_rep > 0.4, 1.0, 0.0)
+        # plt.imshow(bin_rep)
+        # plt.show()
         bin_rep = binary_erosion(bin_rep, selem=np.ones((3,3)))
-        bin_rep = binary_dilation(bin_rep, selem=np.ones((3,3)))
-
+        for _ in range(3):
+            if np.random.uniform() < 0.5:
+                bin_rep = binary_dilation(bin_rep, selem=np.ones((3,3)))
+            else:
+                bin_rep = binary_dilation(bin_rep)
+        # plt.imshow(bin_rep)
+        # plt.show()
         tags = np.array(tags)
         poss = np.array(poss)
 
