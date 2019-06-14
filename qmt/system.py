@@ -308,7 +308,7 @@ class Structure:
                 sym = kwant.TranslationalSymmetry(self.lattice.vec(lead_vector))
                 a = orthogVecSlope(self.lattice.vec(lead_vector))
                 lead = kwant.Builder(sym)
-                lead[self.lattice.shape(lambda pos: lead_range[0]  <= pos[1] - lead_shift[1] + (pos[0] - lead_shift[0]) * a <= lead_range[1], lead_offset)] = partial(onSiteFunction, self, h0, 0., self.parser.getPhi(), False)
+                lead[self.lattice.shape(lambda pos: lead_range[0]  <= pos[1] - lead_shift[1] + (pos[0] - lead_shift[0]) * a <= lead_range[1], lead_offset)] = partial(onSiteFunction, self, h0, 0., self.parser.getPhi(), True)
                 lead[kwant.builder.HoppingKind((1,0), lat, lat)] =  h1
                 lead[kwant.builder.HoppingKind((0,-1), lat, lat)] = simTransformX(4 * np.pi / 3, h1)
                 lead[kwant.builder.HoppingKind((1,-1), lat, lat)] = reflectZ(simTransformX(np.pi / 3, h1))
