@@ -104,11 +104,10 @@ def main():
         currents_0_1 = pool.map(getConductances, structures, [0] * len(structures), [1] * len(structures))
         currents_0_2 = pool.map(getConductances, structures, [0] * len(structures), [2] * len(structures))
         
-        ga.io.writer('output/currents_gen_' + str(ga.generationNumber()).zfill(3) + '.dat', '# Currents (lead1-k\', lead1-k, lead2-k\', lead2-k)\n', header=True)
-        for cs1, cs2 in zip(currents_0_1, currents_0_2):
-            ga.io.writer('output/currents_gen_' + str(ga.generationNumber()).zfill(3) + '.dat', cs1 + cs2)
-        ga.io.close('output/currents_gen_' + str(ga.generationNumber()).zfill(3) + '.dat')
-
+        with open('output/currents_gen_' + str(ga.generationNumber()).zfill(3) + '.dat', 'w') as cf:
+            cf.write('# Currents (lead1-k\', lead1-k, lead2-k\', lead2-k)\n')
+            for cs1, cs2 in zip(currents_0_1, currents_0_2):
+                cf.write('%0.20e\t%0.20e\t%0.20e\t%0.20e\n' % (cs1[0], cs1[1], cs2[0], cs2[1]))
 
         # calculate the objective function
         ga.calculate((currents_0_1, currents_0_2))
