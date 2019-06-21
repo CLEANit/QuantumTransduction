@@ -406,10 +406,10 @@ class Structure:
         max_tag_sx = np.max(tags[:,0])
         max_tag_sy = np.max(tags[:,1])
 
-        for s in values:
-            val = (s.pos[1] - min_pos_sy) / (max_pos_sy - min_pos_sy)
-            values[s] = 1 - val
-            self.system_colours[s] = values[s]
+        # for s in values:
+        #     val = (s.pos[1] - min_pos_sy) / (max_pos_sy - min_pos_sy)
+        #     values[s] = 1 - val
+        #     self.system_colours[s] = values[s]
 
         # bin_rep = self.getBinaryRepresentation(system, policyMask=True)
         # plt.imshow(bin_rep)
@@ -427,7 +427,7 @@ class Structure:
         except AttributeError:
             self.parser.policy_mask = MLPRegressor(hidden_layer_sizes=[max_vec_size] + generator_params['neurons'] + [1], activation='tanh')
             self.parser.policy_mask._random_state = np.random.RandomState(np.random.randint(2**32))
-            self.parser.policy_mask._initialize(np.empty((1, 2)), [max_vec_size, 128, 1])
+            self.parser.policy_mask._initialize(np.empty((1, 1)), [max_vec_size] + generator_params['neurons'] + [1])
             self.parser.policy_mask.out_activation_ = 'logistic'
 
 
