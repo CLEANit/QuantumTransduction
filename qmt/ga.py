@@ -44,6 +44,10 @@ class GA:
         with open('output/structures_gen_' + str(self.generation_number).zfill(3) + '.dill', 'wb') as f:
             dill.dump(self.getCurrentGeneration(), f)
         sys.stdout.flush()
+
+    def resetParser(self, parser):
+        self.parser = parser
+        self.generator.parser = parser
         
     def summarizeGeneration(self):
         """

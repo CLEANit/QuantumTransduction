@@ -47,7 +47,6 @@ class Serializer:
                     if self.parser.getConfig() != ga.parser.getConfig():
                         logger.warning('The YAML configuration has changed, starting fresh...')
                         return None
-
                 return ga
         except:
             return None

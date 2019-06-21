@@ -47,6 +47,30 @@ def objectiveFunction(currents_0_1, currents_0_2):
 
     return data
 
+def getPercentageOfSites(structure, policy=False):
+    bin_rep = structure.getBinaryRepresentation(structure.pre_system, policyMask=policy)
+    num_ones = np.where(bin_rep == 1.)[0].shape[0]
+    num_zeros = np.where(bin_rep == 0.)[0].shape[0]
+    abs_pct_ones = np.abs(float(num_ones) / (num_ones + num_zeros) - 0.3)
+    abs_pct_zeros = float(num_zeros) / (num_ones + num_zeros)
+    return (1 / abs_pct_ones, 1 / abs_pct_zeros)
+
+def getPercentageOfSitesUpperHalf(structure, policy=False):
+    bin_rep = structure.getBinaryRepresentation(structure.pre_system, policyMask=policy)
+    bin_rep_upper = bin_rep[:, bin_rep.shape[1] // 2: ]
+    bin_rep_lower = bin_rep[:, :bin_rep.shape[1] // 2]
+    num_ones_upper = np.where(bin_rep_upper == 1.)[0].shape[0]
+    num_zeros_upper = np.where(bin_rep_upper == 0.)[0].shape[0]
+
+    num_ones_lower = np.where(bin_rep_lower == 1.)[0].shape[0]
+    num_zeros_lower = np.where(bin_rep_lower == 0.)[0].shape[0]
+    print(num_ones_upper, num_zeros_upper, num_ones_lower, num_zeros_lower)
+    return (float(num_ones_upper) / (num_ones_upper + num_zeros_upper), float(num_zeros_lower) / (num_ones_lower + num_zeros_lower))
+
+def objectiveFunctionForNSites(sites_pct1, sites_pct2):
+    # sites_pct1 = sites_pct2
+    return np.array(sites_pct1)
+
 def main():
     total_timer = Timer()
     iteration_timer = Timer()
@@ -71,8 +95,8 @@ def main():
         short_timer.start()
 
         
-        ga = GA(parser, objective_function=objectiveFunction)
-        structures = ga.generator.generateAll(pool=pool, seeds=np.random.randint(0, 2**32 - 1, parser.config['GA']['n_structures']))
+        ga = GA(parser, objective_function=objectiveFunctionForNSites)
+        structures = ga.generator.generateAll(pool=None, seeds=np.random.randint(0, 2**32 - 1, parser.config['GA']['n_structures']))
         ga.setNextGeneration(structures)
         logger.success('Initial structures generated. Elapsed time: %s' % (short_timer.stop()))
 
@@ -102,16 +126,17 @@ def main():
             s.visualizeSystem(args={'dpi': 600, 'file': 'output/' + 'gen_' + str(ga.generationNumber()).zfill(3) + '/gen_%03i_struct_%03i.png' % (ga.generationNumber(), i)})
 
         # calculate currents and write them out to disk
-        currents_0_1 = pool.map(getConductances, structures, [0] * len(structures), [1] * len(structures))
-        currents_0_2 = pool.map(getConductances, structures, [0] * len(structures), [2] * len(structures))
+        # currents_0_1 = pool.map(getConductances, structures, [0] * len(structures), [1] * len(structures))
+        # currents_0_2 = pool.map(getConductances, structures, [0] * len(structures), [2] * len(structures))
+        sites_pct = pool.map(getPercentageOfSitesUpperHalf, structures, [parser.getGenerator()['turn_on']] * len(structures))
         
         with open('output/currents_gen_' + str(ga.generationNumber()).zfill(3) + '.dat', 'w') as cf:
             cf.write('# Currents (lead1-k\', lead1-k, lead2-k\', lead2-k)\n')
-            for cs1, cs2 in zip(currents_0_1, currents_0_2):
+            for cs1, cs2 in zip(sites_pct, sites_pct):
                 cf.write('%0.20e\t%0.20e\t%0.20e\t%0.20e\n' % (cs1[0], cs1[1], cs2[0], cs2[1]))
 
         # calculate the objective function
-        ga.calculate((currents_0_1, currents_0_2))
+        ga.calculate((sites_pct, sites_pct))
 
         structures = ga.rankGeneration()
         logger.success('Calculations finished. Elapsed time: %s' % (short_timer.stop()))

@@ -370,8 +370,9 @@ class Structure:
 
     def policyMask(self, system):
         nns = []
-        neighborhoods = []
+        neighborhoods = {}
         self.system_colours = {}
+        values = {}
         pnj_config = self.parser.getPNJunction()
         tags = []
         poss = []
@@ -379,63 +380,19 @@ class Structure:
             if self.body(s.pos):
                 tags.append(s.tag)
                 poss.append(s.pos)
-                neighborhood = {}
+                neighborhoods[s] = list()
+                neighborhoods[s].append(s)
+                self.system_colours[s] = 0.5
+                values[s] = 0.5
                 for n in self.system.neighbors(s):
-                    val = self.system[n]
-                    neighborhood[n.index] = np.mean(val(n))
+                    if self.body(n.pos):
+                        neighborhoods[s].append(n)
                     for nn in self.system.neighbors(n):
-                        val = self.system[nn]
-                        neighborhood[nn.index] = np.mean(np.array(val(nn)).diagonal())
+                        if self.body(nn.pos):
+                            neighborhoods[s].append(nn)
 
-                neighborhoods.append((s, np.array(list(neighborhood.values()))))
-                nns.append(len(neighborhood))
+                nns.append(len(neighborhoods[s]))
 
-        max_vec_size = np.max(nns)
-
-        # get the ANN
-        generator_params = self.parser.getGenerator()
-
-        # create the ANN if we need it
-        try:
-            _ = self.parser.policy_mask
-        except AttributeError:
-            self.parser.policy_mask = MLPRegressor(hidden_layer_sizes=[max_vec_size] + generator_params['neurons'] + [2])
-            self.parser.policy_mask._random_state = np.random.RandomState(np.random.randint(2**32))
-            self.parser.policy_mask._initialize(np.empty((1, 2)), [max_vec_size, 128, 2])
-
-        for s, neighborhood in neighborhoods:
-            if self.body(s.pos):
-                input_vec = np.zeros((1, max_vec_size))
-                input_vec[0, :neighborhood.shape[0]] += neighborhood[:]
-                output_vec = self.parser.policy_mask.predict(input_vec)[0, :]
-                output_vec = np.exp(output_vec) / np.sum(np.exp(output_vec))
-                choice = np.random.choice([0, 1], p=output_vec)
-
-                self.system_colours[s] = choice
-
-                for nn in self.system.neighbors(s):
-                    self.system_colours[nn] = choice
-
-                    for nnn in self.system.neighbors(nn):
-                        self.system_colours[nnn] = choice
-
-        # return system
-        # import scipy
-        bin_rep = self.getBinaryRepresentation(system, policyMask=True)
-        # plt.imshow(bin_rep)
-        # plt.show()
-        bin_rep = gaussian_filter(bin_rep, 2)
-        bin_rep = np.where(bin_rep > 0.4, 1.0, 0.0)
-        # plt.imshow(bin_rep)
-        # plt.show()
-        bin_rep = binary_erosion(bin_rep, selem=np.ones((3,3)))
-        for _ in range(3):
-            if np.random.uniform() < 0.5:
-                bin_rep = binary_dilation(bin_rep, selem=np.ones((3,3)))
-            else:
-                bin_rep = binary_dilation(bin_rep)
-        # plt.imshow(bin_rep)
-        # plt.show()
         tags = np.array(tags)
         poss = np.array(poss)
 
@@ -449,7 +406,72 @@ class Structure:
         max_tag_sx = np.max(tags[:,0])
         max_tag_sy = np.max(tags[:,1])
 
-        image_size = (max_tag_sx - min_tag_sx + 1, max_tag_sy - min_tag_sy + 1)
+        for s in values:
+            val = (s.pos[1] - min_pos_sy) / (max_pos_sy - min_pos_sy)
+            values[s] = 1 - val
+            self.system_colours[s] = values[s]
+
+        # bin_rep = self.getBinaryRepresentation(system, policyMask=True)
+        # plt.imshow(bin_rep)
+        # plt.colorbar()
+        # plt.show()
+
+        max_vec_size = np.max(nns)
+
+        # get the ANN
+        generator_params = self.parser.getGenerator()
+
+        # create the ANN if we need it
+        try:
+            _ = self.parser.policy_mask
+        except AttributeError:
+            self.parser.policy_mask = MLPRegressor(hidden_layer_sizes=[max_vec_size] + generator_params['neurons'] + [1], activation='tanh')
+            self.parser.policy_mask._random_state = np.random.RandomState(np.random.randint(2**32))
+            self.parser.policy_mask._initialize(np.empty((1, 2)), [max_vec_size, 128, 1])
+            self.parser.policy_mask.out_activation_ = 'logistic'
+
+
+        # for s, neighborhood in neighborhoods.items():
+        for i in range(len(neighborhoods.keys())):
+            index = np.random.randint(0, len(neighborhoods.keys()))
+            s, neighborhood = list(neighborhoods.keys())[index], neighborhoods[list(neighborhoods.keys())[index]]
+            input_list = []
+            for n in neighborhood:
+                input_list.append(values[n])
+            input_vec = np.zeros((1, max_vec_size))
+            input_vec[0, :len(input_list)] += np.array(input_list)
+            output_vec = self.parser.policy_mask.predict(input_vec)[0]
+            choice = np.round(output_vec)
+            # choice = np.random.choice([0, 1], p=output_vec)
+            values[s] = choice
+            self.system_colours[s] = choice
+
+            for nn in self.system.neighbors(s):
+                self.system_colours[nn] = choice
+
+                for nnn in self.system.neighbors(nn):
+                    self.system_colours[nnn] = choice
+
+
+        # return system
+        # import scipy
+        bin_rep = self.getBinaryRepresentation(system, policyMask=True)
+        # plt.imshow(bin_rep)
+        # plt.show()
+        # bin_rep = gaussian_filter(bin_rep, 2)
+        # bin_rep = np.where(bin_rep > 0.4, 1.0, 0.0)
+        # # plt.imshow(bin_rep)
+        # # plt.show()
+        # bin_rep = binary_erosion(bin_rep, selem=np.ones((3,3)))
+        # for _ in range(3):
+        #     if np.random.uniform() < 0.5:
+        #         bin_rep = binary_dilation(bin_rep, selem=np.ones((3,3)))
+        #     else:
+        #         bin_rep = binary_dilation(bin_rep)
+        # plt.imshow(bin_rep)
+        # plt.show()
+
+        image_size = (max_tag_sx - min_tag_sx, max_tag_sy - min_tag_sy)
         dx = (max_pos_sx - min_pos_sx) / (image_size[0] - 1)
         dy = (max_pos_sy - min_pos_sy) / (image_size[1] - 1)
 
@@ -594,9 +616,9 @@ class Structure:
             max_tag_sx = np.max(tags[:,0])
             max_tag_sy = np.max(tags[:,1])
 
-            image_size = (max_tag_sx - min_tag_sx + 1, max_tag_sy - min_tag_sy + 1)
-            dx = (max_pos_sx - min_pos_sx) / image_size[0]
-            dy = (max_pos_sy - min_pos_sy) / image_size[1]
+            image_size = (max_tag_sx - min_tag_sx, max_tag_sy - min_tag_sy)
+            dx = (max_pos_sx - min_pos_sx) / (image_size[0] - 1)
+            dy = (max_pos_sy - min_pos_sy) / (image_size[1] - 1)
 
             image = np.zeros(image_size)
             for s, v in system.site_value_pairs():
