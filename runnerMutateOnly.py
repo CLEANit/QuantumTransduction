@@ -130,7 +130,7 @@ def main():
             new_structures.append(structures_subset[index])
         
         # mutate the current generation
-        structures_modified = ga.generator.mutateAll(new_structures[:len(structures)], pool=pool, seeds=np.random.randint(0, 2**32 - 1, len(structures)))
+        structures_modified = ga.generator.mutateAll(new_structures, pool=pool, seeds=np.random.randint(0, 2**32 - 1, len(structures)))
 
         structures = structures_subset + structures_modified
 
