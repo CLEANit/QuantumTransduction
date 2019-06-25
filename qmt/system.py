@@ -425,7 +425,7 @@ class Structure:
         try:
             _ = self.parser.policy_mask
         except AttributeError:
-            self.parser.policy_mask = MLPRegressor(hidden_layer_sizes=[max_vec_size] + generator_params['neurons'] + [1], activation='tanh')
+            self.parser.policy_mask = MLPRegressor(hidden_layer_sizes=[max_vec_size] + generator_params['neurons'] + [1], activation='logistic')
             self.parser.policy_mask._random_state = np.random.RandomState(np.random.randint(2**32))
             self.parser.policy_mask._initialize(np.empty((1, 1)), [max_vec_size] + generator_params['neurons'] + [1])
             self.parser.policy_mask.out_activation_ = 'logistic'
@@ -441,7 +441,10 @@ class Structure:
             input_vec = np.zeros((1, max_vec_size))
             input_vec[0, :len(input_list)] += np.array(input_list)
             output_vec = self.parser.policy_mask.predict(input_vec)[0]
-            choice = np.round(output_vec)
+            if output_vec < np.random.rand():
+                choice = 1.
+            else:
+                choice = 0.
             # choice = np.random.choice([0, 1], p=output_vec)
             values[s] = choice
             self.system_colours[s] = choice
