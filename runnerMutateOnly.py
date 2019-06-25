@@ -125,12 +125,14 @@ def main():
         subset_limit = parser.config['GA']['random-step']['keep-best']
         structures_subset = structures[:subset_limit]
         new_structures = []
-        for i in range(len(structures)):
+        for i in range(len(structures) - subset_limit):
             index = np.random.randint(subset_limit)
             new_structures.append(structures_subset[index])
         
         # mutate the current generation
-        structures = ga.generator.mutateAll(new_structures[:len(structures)], pool=pool, seeds=np.random.randint(0, 2**32 - 1, len(structures)))
+        structures_modified = ga.generator.mutateAll(new_structures[:len(structures)], pool=pool, seeds=np.random.randint(0, 2**32 - 1, len(structures)))
+
+        structures = structures_subset + structures_modified
 
         ga.setNextGeneration(structures)
         logger.success('Structures have been updated. Elapsed time: %s' % (short_timer.stop()))
