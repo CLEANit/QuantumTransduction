@@ -73,7 +73,7 @@ class GA:
         """
         return self.current_structures
 
-    def rankGeneration(self):
+    def rankGenerationWithPareto(self):
         """
         Rank the current structures. We rank based on the euclidean distance
         between the vector and the pareto front.
@@ -117,6 +117,36 @@ class GA:
             all_structs = self.current_structures
             self.current_objectives = np.sort(objectives)[:self.parser.getNStructures()]
             return [all_structs[elem] for elem in np.argsort(objectives)[:self.parser.getNStructures()]]
+        else:
+            logger.error('Error in ranking structures, you seem to be using an objective function that is not 2D nor 3D.')
+
+    def rankGenerationWithSquare(self):
+        """
+        Rank the current structures. We rank based on the euclidean distance
+        between the vector and the pareto front.
+
+        Returns
+        -------
+        A list of structures ordered by their distances to the pareto front.
+        
+        """
+        # if self.past_vectors is None:
+        data = self.current_vectors
+        # else:
+        #     data = np.vstack((self.past_vectors, self.current_vectors))
+
+        # if we're working in 2D
+        if data.shape[1] == 2:
+            rs = data[:,0]**2 + data[:,1]**2 
+            self.current_objectives = np.flip(np.sort(rs), axis=0)
+            return [self.current_structures[elem] for elem in np.flip(np.argsort(rs), axis=0)]
+
+
+        # if we're working in 3D
+        if data.shape[1] == 3:
+            rs = data[:,0]**2 + data[:,1]**2 + data[:,2]**2
+            self.current_objectives = np.flip(np.sort(rs), axis=0)
+            return [self.current_structures[elem] for elem in np.flip(np.argsort(rs), axis=0)]
         else:
             logger.error('Error in ranking structures, you seem to be using an objective function that is not 2D nor 3D.')
 

@@ -109,7 +109,7 @@ def main():
         # calculate the objective function
         ga.calculate((currents_0_1, currents_0_2))
 
-        structures = ga.rankGeneration()
+        structures = ga.rankGenerationWithSquare()
         for s, objs in zip(structures, ga.current_objectives):
             print(s.identifier, objs)
         logger.success('Calculations finished. Elapsed time: %s' % (short_timer.stop()))
