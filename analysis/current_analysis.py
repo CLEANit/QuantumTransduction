@@ -27,21 +27,21 @@ def expRunningAvg(current_data, alpha=0.9):
     return avgs
 
 # for finding the best structure
-# for i in range(n_generations):
-#     gen_data = current_data[i*n_structures:(i+1)*n_structures,:]
-#     objs = ((gen_data[:,0] / (gen_data[:,0] + gen_data[:,1]))**2 + (gen_data[:,3] / (gen_data[:,2] + gen_data[:,3]))**2 + (gen_data[:,0] + gen_data[:,3])**2)**0.5
-#     index = np.argmax(objs)
-#     objectives.append(objs[index])
-#     purities.append([gen_data[index,0] / (gen_data[index,0] + gen_data[index,1]), gen_data[index,3] / (gen_data[index,2] + gen_data[index,3])])
-#     currents.append(gen_data[index,:])
-
-# for averaging
 for i in range(n_generations):
     gen_data = current_data[i*n_structures:(i+1)*n_structures,:]
     objs = ((gen_data[:,0] / (gen_data[:,0] + gen_data[:,1]))**2 + (gen_data[:,3] / (gen_data[:,2] + gen_data[:,3]))**2 + (gen_data[:,0] + gen_data[:,3])**2)**0.5
-    objectives.append(np.mean(objs))
-    purities.append([np.mean(gen_data[:,0] / (gen_data[:,0] + gen_data[:,1])), np.mean(gen_data[:,3] / (gen_data[:,2] + gen_data[:,3]))])
-    currents.append([np.mean(gen_data[:, 0]), np.mean(gen_data[:, 1]), np.mean(gen_data[:, 2]), np.mean(gen_data[:, 3])])
+    index = np.argmax(objs)
+    objectives.append(objs[index])
+    purities.append([gen_data[index,0] / (gen_data[index,0] + gen_data[index,1]), gen_data[index,3] / (gen_data[index,2] + gen_data[index,3])])
+    currents.append(gen_data[index,:])
+
+# for averaging
+# for i in range(n_generations):
+#     gen_data = current_data[i*n_structures:(i+1)*n_structures,:]
+#     objs = ((gen_data[:,0] / (gen_data[:,0] + gen_data[:,1]))**2 + (gen_data[:,3] / (gen_data[:,2] + gen_data[:,3]))**2 + (gen_data[:,0] + gen_data[:,3])**2)**0.5
+#     objectives.append(np.mean(objs))
+#     purities.append([np.mean(gen_data[:,0] / (gen_data[:,0] + gen_data[:,1])), np.mean(gen_data[:,3] / (gen_data[:,2] + gen_data[:,3]))])
+#     currents.append([np.mean(gen_data[:, 0]), np.mean(gen_data[:, 1]), np.mean(gen_data[:, 2]), np.mean(gen_data[:, 3])])
 
 currents = np.array(currents)
 purities = np.array(purities)

@@ -110,8 +110,8 @@ def main():
         ga.calculate((currents_0_1, currents_0_2))
 
         structures = ga.rankGenerationWithSquare()
-        for s, objs in zip(structures, ga.current_objectives):
-            print(s.identifier, objs)
+        # for s, objs in zip(structures, ga.current_objectives):
+        #     print(s.identifier, objs)
         logger.success('Calculations finished. Elapsed time: %s' % (short_timer.stop()))
         # write gene variables and objective function parameters to file
         ga.writePhaseSpace(structures)
