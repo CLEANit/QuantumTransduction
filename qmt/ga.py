@@ -98,8 +98,8 @@ class GA:
             r = np.sqrt(xd + yd)
             objectives = np.min(r, axis=0)
             all_structs = self.current_structures
-            self.current_objectives = np.flip(np.sort(objectives)[:self.parser.getNStructures()], axis=0)
-            return [all_structs[elem] for elem in np.flip(np.argsort(objectives)[:self.parser.getNStructures()], axis=0)]
+            self.current_objectives = np.sort(objectives)[:self.parser.getNStructures()]
+            return [all_structs[elem] for elem in np.argsort(objectives)[:self.parser.getNStructures()]]
 
         # if we're working in 3D
         if data.shape[1] == 3:
@@ -115,8 +115,8 @@ class GA:
             zd = np.min((interp_wout_nan.flatten()[:,None] - data[:,2])**2, axis=0)
             objectives = np.sqrt(xd + yd + zd)
             all_structs = self.current_structures
-            self.current_objectives = np.flip(np.sort(objectives)[:self.parser.getNStructures()],axis=0)
-            return [all_structs[elem] for elem in np.flip(np.argsort(objectives)[:self.parser.getNStructures()], axis=0)]
+            self.current_objectives = np.sort(objectives)[:self.parser.getNStructures()]
+            return [all_structs[elem] for elem in np.argsort(objectives)[:self.parser.getNStructures()]]
         else:
             logger.error('Error in ranking structures, you seem to be using an objective function that is not 2D nor 3D.')
 

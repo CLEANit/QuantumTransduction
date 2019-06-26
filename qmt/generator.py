@@ -335,7 +335,7 @@ class Generator:
             # identifier = self.n_generated
             # # history = copy.copy(structure.history)
             # # history.append(structure.identifier)
-            s = Structure(new_parser, structure.identifier, structure.parents)
+            s = Structure(new_parser, self.n_generated + thread_num, structure.identifier)
             # self.n_generated += 1
 
             return s
@@ -420,7 +420,7 @@ class Generator:
             # identifier = self.n_generated
             # # history = copy.copy(structure.history)
             # # history.append(structure.identifier)
-            s = Structure(new_parser, structure.identifier, structure.parents)
+            s = Structure(new_parser, self.n_generated + thread_num, structure.identifier)
             # self.n_generated += 1
 
             return s
