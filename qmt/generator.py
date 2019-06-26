@@ -297,7 +297,7 @@ class Generator:
 
 
 
-    def mutate(self, structure, seed=None):
+    def mutate(self, structure, seed=None, thread_num=None):
         """
         Mutate the structures gene in some way.
 
@@ -377,7 +377,7 @@ class Generator:
             # identifier = self.n_generated
             # # history = copy.copy(structure.history)
             # # history.append(structure.identifier)
-            s = Structure(new_parser, structure.identifier, structure.parents)
+            s = Structure(new_parser, self.n_generated + thread_num, structure.identifier)
             # self.n_generated += 1
 
             return s
@@ -487,7 +487,9 @@ class Generator:
         if pool is None:
             return [self.mutate(s) for s in structures]
         else:
-            return pool.map(self.mutate, structures, seeds)
+            ss = pool.map(self.mutate, structures, seeds, range(len(structures)))
+            self.n_generated += len(structures)
+            return ss
 
     def crossOverAll(self, pairs_of_structures, pool=None, seeds=None):
         """
