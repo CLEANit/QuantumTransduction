@@ -36,11 +36,7 @@ def getNewStructure(parser, identifier):
 
 def objectiveFunction(currents_0_1, currents_0_2):
     vectors = []
-    objectives = []
     for v1, v2 in  zip(currents_0_1, currents_0_2):
-        objective = []
-        objective.append((v1[0]) / (v1[0] + v1[1]) - 1)
-        objective.append((v2[1]) / (v2[0] + v2[1]) - 1)
         vectors.append((np.abs((v1[0]) / (v1[0] + v1[1])), np.abs((v2[1]) / (v2[0] + v2[1])), v1[0] + v2[1]))
 
     data = np.array(vectors).reshape(len(vectors), 3)
@@ -114,6 +110,8 @@ def main():
         ga.calculate((currents_0_1, currents_0_2))
 
         structures = ga.rankGeneration()
+        for s, objs in zip(structures, ga.current_objectives):
+            print(s.identifier, objs)
         logger.success('Calculations finished. Elapsed time: %s' % (short_timer.stop()))
         # write gene variables and objective function parameters to file
         ga.writePhaseSpace(structures)
@@ -130,7 +128,7 @@ def main():
             new_structures.append(structures_subset[index])
         
         # mutate the current generation
-        structures_modified = ga.generator.mutateAll(new_structures, pool=pool, seeds=np.random.randint(0, 2**32 - 1, len(structures)))
+        structures_modified = ga.generator.mutateAll(new_structures, pool=pool, seeds=np.random.randint(0, 2**32 - 1, len(new_structures)))
 
         structures = structures_subset + structures_modified
 
