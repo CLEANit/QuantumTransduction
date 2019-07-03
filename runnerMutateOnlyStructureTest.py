@@ -128,7 +128,7 @@ def main():
         # calculate currents and write them out to disk
         # currents_0_1 = pool.map(getConductances, structures, [0] * len(structures), [1] * len(structures))
         # currents_0_2 = pool.map(getConductances, structures, [0] * len(structures), [2] * len(structures))
-        sites_pct = pool.map(getPercentageOfSites, structures, [parser.getGenerator()['turn_on']] * len(structures))
+        sites_pct = pool.map(getPercentageOfSitesUpperHalf, structures, [parser.getGenerator()['turn_on']] * len(structures))
         
         with open('output/currents_gen_' + str(ga.generationNumber()).zfill(3) + '.dat', 'w') as cf:
             cf.write('# Currents (lead1-k\', lead1-k, lead2-k\', lead2-k)\n')
@@ -138,7 +138,7 @@ def main():
         # calculate the objective function
         ga.calculate((sites_pct, sites_pct))
 
-        structures = ga.rankGeneration()
+        structures = ga.rankGenerationWithSquare()
         logger.success('Calculations finished. Elapsed time: %s' % (short_timer.stop()))
         # write gene variables and objective function parameters to file
         ga.writePhaseSpace(structures)
