@@ -41,12 +41,12 @@ for energy in bar(energies):
 	K_prime_wfs = kwant.wave_function(best_structure.system, energy)(0)[K_prime_indices,:]
 	K_wfs = kwant.wave_function(best_structure.system, energy)(0)[K_indices,:]
 	currents_kp.append(np.sum(J(wf) for wf in K_prime_wfs))
-	current_k.append(np.sum(J(wf) for wf in K_wfs))
+	currents_k.append(np.sum(J(wf) for wf in K_wfs))
 
 current_K_prime = np.sum(np.array(currents_kp))
 current_K = np.sum(np.array(currents_k))
 
-fig, ax = pyplot.subplots(1,1, figsize=(20, 10))
+fig, ax = plt.subplots(1,1, figsize=(20, 10))
 red_cm = cmocean.cm.amp
 red_cm._init()
 alphas = np.abs(np.linspace(0.5, 1.0, red_cm.N))
@@ -73,13 +73,13 @@ kwant.plotter.current(best_structure.system, current_K, cmap=blue_cm, ax=ax, lin
 patch_up = mpatches.Patch(color=cmocean.cm.amp(0.75), label='$k\'$')
 patch_down = mpatches.Patch(color=cmocean.cm.ice_r(0.75), label='$k$')
 
-pyplot.legend(handles=[patch_up, patch_down])
-pyplot.xlabel('x-coordinate [\AA]')
-pyplot.ylabel(r'y-coordinate [\AA]')
-pyplot.tight_layout()
-# pyplot.savefig('spin-densities.pdf')
-pyplot.savefig('valley_densities.pdf')
-pyplot.show()
+plt.legend(handles=[patch_up, patch_down])
+plt.xlabel('x-coordinate [\AA]')
+plt.ylabel(r'y-coordinate [\AA]')
+plt.tight_layout()
+# plt.savefig('spin-densities.pdf')
+plt.savefig('valley_densities.pdf')
+plt.show()
 # best_structure.visualizeSystem(args={'file': 'best_structure.pdf'})
 
 # currents_0_1 = best_structure.getValleyPolarizedCurrent(0, 1)
