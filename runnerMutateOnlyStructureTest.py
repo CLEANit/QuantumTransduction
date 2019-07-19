@@ -51,8 +51,9 @@ def getPercentageOfSites(structure, policy=False):
     bin_rep = structure.getBinaryRepresentation(structure.pre_system, policyMask=policy)
     num_ones = np.where(bin_rep == 1.)[0].shape[0]
     num_zeros = np.where(bin_rep == 0.)[0].shape[0]
-    abs_pct_ones = np.abs(float(num_ones) / (num_ones + num_zeros) - 0.3)
+    abs_pct_ones = np.abs(float(num_ones) / (num_ones + num_zeros) - 0.5)
     abs_pct_zeros = float(num_zeros) / (num_ones + num_zeros)
+    print(abs_pct_ones, abs_pct_zeros)
     return (1 / abs_pct_ones, 1 / abs_pct_zeros)
 
 def getPercentageOfSitesUpperHalf(structure, policy=False):
@@ -128,7 +129,7 @@ def main():
         # calculate currents and write them out to disk
         # currents_0_1 = pool.map(getConductances, structures, [0] * len(structures), [1] * len(structures))
         # currents_0_2 = pool.map(getConductances, structures, [0] * len(structures), [2] * len(structures))
-        sites_pct = pool.map(getPercentageOfSitesUpperHalf, structures, [parser.getGenerator()['turn_on']] * len(structures))
+        sites_pct = pool.map(getPercentageOfSites, structures, [parser.getGenerator()['turn_on']] * len(structures))
         
         with open('output/currents_gen_' + str(ga.generationNumber()).zfill(3) + '.dat', 'w') as cf:
             cf.write('# Currents (lead1-k\', lead1-k, lead2-k\', lead2-k)\n')

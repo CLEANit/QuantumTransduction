@@ -7,7 +7,7 @@ import pandas
 
 font = {'family' : 'CMU Sans Serif',
 #         'weight' : 'light',
-        'size'   : 12}
+        'size'   : 36}
 
 plt.rc('font', **font)
 plt.rc('text', usetex=True)
@@ -46,34 +46,34 @@ for i in range(n_generations):
 currents = np.array(currents)
 purities = np.array(purities)
 objectives = np.array(objectives)
-fig, axes = plt.subplots(1, 3, figsize=(15,5))
+fig, axes = plt.subplots(1, 3, figsize=(30,10))
 
-axes[0].plot(range(n_generations), objectives, color='g', alpha=0.1)
-axes[0].plot(range(n_generations), expRunningAvg(objectives), color='g', alpha=0.9)
+axes[0].plot(range(n_generations), objectives, color='g', alpha=0.175, lw=5.0)
+axes[0].plot(range(n_generations), expRunningAvg(objectives), color='g', alpha=0.9, label='Running Average', lw=5.0)
 axes[0].grid(linestyle='--', linewidth=0.5)
 axes[0].set_xlabel('Generation')
 axes[0].set_ylabel('Objective Function')
+axes[0].legend()
 
-
-axes[1].plot(range(n_generations), purities[:,0], color='r', alpha=0.1),
-axes[1].plot(range(n_generations), expRunningAvg(purities[:, 0], alpha=0.9), color='r', label='$k\'$')
-axes[1].plot(range(n_generations), purities[:,1], color='b', alpha=0.1),
-axes[1].plot(range(n_generations), expRunningAvg(purities[:, 1], alpha=0.9), color='b', label='$k$')
+axes[1].plot(range(n_generations), purities[:,0], color='r', alpha=0.175, lw=5.0),
+axes[1].plot(range(n_generations), expRunningAvg(purities[:, 0]), alpha=0.9, lw=5.0, color='r', label='$k\'$')
+axes[1].plot(range(n_generations), purities[:,1], color='b', alpha=0.175, lw=5.0),
+axes[1].plot(range(n_generations), expRunningAvg(purities[:, 1]), alpha=0.9, color='b', lw=5.0, label='$k$')
 axes[1].grid(linestyle='--', linewidth=0.5)
 axes[1].set_xlabel('Generation')
-axes[1].set_ylabel('Polarization')
+axes[1].set_ylabel('Purity')
 # axes[1].set_aspect('equal', adjustable='box')
 # axes[1].set_facecolor('k', alpha=0.2)
 axes[1].legend()
 
-axes[2].plot(range(n_generations), currents[:,0], 'r', alpha=0.1)
-axes[2].plot(range(n_generations), expRunningAvg(currents[:,0]), 'r', label='lead 1: $k\'$')
-axes[2].plot(range(n_generations), currents[:,1], 'b', alpha=0.1)
-axes[2].plot(range(n_generations), expRunningAvg(currents[:,1]), 'b', label='lead 1: $k$')
-axes[2].plot(range(n_generations), currents[:,2], 'r--', alpha=0.1)
-axes[2].plot(range(n_generations), expRunningAvg(currents[:,2]), 'r--', label='lead 2: $k\'$')
-axes[2].plot(range(n_generations), currents[:,3], 'b--', alpha=0.1)
-axes[2].plot(range(n_generations), expRunningAvg(currents[:,3]), 'b--', label='lead 2: $k$')
+axes[2].plot(range(n_generations), currents[:,0], 'r', alpha=0.1, lw=5.0)
+axes[2].plot(range(n_generations), expRunningAvg(currents[:,0]), 'r', lw =5.0, label='lead 1: $k\'$')
+axes[2].plot(range(n_generations), currents[:,1], 'b', alpha=0.1, lw=5.0)
+axes[2].plot(range(n_generations), expRunningAvg(currents[:,1]), 'b', lw=5.0, label='lead 1: $k$')
+axes[2].plot(range(n_generations), currents[:,2], 'r--', alpha=0.1, lw=5.0)
+axes[2].plot(range(n_generations), expRunningAvg(currents[:,2]), 'r--', lw=5.0, label='lead 2: $k\'$')
+axes[2].plot(range(n_generations), currents[:,3], 'b--', alpha=0.1, lw=5.0)
+axes[2].plot(range(n_generations), expRunningAvg(currents[:,3]), 'b--', lw=5.0, label='lead 2: $k$')
 axes[2].grid(linestyle='--', linewidth=0.5)
 axes[2].set_xlabel('Generation')
 axes[2].set_ylabel('Current [$e \pi^{-1} \hbar^{-1}$]')

@@ -458,8 +458,8 @@ class Structure:
 
         # return system
         # import scipy
+        bin_rep = self.getBinaryRepresentation(system, policyMask=True)
         if self.parser.getGenerator()['filter']:
-            bin_rep = self.getBinaryRepresentation(system, policyMask=True)
             # plt.imshow(bin_rep)
             # plt.show()
             bin_rep = gaussian_filter(bin_rep, 2)
@@ -663,17 +663,17 @@ class Structure:
                         if self.system_colours[site]:
                             return cmocean.cm.deep(0.9)
                         else:
-                            return cmocean.cm.deep(0.1)
+                            return 'w'
                     except:
                         if self.parser.getGenerator()['leads'] == 'p-doped':
-                            return cmocean.cm.deep(0.1)
+                            return 'w'
                         elif self.parser.getGenerator()['leads'] == 'n-doped':
-                            return cmocean.cm.deep(0.9)
+                            return 'w'
                         else:
-                            return cmocean.cm.deep(0.5)
+                            return 'w'
 
 
-                return kwant.plot(self.pre_system, site_lw=0.1, lead_site_lw=0, colorbar=False, site_color=siteColours, show=True, **args)            
+                return kwant.plot(self.pre_system, site_size=0.5, site_lw=0.1, lead_site_lw=0, colorbar=False, site_color=siteColours, show=True, **args)            
             else:
                 return kwant.plot(self.pre_system, site_lw=0.1, colorbar=False, show=False, **args)
 
