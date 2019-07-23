@@ -6,15 +6,22 @@ import matplotlib.pyplot as plt
 import kwant
 import cmocean
 import progressbar
+from matplotlib.colors import to_rgba
+import matplotlib.patches as mpatches
+import matplotlib.cm as pltcm
 
+###############################################
+# get the colormap and set the transparency
+###############################################
+cmap = pltcm.get_cmap('jet')
+cmap._init()
+alphas = np.abs(np.ones(cmap.N) * 0.6)
+cmap._lut[:-3,-1] = alphas
+###############################################
 
-
-font = {'family' : 'CMU Sans Serif',
-#         'weight' : 'light',
-        'size'   : 12}
-plt.rc('font', **font)
-plt.rc('text', usetex=True)
-
+###############################################
+# load calculation and get currents
+###############################################
 ga = dill.load(open('restart/ga.dill', 'rb'))
 
 structures = ga.rankGenerationWithSquare()
@@ -23,7 +30,7 @@ best_structure = structures[0]
 print('Got best structure, now calculating currents...')
 
 energy_range = best_structure.getEnergyRange()
-energies = np.linspace(energy_range[0], energy_range[1], 8)
+energies = np.linspace(energy_range[0], energy_range[1], 128)
 
 J = kwant.operator.Current(best_structure.system)
 
@@ -40,57 +47,37 @@ for energy in bar(energies):
 
 	K_prime_wfs = kwant.wave_function(best_structure.system, energy)(0)[K_prime_indices,:]
 	K_wfs = kwant.wave_function(best_structure.system, energy)(0)[K_indices,:]
-	currents_kp.append(np.sum(J(wf) for wf in K_prime_wfs))
-	currents_k.append(np.sum(J(wf) for wf in K_wfs))
+	currents_kp.append(np.sum([J(wf) for wf in K_prime_wfs], axis=0))
+	currents_k.append(np.sum([J(wf) for wf in K_wfs], axis=0))
 
-current_K_prime = np.sum(np.array(currents_kp))
-current_K = np.sum(np.array(currents_k))
+current_K_prime = np.sum(np.array(currents_kp), axis=0)
+current_K = np.sum(np.array(currents_k), axis=0)
+###############################################
+
+###############################################
+# plot the K and K prime currents with the structure
+###############################################
 
 fig, ax = plt.subplots(1,1, figsize=(20, 10))
-red_cm = cmocean.cm.amp
-red_cm._init()
-alphas = np.abs(np.linspace(0.5, 1.0, red_cm.N))
-red_cm._lut[:-3,-1] = alphas
+best_structure.visualizeSystem(args={'ax': ax, 'hop_lw' : 0.0})
+stuff_before = ax.get_children()
 
-blue_cm = cmocean.cm.ice_r
-blue_cm._init()
-alphas = np.abs(np.linspace(0.25, 1.0, blue_cm.N))
-blue_cm._lut[:-3,-1] = alphas
+im = kwant.plotter.current(best_structure.system, current_K_prime, cmap=cmap, ax=ax, linecolor='k', max_linewidth=8., min_linewidth=0.0)
 
-kwant.plot(best_structure.system, 
-           site_lw=0.1,
-           lead_site_lw=0,
-           site_size=0.0,
-           site_color=to_rgba('g', 0.1),
-           hop_lw=0.1,
-           hop_color=to_rgba('g', 0.5),
-           lead_color=to_rgba('r', 0.5),
-           colorbar=False,
-           show=False,
-           ax=ax)
-kwant.plotter.current(best_structure.system, current_K_prime, cmap=red_cm, ax=ax, linecolor=cmocean.cm.amp(0.75), density=0.5, relwidth=0.1)
-kwant.plotter.current(best_structure.system, current_K, cmap=blue_cm, ax=ax, linecolor=cmocean.cm.ice_r(0.75), density=0.5, relwidth=0.1)
-patch_up = mpatches.Patch(color=cmocean.cm.amp(0.75), label='$k\'$')
-patch_down = mpatches.Patch(color=cmocean.cm.ice_r(0.75), label='$k$')
+for elem in stuff_before:
+	elem.set_zorder(-10)
 
-plt.legend(handles=[patch_up, patch_down])
-plt.xlabel('x-coordinate [\AA]')
-plt.ylabel(r'y-coordinate [\AA]')
-plt.tight_layout()
-# plt.savefig('spin-densities.pdf')
-plt.savefig('valley_densities.pdf')
-plt.show()
-# best_structure.visualizeSystem(args={'file': 'best_structure.pdf'})
+plt.savefig('valley_current_K_prime.pdf')
 
-# currents_0_1 = best_structure.getValleyPolarizedCurrent(0, 1)
-# currents_0_2 = best_structure.getValleyPolarizedCurrent(0, 2)
-# print(currents_0_1, currents_0_2)
-# es1, cs1 = best_structure.getConductance(0, 1)
-# es2, cs2 = best_structure.getConductance(0, 2)
+fig, ax = plt.subplots(1,1, figsize=(20, 10))
+best_structure.visualizeSystem(args={'ax': ax, 'hop_lw' : 0.0})
+stuff_before = ax.get_children()
 
-# plt.plot(es1, cs1, '-', color=plt.get_cmap('viridis')(0.25))
-# plt.plot(es2, cs2, '--', color=plt.get_cmap('viridis')(0.75))
-# plt.legend(['$k\'$', '$k$'])
-# plt.xlabel('Energy [eV]')
-# plt.ylabel('Conductance [$2e^2 \hbar^{-1}$]')
-# plt.show()
+im = kwant.plotter.current(best_structure.system, current_K, cmap=cmap, ax=ax, linecolor='k', max_linewidth=8., min_linewidth=0.0)
+
+for elem in stuff_before:
+	elem.set_zorder(-10)
+
+plt.savefig('valley_current_K.pdf')
+###############################################
+# all done

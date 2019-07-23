@@ -655,7 +655,7 @@ class Structure:
                         return cmocean.cm.deep(0.9)
                     else:
                         return cmocean.cm.deep(0.1)
-                return kwant.plot(self.pre_system, site_lw=0.1, lead_site_lw=0, colorbar=False, site_color=siteColours, show=True, **args)
+                return kwant.plot(self.pre_system, site_lw=0.1, lead_site_lw=0., colorbar=False, site_color=siteColours, show=False, **args)
             elif self.parser.getGenerator()['turn_on']:
                 def siteColours(site):
                     # print(list(self.pre_system.sites())[site])
@@ -673,7 +673,7 @@ class Structure:
                             return 'w'
 
 
-                return kwant.plot(self.pre_system, site_size=0.5, site_lw=0.1, lead_site_lw=0, colorbar=False, site_color=siteColours, show=True, **args)            
+                return kwant.plot(self.pre_system, site_size=0.5, site_lw=0.1, lead_site_lw=0., colorbar=False, site_color=siteColours, show=False, **args)            
             else:
                 return kwant.plot(self.pre_system, site_lw=0.1, colorbar=False, show=False, **args)
 
