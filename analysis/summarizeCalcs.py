@@ -21,18 +21,26 @@ for elem in files.split():
 
 dir_to_data = {}
 for key, val in dir_to_file.items():
-    dir_to_data[key] = np.loadtxt(val)
-
+    try:
+        dir_to_data[key] = np.loadtxt(val)
+    except:
+        pass
 data_x = []
 data_y = []
 cs = []
 
 for key, val in dir_to_data.items():
-    objs = (val[:,0]**2 + val[:,1]**2 + val[:,2]**2)**0.5
-    obj = np.max(objs)
-    data_x.append(float(key.split('_')[2]))
-    data_y.append(float(key.split('_')[6]))
-    cs.append(obj)
+    try:
+        objs = (val[:,0]**2 + val[:,1]**2 + val[:,2]**2)**0.5
+        obj = np.max(objs)
+        data_x.append(float(key.split('_')[2]))
+        data_y.append(float(key.split('_')[6]))
+        cs.append(obj)
+    except:
+        pass
+
+for i in range(len(data_x)):
+    print(data_x[i], data_y[i], cs[i])
 
 plt.scatter(data_x, data_y, c=cs, cmap=cm.deep, s=500)
 plt.colorbar()
