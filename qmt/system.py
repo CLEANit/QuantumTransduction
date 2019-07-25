@@ -946,9 +946,9 @@ class Structure:
             logger.error("You have defined the direction of the velocities wrong. It is either 'out_going' or 'in_coming'.")
 
         momentas = smatrix.lead_info[lead_start].momenta[positives]
-        K_prime_indices = np.where(np.logical_and(momentas >= K_prime_range[0], momentas <= K_prime_range[1]))[0]
+        K_prime_indices = positives[np.ma.masked_where(np.logical_and(momentas >= K_prime_range[0], momentas <= K_prime_range[1]), momentas).mask]
         # K_prime_indices = np.where(momentas < 0)
-        K_indices = np.where(np.logical_and(momentas >= K_range[0], momentas <= K_range[1]))[0]
+        K_indices = positives[np.ma.masked_where(np.logical_and(momentas >= K_range[0], momentas <= K_range[1])).mask]
         submatrix = smatrix.submatrix(lead_end, lead_start)
         K_prime_T = np.sum(np.absolute(submatrix[:, K_prime_indices])**2) 
         K_T = np.sum(np.absolute(submatrix[:, K_indices])**2)
@@ -968,7 +968,7 @@ class Structure:
         K_prime_range : A tuple of length 2 which defines the range where K' would be the polarization. Default: (-np.inf, -1e-8)
         K_range : A tuple of length 2 which defines the range where K would be the polarization. Default (0, np.inf)
         velocities : If 'out_going', we only consider velocities <= 0. If 'in_coming', velocities > 0. Default: 'out_going'
-        avg_chem_pot : The average of the chemical potentials between two leads. Default: 1.0.
+        avg_chem_pot : The average of the chemical potentials between two leads. Default: 0.0.
 
         Returns
         -------

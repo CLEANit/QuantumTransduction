@@ -30,7 +30,7 @@ best_structure = structures[0]
 print('Got best structure, now calculating currents...')
 
 energy_range = best_structure.getEnergyRange()
-energies = np.linspace(energy_range[0], energy_range[1], 128)
+energies = np.linspace(energy_range[0], energy_range[1], 8)
 
 J = kwant.operator.Current(best_structure.system)
 
@@ -38,13 +38,17 @@ currents_kp = []
 currents_k = []
 
 bar = progressbar.ProgressBar()
-for energy in bar(energies):
+for energy in energies:
 	smatrix = kwant.smatrix(best_structure.system, energy)
 	positives = np.where(smatrix.lead_info[0].velocities <= 0)[0]
-	momentas = smatrix.lead_info[0].momenta[positives]
-	K_prime_indices = np.where(momentas < 0)[0]
-	K_indices = np.where(momentas >= 0)[0]
+	momentas = smatrix.lead_info[0].momenta[positives] 
+	K_prime_indices = positives[np.ma.masked_where(momentas < 0, momentas).mask] 
+	K_indices = positives[np.ma.masked_where(momentas >= 0, momentas).mask] 
+	print('KP ind', K_prime_indices)
+	print('K ind', K_indices)
 
+
+	print('Shape modes for wf:', kwant.wave_function(best_structure.system, energy)(0).shape)
 	K_prime_wfs = kwant.wave_function(best_structure.system, energy)(0)[K_prime_indices,:]
 	K_wfs = kwant.wave_function(best_structure.system, energy)(0)[K_indices,:]
 	currents_kp.append(np.sum([J(wf) for wf in K_prime_wfs], axis=0))
