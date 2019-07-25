@@ -11,7 +11,7 @@ font = {'family' : 'CMU Serif',
         'size'   : 18}
 
 plt.rc('font', **font)
-plt.rc('text', usetex=False)
+plt.rc('text', usetex=True)
 
 def expRunningAvg(current_data, alpha=0.9):
     avgs = [current_data[0]]
