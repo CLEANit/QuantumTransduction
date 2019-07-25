@@ -948,7 +948,7 @@ class Structure:
         momentas = smatrix.lead_info[lead_start].momenta[positives]
         K_prime_indices = positives[np.ma.masked_where(np.logical_and(momentas >= K_prime_range[0], momentas <= K_prime_range[1]), momentas).mask]
         # K_prime_indices = np.where(momentas < 0)
-        K_indices = positives[np.ma.masked_where(np.logical_and(momentas >= K_range[0], momentas <= K_range[1])).mask]
+        K_indices = positives[np.ma.masked_where(np.logical_and(momentas >= K_range[0], momentas <= K_range[1]), momentas).mask]
         submatrix = smatrix.submatrix(lead_end, lead_start)
         K_prime_T = np.sum(np.absolute(submatrix[:, K_prime_indices])**2) 
         K_T = np.sum(np.absolute(submatrix[:, K_indices])**2)

@@ -135,6 +135,10 @@ class GA:
         # else:
         #     data = np.vstack((self.past_vectors, self.current_vectors))
 
+        if data.shape[1] == 1:
+            rs = data
+            self.current_objectives = np.flip(np.sort(rs), axis=0)
+            return [self.current_structures[elem] for elem in np.flip(np.argsort(rs), axis=0)]
         # if we're working in 2D
         if data.shape[1] == 2:
             rs = data[:,0]**2 + data[:,1]**2 
@@ -148,7 +152,7 @@ class GA:
             self.current_objectives = np.flip(np.sort(rs), axis=0)
             return [self.current_structures[elem] for elem in np.flip(np.argsort(rs), axis=0)]
         else:
-            logger.error('Error in ranking structures, you seem to be using an objective function that is not 2D nor 3D.')
+            logger.error('Error in ranking structures, you seem to be using an objective function that is not 1D, 2D, nor 3D.')
 
 
     def setNextGeneration(self, structures):
