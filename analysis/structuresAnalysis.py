@@ -9,6 +9,7 @@ import progressbar
 from matplotlib.colors import to_rgba
 import matplotlib.patches as mpatches
 import matplotlib.cm as pltcm
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 ###############################################
 # get the colormap and set the transparency
@@ -30,7 +31,7 @@ best_structure = structures[0]
 print('Got best structure, now calculating currents...')
 
 energy_range = best_structure.getEnergyRange()
-energies = np.linspace(energy_range[0], energy_range[1], 8)
+energies = np.linspace(energy_range[0], energy_range[1], 32)
 
 J = kwant.operator.Current(best_structure.system)
 
@@ -38,17 +39,13 @@ currents_kp = []
 currents_k = []
 
 bar = progressbar.ProgressBar()
-for energy in energies:
+for energy in bar(energies):
 	smatrix = kwant.smatrix(best_structure.system, energy)
 	positives = np.where(smatrix.lead_info[0].velocities <= 0)[0]
 	momentas = smatrix.lead_info[0].momenta[positives] 
 	K_prime_indices = positives[np.ma.masked_where(momentas < 0, momentas).mask] 
 	K_indices = positives[np.ma.masked_where(momentas >= 0, momentas).mask] 
-	print('KP ind', K_prime_indices)
-	print('K ind', K_indices)
 
-
-	print('Shape modes for wf:', kwant.wave_function(best_structure.system, energy)(0).shape)
 	K_prime_wfs = kwant.wave_function(best_structure.system, energy)(0)[K_prime_indices,:]
 	K_wfs = kwant.wave_function(best_structure.system, energy)(0)[K_indices,:]
 	currents_kp.append(np.sum([J(wf) for wf in K_prime_wfs], axis=0))
@@ -71,6 +68,10 @@ im = kwant.plotter.current(best_structure.system, current_K_prime, cmap=cmap, ax
 for elem in stuff_before:
 	elem.set_zorder(-10)
 
+divider = make_axes_locatable(ax)
+cax = divider.append_axes('right', size='2.5%', pad=0.05)
+fig.colorbar(im, ax=ax, cax=cax, orientation='vertical')
+
 plt.savefig('valley_current_K_prime.pdf')
 
 fig, ax = plt.subplots(1,1, figsize=(20, 10))
@@ -81,6 +82,10 @@ im = kwant.plotter.current(best_structure.system, current_K, cmap=cmap, ax=ax, l
 
 for elem in stuff_before:
 	elem.set_zorder(-10)
+
+divider = make_axes_locatable(ax)
+cax = divider.append_axes('right', size='2.5%', pad=0.05)
+fig.colorbar(im, ax=ax, cax=cax, orientation='vertical')
 
 plt.savefig('valley_current_K.pdf')
 ###############################################

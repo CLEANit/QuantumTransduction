@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 
 
-from src.qmt.system import Structure
-from src.qmt.generator import Generator
-from src.qmt.ga import GA
-from src.qmt.serializer import Serializer
-from src.qmt.parser import Parser
-from src.qmt.timer import Timer
-from src.qmt.parser import Parser
+from qmt.system import Structure
+from qmt.generator import Generator
+from qmt.ga import GA
+from qmt.serializer import Serializer
+from qmt.parser import Parser
+from qmt.timer import Timer
+from qmt.parser import Parser
 
 import numpy as np
-
+import os
 
 import multiprocessing
 from pathos.multiprocessing import ProcessingPool as Pool
@@ -18,149 +18,77 @@ from pathos.multiprocessing import ProcessingPool as Pool
 import coloredlogs, verboselogs
 import copy
 import matplotlib.pyplot as plt
+import pickle
+
+font = {'family' : 'CMU Serif',
+#         'weight' : 'light',
+        'size'   : 18}
+
+plt.rc('font', **font)
+plt.rc('text', usetex=True)
+
+
 # create logger
 coloredlogs.install(level='INFO')
 
-logger = verboselogs.VerboseLogger('qmt::inspector ')
+logger = verboselogs.VerboseLogger('qmt::runner ')
 
-def getConductances(structure, lead0, lead1):
-    return structure.getValleyPolarizedConductance(1.0, lead0, lead1)
+# def threadedCall(structure, lead0, lead1):
+#     return structure.getCurrent(lead0, lead1, avg_chem_pot=2.7)
 
-def getBandstructures(structure):
-    return structure.getBandStructure(0)
+def objectiveFunction():
+    pass
 
-def getDosses(structure):
-    return structure.getDOS()
-
-def objectiveFunction(currents_0_1, currents_0_2):
-    vectors = []
-    objectives = []
-    for v1, v2 in  zip(currents_0_1, currents_0_2):
-        objective = []
-        objective.append((v1[0]) / (v1[0] + v1[1]) - 1)
-        objective.append((v2[1]) / (v2[0] + v2[1]) - 1)
-        vectors.append([np.abs((v1[0]) / (v1[0] + v1[1]) - 1), np.abs((v2[1]) / (v2[0] + v2[1]) - 1)])
-        objectives.append((objective[0]**2 + objective[1]**2)**0.5)
-    return np.array(objectives), np.array(vectors)
 
 def main():
     total_timer = Timer()
+    iteration_timer = Timer()
     short_timer = Timer()
     total_timer.start()
-    pool = Pool()
 
-    logger.success(' --- Welcome to the Quantum transmission device optimizer --- ')
+    logger.success(' --- Welcome to the Kwantum Transmission Device Optimizer --- ')
 
     parser = Parser()
-    g = Generator(parser)
-    serializer = Serializer(parser)
-    ga = serializer.deserialize()
-    if ga is not None:
-        # continue from before
-        logger.success('Successfully loaded previous GA. Will continue previous calculation.')
-        ga.io.reInit()
-    else:
-        logger.info('GA starting from scratch.')
-        logger.info('Generating initial structures...')
-        short_timer.start()
-        parsers = g.generateAll()
-        structures = [Structure(parser) for parser in parsers]
-        # structures = pool.map(Structure, parsers)
-        logger.success('Initial structures generated. Elapsed time: %s' % (short_timer.stop()))
-        
-        ga = GA(parser, structures, objective_function=objectiveFunction)
+    pool = Pool(nodes=parser.config['n_cpus'])
+    logger.info('Running calculations with ' + str(parser.config['n_cpus']) + ' workers.')
+            
+    ga = GA(parser, objective_function=objectiveFunction)
+    structures = ga.generator.generateAll(pool=pool, seeds=np.random.randint(0, 2**32 - 1, parser.config['GA']['n_structures']))
 
-    ga.summarizeGeneration()
+    s = structures[0]
 
-    short_timer.start()
-    currents_0_1 = pool.map(getConductances, structures, [0]*len(structures), [1]*len(structures))
-    currents_0_2 = pool.map(getConductances, structures, [0]*len(structures), [2]*len(structures))
 
-    bands = pool.map(getBandstructures, structures)
-    dosses = pool.map(getDosses, structures)
-    logger.info('Calculations took: %s' % short_timer.stop())
-
-    # fig, axes = plt.subplots(len(structures), 2, figsize=(len(structures)*5, 10))
-    # for i in range(len(structures)):
-    #     structures[i].visualizeSystem(args={'file': 'output/gen_%i_struct_%i.png' % (ga.generationNumber(), i)})
-
-    #     # cond1, cond2 = s.getConductance(0, 1), s.getConductance(0, 2)
-    #     axes[i][0].plot(currents_0_1[i][0], currents_0_1[i][1], currents_0_1[i][0], currents_0_1[i][2])
-    #     axes[i][0].legend(['k', 'k\''])
-    #     axes[i][0].set_xlabel('Energy [eV]')
-    #     axes[i][0].set_ylabel('Conductance [$2e^2 h^{-1}$]')
-
-    #     axes[i][1].plot(currents_0_2[i][0], currents_0_2[i][1], currents_0_2[i][0], currents_0_2[i][2])
-    #     axes[i][1].legend(['k', 'k\''])
-    #     axes[i][1].set_xlabel('Energy [eV]')
-    #     axes[i][1].set_ylabel('Conductance [$2e^2 h^{-1}$]')
+    fig, axes = plt.subplots(2, 2, figsize=(10,10))
     
-    # plt.savefig('conductances.png')
-    # plt.savefig('conductances.pdf')
+    ms, bs = s.getBandStructure(0)
+    axes[0][0].plot(ms, bs, c='k')
+    axes[0][0].set_xlabel('Wavenumber [\AA${}^{-1}$]')
+    axes[0][0].set_ylabel('Energy [eV]')
 
-    fig, axes = plt.subplots(len(structures), 1, figsize=(7.5, len(structures)*5))
-    for i in range(len(structures)):
-        axes[i].plot(bands[i][0], bands[i][1], 'b-', bands[i][0], bands[i][2], 'r--')
-        axes[i].legend(['k', 'k\''])
-        axes[i].set_xlabel('Momenta [Lattice constant${}^{-1}$]')
-        axes[i].set_ylabel('Energy [eV]')
-    
-    plt.savefig('bands.png')
-    plt.savefig('bands.pdf')
 
-    fig, axes = plt.subplots(len(structures), 1, figsize=(7.5, len(structures)*5))
-    for i in range(len(structures)):
-        axes[i].plot(dosses[i][0], dosses[i][1], dosses[i][0], dosses[i][2])
-        axes[i].legend(['k', 'k\''])
-        axes[i].set_xlabel('Energy [eV]')
-        axes[i].set_ylabel('Number of states [Arbitrary units]')
-    
-    plt.savefig('dosses.png')
-    plt.savefig('dosses.pdf')
-    # plt.show()
+    es, cs = s.getConductance(0, 1)
+    axes[0][1].plot(es, cs, c='k')
+    axes[0][1].set_ylabel('Conductance [$2e^2 / h$]')
+    axes[0][1].set_xlabel('Energy [eV]')
 
-    #########################
-    # main loop here
-    #########################
+    es, ds = s.getDOS()
+    axes[1][0].plot(es, ds, c='k')
+    axes[1][0].set_ylabel('Arbitrary Units')
+    axes[1][0].set_xlabel('Energy [eV]')
 
-    # ga.io.writer('output/currents.dat', '# Currents (lead1-spin-up, lead1-spin-down, lead2-spin-up, lead2-spin-down)\n', header=True)
+    energy_range = s.getEnergyRange()
+    energies = np.linspace(energy_range[0], energy_range[1], 128)
+    cvs = [s.getValleyPolarizedConductance(energy, 0, 1) for energy in energies]
+    cvs = np.array(cvs)
+    axes[1][1].plot(energies, cvs[:, 0], 'k', label='$k\'$')
+    axes[1][1].plot(energies, cvs[:, 1], 'k--', label='$k$')
+    axes[1][1].set_ylabel('Conductance [$2e^2 / h$]')
+    axes[1][1].set_xlabel('Energy [eV]')
+    axes[1][1].legend()
 
-    # while ga.generationNumber() < parser.getNIterations():
+    plt.show()
 
-    #     short_timer.start()
-
-    #     # print info about the upcoming calculation
-    #     ga.summarizeGeneration()
-
-    #     # get the structures we are going to run calculations on
-    #     structures = ga.getCurrentGeneration()
-
-    #     # plot the systems and save image to disk
-    #     for i, s in enumerate(structures):
-    #         s.visualizeSystem(args={'file': 'output/gen_%i_struct_%i.png' % (ga.generationNumber(), i)})
-
-    #     # calculate currents and write them out to disk
-    #     currents_0_1 = pool.map(threadedCall, structures, [0] * len(structures), [1] * len(structures))
-    #     currents_0_2 = pool.map(threadedCall, structures, [0] * len(structures), [2] * len(structures))
-
-    #     for cs1, cs2 in zip(currents_0_1, currents_0_2):
-    #         ga.io.writer('output/currents.dat', cs1 + cs2)
-
-    #     # calculate the objective function
-    #     ga.calculate((currents_0_1, currents_0_2))
-
-    #     # write gene variables and objective function parameters to file
-    #     ga.writePhaseSpace(structures)
-
-    #     # mutate the current generation
-    #     ga.setNextGeneration(g.mutateAll(structures, pool=pool, seeds=np.random.random_integers(0, 2**32 - 1, len(structures))))
-
-    #     # print how long it took and serialize the current GA
-    #     logger.info('Calculations finished. Elapsed time: %s' % (short_timer.stop()))
-    #     serializer.serialize(ga)
-    #     logger.success('Generation %i completed. Elapsed time: %s' % (ga.generationNumber(), short_timer.stop()))
-
-    # logger.success(' --- Elapsed time: %s ---' % (total_timer.stop()))
+    logger.success(' --- Elapsed time: %s ---' % (total_timer.stop()))
 
 if __name__ == '__main__':
     main()

@@ -32,7 +32,7 @@ def getMaxCurrentsForFile(filename):
 
     for i in range(n_generations):
         gen_data = current_data[i*n_structures:(i+1)*n_structures,:]
-        objs = ((gen_data[:,0] / (gen_data[:,0] + gen_data[:,1]))**2 + ((gen_data[:,0] + gen_data[:,1]) / gen_data[:,1])**2)**0.5
+        objs = ((gen_data[:,1] / (gen_data[:,0] + gen_data[:,1]))**2 + ((gen_data[:,0] + gen_data[:,1]) / gen_data[:,0])**2)**0.5
         index = np.argmax(objs)
         objectives.append(objs[index])
         purities.append([gen_data[index,0] / (gen_data[index,0] + gen_data[index,1]), gen_data[index,1] / (gen_data[index,0] + gen_data[index,1])])

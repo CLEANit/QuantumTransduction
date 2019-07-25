@@ -23,7 +23,7 @@ class Parser:
     """
     def __init__(self):
         try:
-            self.config = yaml.load(open('input.yaml', 'r'))
+            self.config = yaml.safe_load(open('input.yaml', 'r'))
         except:
             logger.error('Could not parse the configuration file: "input.yaml".')
 

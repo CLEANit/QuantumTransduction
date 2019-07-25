@@ -37,7 +37,7 @@ def getNewStructure(parser, identifier):
 def objectiveFunction(currents_0_1):
     vectors = []
     for v1 in currents_0_1:
-        vectors.append((np.abs((v1[0]) / (v1[0] + v1[1])), (np.abs((v1[0] + v1[1]) / v1[1]))))
+        vectors.append((np.abs((v1[1]) / (v1[0] + v1[1])), (np.abs((v1[0] + v1[1]) / v1[0]))))
 
     data = np.array(vectors).reshape(len(vectors), 2)
 
