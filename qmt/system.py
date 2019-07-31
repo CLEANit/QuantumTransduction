@@ -130,7 +130,9 @@ class Structure:
                  ):
         # define the class parameters
         self.parser = parser
-        self.grid_size = 128
+        self.grid_size = int(self.getEnergyRange()[1]*2 / 0.001)
+        if self.grid_size % 2 != 0:
+            self.grid_size += 1
         self.device = parser.getDevice()
         self.leads = parser.getLeads()
         self.body = self.device['body']
@@ -708,9 +710,12 @@ class Structure:
         (energies, conductances_up, conductances_down)
 
         """
-        if energies == None:
-            energy_range = self.getEnergyRange()
-            energies = np.linspace(energy_range[0], energy_range[1], self.grid_size)
+        try:
+            if energies == None:
+                energy_range = self.getEnergyRange()
+                energies = np.linspace(energy_range[0], energy_range[1], self.grid_size)
+        except:
+            pass
 
         if self.spin_dep:
             data_up, data_down = [], []
@@ -727,7 +732,7 @@ class Structure:
                 data.append(smatrix.transmission(lead_out, lead_in))
             return energies, data
 
-    def getCurrent(self, lead_in, lead_out, avg_chem_pot=1.0):
+    def getCurrent(self, lead_in, lead_out, avg_chem_pot=0.0):
         """
         Compute the current between 2 leads.
 
@@ -754,8 +759,8 @@ class Structure:
         kb_T = self.parser.getKBT()
 
         if self.spin_dep:
-            if 'current_up' in self.finished_calculations.keys() and 'current_down' in self.finished_calculations.keys():
-                return self.finished_calculations['current_up'], self.finished_calculations['current_down']
+            # if 'current_up' in self.finished_calculations.keys() and 'current_down' in self.finished_calculations.keys():
+            #     return self.finished_calculations['current_up'], self.finished_calculations['current_down']
             e, cond_up, cond_down = self.getConductance(lead_in, lead_out)
             de = e[1] - e[0]
             mu_left = bias / 2.0 + avg_chem_pot
@@ -766,15 +771,18 @@ class Structure:
             return self.finished_calculations['current_up'], self.finished_calculations['current_down']
 
         else:
-            if 'current' in self.finished_calculations.keys():
-                return self.finished_calculations['current']
+            # if 'current' in self.finished_calculations.keys():
+            #     return self.finished_calculations['current']
             e, cond = self.getConductance(lead_in, lead_out)
             de = e[1] - e[0]
             mu_left = bias / 2.0 + avg_chem_pot
             mu_right = -bias / 2.0 + avg_chem_pot
             diff_fermi = vectorizedFermi(e, mu_left, kb_T) - vectorizedFermi(e, mu_right, kb_T)
-            self.finished_calculations['current'] = de * np.sum(cond * diff_fermi)
-            return self.finished_calculations['current']
+            # logger.info(bias)
+            # plt.plot(e, diff_fermi)
+            # plt.show()
+            # self.finished_calculations['current'] = de * np.sum(cond * diff_fermi)
+            return de * np.sum(cond * diff_fermi)
 
 
 
@@ -795,8 +803,8 @@ class Structure:
             momenta = np.linspace(-np.pi, np.pi, self.grid_size)
 
         if self.spin_dep:
-            if 'momenta' in self.finished_calculations.keys() and 'energies_up' in self.finished_calculations.keys() and 'energies_down' in self.finished_calculations.keys():
-                return self.finished_calculations['momenta'], self.finished_calculations['energies_up'], self.finished_calculations['energies_down']
+            # if 'momenta' in self.finished_calculations.keys() and 'energies_up' in self.finished_calculations.keys() and 'energies_down' in self.finished_calculations.keys():
+            #     return self.finished_calculations['momenta'], self.finished_calculations['energies_up'], self.finished_calculations['energies_down']
             bands_up = kwant.physics.Bands(self.system_up.leads[lead_id])
             bands_down = kwant.physics.Bands(self.system_down.leads[lead_id])
             energies_up = [bands_up(k) for k in momenta]
@@ -806,8 +814,8 @@ class Structure:
             self.finished_calculations['energies_down'] = energies_down
             return momenta, energies_up, energies_down         
         else:
-            if 'momenta' in self.finished_calculations.keys() and 'energies' in self.finished_calculations.keys():
-                return self.finished_calculations['momenta'], self.finished_calculations['energies']
+            # if 'momenta' in self.finished_calculations.keys() and 'energies' in self.finished_calculations.keys():
+            #     return self.finished_calculations['momenta'], self.finished_calculations['energies']
             bands = kwant.physics.Bands(self.system.leads[lead_id])
             energies = [bands(k) for k in momenta]
             self.finished_calculations['momenta'] = momenta
@@ -825,31 +833,35 @@ class Structure:
         """
 
         # try to avoid a calculation and return what was computed before
-        if 'energy_range' in self.finished_calculations.keys():
-            return self.finished_calculations['energy_range']
+        # if 'energy_range' in self.finished_calculations.keys():
+        #     return self.finished_calculations['energy_range']
         
-        if self.spin_dep:
-            mins = []
-            maxs = []
-            for i, l in enumerate(self.system_up.leads):
-                m, e_up, e_down = self.getBandStructure(i)
-                mins.append(np.min(np.array(e_up).flatten()))
-                maxs.append(np.max(np.array(e_up).flatten()))
-                mins.append(np.min(np.array(e_down).flatten()))
-                maxs.append(np.max(np.array(e_down).flatten()))
-                self.energy_range = [min(mins), max(maxs)]
-                self.finished_calculations['energy_range'] = self.energy_range
-            return self.energy_range
-        else:
-            mins = []
-            maxs = []
-            for i, l in enumerate(self.system.leads):
-                m, e = self.getBandStructure(i)
-                mins.append(np.min(np.array(e).flatten()))
-                maxs.append(np.max(np.array(e).flatten()))
-                self.energy_range = [min(mins), max(maxs)]
-                self.finished_calculations['energy_range'] = self.energy_range
-            return self.energy_range
+        # if self.spin_dep:
+        #     mins = []
+        #     maxs = []
+        #     for i, l in enumerate(self.system_up.leads):
+        #         m, e_up, e_down = self.getBandStructure(i)
+        #         mins.append(np.min(np.array(e_up).flatten()))
+        #         maxs.append(np.max(np.array(e_up).flatten()))
+        #         mins.append(np.min(np.array(e_down).flatten()))
+        #         maxs.append(np.max(np.array(e_down).flatten()))
+        #         self.energy_range = [min(mins), max(maxs)]
+        #         self.finished_calculations['energy_range'] = self.energy_range
+        #     return self.energy_range
+        # else:
+        #     mins = []
+        #     maxs = []
+        #     for i, l in enumerate(self.system.leads):
+        #         m, e = self.getBandStructure(i)
+        #         mins.append(np.min(np.array(e).flatten()))
+        #         maxs.append(np.max(np.array(e).flatten()))
+        #         self.energy_range = [min(mins), max(maxs)]
+        #         self.finished_calculations['energy_range'] = self.energy_range
+        #     return self.energy_range
+        bias = self.parser.getBias()
+        kb_T = self.parser.getKBT()
+        return (-bias - 3*kb_T, bias + 3* kb_T)
+
 
     def getDOS(self, energies=None):
         """
@@ -863,13 +875,17 @@ class Structure:
         -------
         Energies and DOS in the form of a tuple. If spin-dependent calculations are specified, it returns energies, DOS for spin up, DOS for spin down.
         """
-        if energies == None:
-            energy_range = self.getEnergyRange()
-            energies = np.linspace(energy_range[0], energy_range[1], self.grid_size)
+        try:
+            if energies == None:
+                energy_range = self.getEnergyRange()
+                energies = np.linspace(energy_range[0], energy_range[1], self.grid_size)
+
+        except:
+            pass
 
         if self.spin_dep:
-            if 'energies_DOS' in self.finished_calculations.keys() and 'DOS_up' in self.finished_calculations.keys() and 'DOS_down' in self.finished_calculations.keys():
-                return self.finished_calculations['energies_DOS'], self.finished_calculations['DOS_up'], self.finished_calculations['DOS_down']
+            # if 'energies_DOS' in self.finished_calculations.keys() and 'DOS_up' in self.finished_calculations.keys() and 'DOS_down' in self.finished_calculations.keys():
+            #     return self.finished_calculations['energies_DOS'], self.finished_calculations['DOS_up'], self.finished_calculations['DOS_down']
             es, DOS_up, DOS_down = [], [], []
             for e in energies:
                 # sometimes the ldos function returns an error for a certain value of energy
@@ -888,8 +904,8 @@ class Structure:
             self.finished_calculations['DOS_down'] = DOS_down
             return es, DOS_up, DOS_down
         else:
-            if 'energies_DOS' in self.finished_calculations.keys() and 'DOS' in self.finished_calculations.keys():
-                return self.finished_calculations['energies_DOS'], self.finished_calculations['DOS']
+            # if 'energies_DOS' in self.finished_calculations.keys() and 'DOS' in self.finished_calculations.keys():
+            #     return self.finished_calculations['energies_DOS'], self.finished_calculations['DOS']
             es, DOS = [], []
             for e in energies:
                 # sometimes the ldos function returns an error for a certain value of energy
@@ -934,8 +950,8 @@ class Structure:
         ]
 
 
-        if set(keys).issubset(self.finished_calculations.keys()):
-            return self.finished_calculations[keys[0]], self.finished_calculations[keys[1]]
+        # if set(keys).issubset(self.finished_calculations.keys()):
+        #     return self.finished_calculations[keys[0]], self.finished_calculations[keys[1]]
 
         smatrix = kwant.smatrix(self.system, energy)
         if velocities == 'out_going':
@@ -989,8 +1005,8 @@ class Structure:
         ]
 
 
-        if set(keys).issubset(self.finished_calculations.keys()):
-            return self.finished_calculations[keys[0]], self.finished_calculations[keys[1]]
+        # if set(keys).issubset(self.finished_calculations.keys()):
+        #     return self.finished_calculations[keys[0]], self.finished_calculations[keys[1]]
 
 
         energy_range = self.getEnergyRange()
@@ -1014,6 +1030,7 @@ class Structure:
         mu_left = bias / 2.0 + avg_chem_pot
         mu_right = -bias / 2.0 + avg_chem_pot
         diff_fermi = vectorizedFermi(energies, mu_left, kb_T) - vectorizedFermi(energies, mu_right, kb_T)
+
         self.finished_calculations[keys[0]] = de * np.sum(KPs * diff_fermi)
         self.finished_calculations[keys[1]] = de * np.sum(Ks * diff_fermi)
 

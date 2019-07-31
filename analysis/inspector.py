@@ -4,23 +4,17 @@
 from qmt.system import Structure
 from qmt.generator import Generator
 from qmt.ga import GA
-from qmt.serializer import Serializer
 from qmt.parser import Parser
 from qmt.timer import Timer
-from qmt.parser import Parser
 
 import numpy as np
 import os
-
-import multiprocessing
 from pathos.multiprocessing import ProcessingPool as Pool
-
 import coloredlogs, verboselogs
-import copy
 import matplotlib.pyplot as plt
-import pickle
+import progressbar as pb
 
-font = {'family' : 'CMU Serif',
+font = {'family' : 'serif',
 #         'weight' : 'light',
         'size'   : 18}
 
@@ -46,7 +40,7 @@ def main():
     short_timer = Timer()
     total_timer.start()
 
-    logger.success(' --- Welcome to the Kwantum Transmission Device Optimizer --- ')
+    logger.success(' --- Welcome to the Kwantum Transmission Device Inspector --- ')
 
     parser = Parser()
     pool = Pool(nodes=parser.config['n_cpus'])
@@ -58,7 +52,9 @@ def main():
     s = structures[0]
 
 
-    fig, axes = plt.subplots(2, 2, figsize=(10,10))
+    s.visualizeSystem(args={'dpi': 600, 'file': 'system.png'})
+    fig, axes = plt.subplots(3, 2, figsize=(10,15))
+
     
     ms, bs = s.getBandStructure(0)
     axes[0][0].plot(ms, bs, c='k')
@@ -68,24 +64,43 @@ def main():
 
     es, cs = s.getConductance(0, 1)
     axes[0][1].plot(es, cs, c='k')
-    axes[0][1].set_ylabel('Conductance [$2e^2 / h$]')
+    axes[0][1].set_ylabel('Transmission Function')
     axes[0][1].set_xlabel('Energy [eV]')
+    # axes[0][1].set_xlim([-0.5, 0.5])
 
     es, ds = s.getDOS()
     axes[1][0].plot(es, ds, c='k')
-    axes[1][0].set_ylabel('Arbitrary Units')
+    axes[1][0].set_ylabel('Density of States')
     axes[1][0].set_xlabel('Energy [eV]')
-
-    energy_range = s.getEnergyRange()
-    energies = np.linspace(energy_range[0], energy_range[1], 128)
-    cvs = [s.getValleyPolarizedConductance(energy, 0, 1) for energy in energies]
+    # axes[1][0].set_xlim([-0.5, 0.5])
+    cvs = [s.getValleyPolarizedConductance(energy, 0, 1) for energy in es]
     cvs = np.array(cvs)
-    axes[1][1].plot(energies, cvs[:, 0], 'k', label='$k\'$')
-    axes[1][1].plot(energies, cvs[:, 1], 'k--', label='$k$')
-    axes[1][1].set_ylabel('Conductance [$2e^2 / h$]')
+    axes[1][1].plot(es, cvs[:, 0], 'k', label='$k\'$')
+    axes[1][1].plot(es, cvs[:, 1], 'k--', label='$k$')
+    axes[1][1].set_ylabel('Transmission Function')
     axes[1][1].set_xlabel('Energy [eV]')
+    # axes[1][1].set_xlim([-0.5, 0.5])
     axes[1][1].legend()
 
+    biases = np.linspace(0.05, 0.5, 8)
+    currents = []
+    bar = pb.ProgressBar()
+    for bias in bar(biases):
+        s.parser.config['System']['bias'] = bias
+        currents.append(s.getCurrent(0, 1))
+
+    currents = np.array(currents)
+    axes[2][0].plot(biases, currents, 'k')
+    axes[2][0].set_xlabel('Bias [V]')
+    axes[2][0].set_ylabel('Current [$e / \pi \hbar$]')
+
+    s.visualizeSystem(args={'ax': axes[2][1]})
+
+
+    for axis in fig.get_axes():
+        axis.grid(linestyle='--', linewidth=0.5)
+    
+    plt.tight_layout()
     plt.show()
 
     logger.success(' --- Elapsed time: %s ---' % (total_timer.stop()))
