@@ -53,54 +53,71 @@ def main():
 
 
     s.visualizeSystem(args={'dpi': 600, 'file': 'system.png'})
-    fig, axes = plt.subplots(3, 2, figsize=(10,15))
+    # fig, axes = plt.subplots(3, 2, figsize=(10,15))
+    # import matplotlib.gridspec as gridspec
 
-    
-    ms, bs = s.getBandStructure(0)
-    axes[0][0].plot(ms, bs, c='k')
-    axes[0][0].set_xlabel('Wavenumber [\AA${}^{-1}$]')
-    axes[0][0].set_ylabel('Energy [eV]')
+    # fig = plt.figure(figsize=(40,10))
+    # outer = gridspec.GridSpec(2, 1)
 
+    # top = gridspec.GridSpecFromSubplotSpec(1, 5, subplot_spec=outer[0], wspace=0.2, hspace=0.2)
 
-    es, cs = s.getConductance(0, 1)
-    axes[0][1].plot(es, cs, c='k')
-    axes[0][1].set_ylabel('Transmission Function')
-    axes[0][1].set_xlabel('Energy [eV]')
-    # axes[0][1].set_xlim([-0.5, 0.5])
+    # bs_axis = plt.Subplot(fig, top[0])
+    # ms, bs = s.getBandStructure(0)
+    # bs_axis.plot(ms, bs, c='k')
+    # bs_axis.set_xlabel('Wavenumber [\AA${}^{-1}$]')
+    # bs_axis.set_ylabel('Energy [eV]')
+    # fig.add_subplot(bs_axis)
 
-    es, ds = s.getDOS()
-    axes[1][0].plot(es, ds, c='k')
-    axes[1][0].set_ylabel('Density of States')
-    axes[1][0].set_xlabel('Energy [eV]')
-    # axes[1][0].set_xlim([-0.5, 0.5])
-    cvs = [s.getValleyPolarizedConductance(energy, 0, 1) for energy in es]
-    cvs = np.array(cvs)
-    axes[1][1].plot(es, cvs[:, 0], 'k', label='$k\'$')
-    axes[1][1].plot(es, cvs[:, 1], 'k--', label='$k$')
-    axes[1][1].set_ylabel('Transmission Function')
-    axes[1][1].set_xlabel('Energy [eV]')
-    # axes[1][1].set_xlim([-0.5, 0.5])
-    axes[1][1].legend()
+    # cs_axis = plt.Subplot(fig, top[1])
+    # es, cs = s.getConductance(0, 1)
+    # cs_axis.plot(es, cs, c='k')
+    # cs_axis.set_ylabel('Transmission Function')
+    # cs_axis.set_xlabel('Energy [eV]')
+    # fig.add_subplot(cs_axis)
 
-    biases = np.linspace(0.05, 0.5, 8)
-    currents = []
-    bar = pb.ProgressBar()
-    for bias in bar(biases):
-        s.parser.config['System']['bias'] = bias
-        currents.append(s.getCurrent(0, 1))
+    # dos_axis = plt.Subplot(fig, top[2])
+    # es, ds = s.getDOS()
+    # dos_axis.plot(es, ds / np.sum(ds), c='k')
+    # dos_axis.set_ylabel('Density of States')
+    # dos_axis.set_xlabel('Energy [eV]')
+    # dos_axis.set_ylim([0.0, 0.001])
+    # fig.add_subplot(dos_axis)
 
-    currents = np.array(currents)
-    axes[2][0].plot(biases, currents, 'k')
-    axes[2][0].set_xlabel('Bias [V]')
-    axes[2][0].set_ylabel('Current [$e / \pi \hbar$]')
+    # vcs_axis = plt.Subplot(fig, top[3])
+    # cvs = [s.getValleyPolarizedConductance(energy, 0, 1) for energy in es]
+    # cvs = np.array(cvs)
+    # vcs_axis.plot(es, cvs[:, 0], 'k', label='$k\'$')
+    # vcs_axis.plot(es, cvs[:, 1], 'k--', label='$k$')
+    # vcs_axis.set_ylabel('Transmission Function')
+    # vcs_axis.set_xlabel('Energy [eV]')
+    # # vcs_axis.set_xlim([-0.5, 0.5])
+    # vcs_axis.legend()
+    # fig.add_subplot(vcs_axis)
 
-    s.visualizeSystem(args={'ax': axes[2][1]})
+    # crs_axis = plt.Subplot(fig, top[4])
+    biases = np.linspace(0.05, 0.5, 32)
+    currents = pool.map(s.getCurrent, [0]*biases.shape[0], [1]*biases.shape[0], biases)
+    vcs = pool.map(s.getValleyPolarizedCurrent, [0]*biases.shape[0], [1]*biases.shape[0], biases)
+    vcs = np.array(vcs)
 
+    plt.plot(biases, currents, 'k', label='Total')
+    plt.plot(biases, vcs[:,0], 'r', label='$k\'$')
+    plt.plot(biases, vcs[:,1], 'b', label='$k$')    
+    plt.xlabel('Bias [V]')
+    plt.ylabel('Current [$e / \pi \hbar$]')
+    plt.legend()
+    # fig.add_subplot(crs_axis)
 
-    for axis in fig.get_axes():
-        axis.grid(linestyle='--', linewidth=0.5)
+    # sys_axis = plt.Subplot(fig, outer[1])
+    # s.visualizeSystem(args={'ax': sys_axis})
+    # fig.add_subplot(sys_axis)
+
+    # for axis in fig.get_axes():
+    #     axis.grid(linestyle='--', linewidth=0.5)
     
     plt.tight_layout()
+    plt.savefig('inspection.pdf')
+
     plt.show()
 
     logger.success(' --- Elapsed time: %s ---' % (total_timer.stop()))

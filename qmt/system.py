@@ -130,7 +130,7 @@ class Structure:
                  ):
         # define the class parameters
         self.parser = parser
-        self.grid_size = int(self.getEnergyRange()[1]*2 / 0.001)
+        self.grid_size = int(self.getEnergyRange()[1]*2 / 0.01)
         if self.grid_size % 2 != 0:
             self.grid_size += 1
         self.device = parser.getDevice()
@@ -655,8 +655,10 @@ class Structure:
                     # print(list(self.pre_system.sites())[site])
                     if pointInHull(site.pos, self.hull):
                         return cmocean.cm.deep(0.9)
+                    elif self.body(site.pos):
+                        return 'w'
                     else:
-                        return cmocean.cm.deep(0.1)
+                        return 'g'
                 return kwant.plot(self.pre_system, site_lw=0.1, lead_site_lw=0., colorbar=False, site_color=siteColours, show=False, **args)
             elif self.parser.getGenerator()['turn_on']:
                 def siteColours(site):
@@ -672,12 +674,12 @@ class Structure:
                         elif self.parser.getGenerator()['leads'] == 'n-doped':
                             return 'w'
                         else:
-                            return 'w'
+                            return 'g'
 
 
-                return kwant.plot(self.pre_system, site_size=0.5, site_lw=0.1, lead_site_lw=0., colorbar=False, site_color=siteColours, show=False, **args)            
+                return kwant.plot(self.pre_system, site_lw=0.1, lead_site_lw=0., colorbar=False, site_color=siteColours, show=False, **args)            
             else:
-                return kwant.plot(self.pre_system, site_lw=0.1, colorbar=False, show=False, **args)
+                return kwant.plot(self.pre_system, site_color='g', site_lw=0.1, colorbar=False, show=False, **args)
 
     def diagonalize(self, args={}):
         # Compute some eigenvalues of the closed system
@@ -732,7 +734,7 @@ class Structure:
                 data.append(smatrix.transmission(lead_out, lead_in))
             return energies, data
 
-    def getCurrent(self, lead_in, lead_out, avg_chem_pot=0.0):
+    def getCurrent(self, lead_in, lead_out, bias=None, avg_chem_pot=0.0, kb_T=None):
         """
         Compute the current between 2 leads.
 
@@ -740,7 +742,7 @@ class Structure:
         ----------
         lead_in : The id of the lead you are injecting electrons.
         lead_out : The id of the lead you would like to find the transmission through.
-        avg_chem_pot : The average chemical potential difference. Default: 1.0. It is common practice to set this to the hopping energy.
+        avg_chem_pot : The average chemical potential difference. Default: 0.0. It is common practice to set this to the hopping energy.
 
         Returns
         -------
@@ -753,10 +755,11 @@ class Structure:
         current_up, current_down
 
         """
-
-
-        bias = self.parser.getBias()
-        kb_T = self.parser.getKBT()
+        if  bias is None:
+            bias = self.parser.getBias()
+        
+        if kb_T is None:
+            kb_T = self.parser.getKBT()
 
         if self.spin_dep:
             # if 'current_up' in self.finished_calculations.keys() and 'current_down' in self.finished_calculations.keys():
@@ -779,7 +782,9 @@ class Structure:
             mu_right = -bias / 2.0 + avg_chem_pot
             diff_fermi = vectorizedFermi(e, mu_left, kb_T) - vectorizedFermi(e, mu_right, kb_T)
             # logger.info(bias)
+            # plt.plot(e, cond)
             # plt.plot(e, diff_fermi)
+            # plt.plot(e, cond * diff_fermi)
             # plt.show()
             # self.finished_calculations['current'] = de * np.sum(cond * diff_fermi)
             return de * np.sum(cond * diff_fermi)
@@ -972,7 +977,15 @@ class Structure:
         self.finished_calculations[keys[1]] = K_T
         return (K_prime_T, K_T)
 
-    def getValleyPolarizedCurrent(self, lead_start=0, lead_end=1, K_prime_range=(-np.inf, -1e-8), K_range=(0, np.inf), velocities='out_going', avg_chem_pot=0.0):
+    def getValleyPolarizedCurrent(self,
+                                  lead_start=0,
+                                  lead_end=1,
+                                  bias=None,
+                                  K_prime_range=(-np.inf, -1e-8),
+                                  K_range=(0, np.inf),
+                                  velocities='out_going',
+                                  avg_chem_pot=0.0,
+                                  kb_T=None):
         """
         Get the valley-polarized currents between two leads. Note: This function only makes sense when
         the bandstructure has two valleys in it. An example is zig-zag edged graphene nanoribbons.
@@ -991,9 +1004,13 @@ class Structure:
         A tuple of length 2. First element is for K', second for K.
         """
 
+        if  bias is None:
+            bias = self.parser.getBias()
+        
+        if kb_T is None:
+            kb_T = self.parser.getKBT()
+
         pid = os.getpid()
-        bias = self.parser.getBias()
-        kb_T = self.parser.getKBT()
 
         if self.spin_dep:
             logger.error('Cannot calculate valley dependent currents for spin-dependent systems.')
