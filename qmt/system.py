@@ -130,7 +130,7 @@ class Structure:
                  ):
         # define the class parameters
         self.parser = parser
-        self.grid_size = int(self.getEnergyRange()[1]*2 / 0.01)
+        self.grid_size = int(self.getEnergyRange()[1]*2 / 0.001)
         if self.grid_size % 2 != 0:
             self.grid_size += 1
         self.device = parser.getDevice()
@@ -654,27 +654,27 @@ class Structure:
                 def siteColours(site):
                     # print(list(self.pre_system.sites())[site])
                     if pointInHull(site.pos, self.hull):
-                        return cmocean.cm.deep(0.9)
+                        return 'b'
                     elif self.body(site.pos):
-                        return 'w'
+                        return 'r'
                     else:
-                        return 'g'
+                        return 'w'
                 return kwant.plot(self.pre_system, site_lw=0.1, lead_site_lw=0., colorbar=False, site_color=siteColours, show=False, **args)
             elif self.parser.getGenerator()['turn_on']:
                 def siteColours(site):
                     # print(list(self.pre_system.sites())[site])
                     try:
                         if self.system_colours[site]:
-                            return cmocean.cm.deep(0.9)
+                            return 'b'
                         else:
-                            return 'w'
+                            return 'r'
                     except:
                         if self.parser.getGenerator()['leads'] == 'p-doped':
                             return 'w'
                         elif self.parser.getGenerator()['leads'] == 'n-doped':
                             return 'w'
                         else:
-                            return 'g'
+                            return 'w'
 
 
                 return kwant.plot(self.pre_system, site_lw=0.1, lead_site_lw=0., colorbar=False, site_color=siteColours, show=False, **args)            
