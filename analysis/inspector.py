@@ -52,7 +52,7 @@ def main():
     s = structures[0]
 
 
-    # s.visualizeSystem(args={'dpi': 600, 'file': 'system.png'})
+    s.visualizeSystem(args={'dpi': 600, 'file': 'system.png'})
     # fig, axes = plt.subplots(3, 2, figsize=(10,15))
     import matplotlib.gridspec as gridspec
 
@@ -96,13 +96,31 @@ def main():
 
     crs_axis = plt.Subplot(fig, top[4])
     biases = np.linspace(0.05, 0.5, 64)
-    currents = pool.map(s.getCurrent, [0]*biases.shape[0], [1]*biases.shape[0], biases)
-    vcs = pool.map(s.getValleyPolarizedCurrent, [0]*biases.shape[0], [1]*biases.shape[0], biases)
-    vcs = np.array(vcs)
+    threeK = 0.00025851991
+    currents_3 = pool.map(s.getCurrent, [0]*biases.shape[0], [1]*biases.shape[0], biases, [threeK]*biases.shape[0])
+    vcs_3 = pool.map(s.getValleyPolarizedCurrent, [0]*biases.shape[0], [1]*biases.shape[0], biases, [threeK]*biases.shape[0])
+    vcs_3 = np.array(vcs_3)
 
-    crs_axis.plot(biases, currents, 'k', label='Total')
-    crs_axis.plot(biases, vcs[:,0], 'r', label='$k\'$')
-    crs_axis.plot(biases, vcs[:,1], 'b', label='$k$')    
+    currents_30 = pool.map(s.getCurrent, [0]*biases.shape[0], [1]*biases.shape[0], biases, [threeK]*biases.shape[0])
+    vcs_30 = pool.map(s.getValleyPolarizedCurrent, [0]*biases.shape[0], [1]*biases.shape[0], biases, [threeK*10]*biases.shape[0])
+    vcs_30 = np.array(vcs_30)
+
+    currents_300 = pool.map(s.getCurrent, [0]*biases.shape[0], [1]*biases.shape[0], biases, [threeK]*biases.shape[0])
+    vcs_300 = pool.map(s.getValleyPolarizedCurrent, [0]*biases.shape[0], [1]*biases.shape[0], biases, [threeK*100]*biases.shape[0])
+    vcs_300 = np.array(vcs_300)
+
+    crs_axis.semilogy(biases, currents_3, 'k', label='Total - 3 K')
+    crs_axis.semilogy(biases, vcs_3[:,0], 'r', label='$k\'$ - 3 K')
+    crs_axis.semilogy(biases, vcs_3[:,1], 'b', label='$k$ - 3 K')
+
+    crs_axis.semilogy(biases, currents_30, 'k--', label='Total - 30 K')
+    crs_axis.semilogy(biases, vcs_30[:,0], 'r--', label='$k\'$ - 30 K')
+    crs_axis.semilogy(biases, vcs_30[:,1], 'b--', label='$k$ - 30 K')  
+
+    crs_axis.semilogy(biases, currents_300, 'k-.-', label='Total - 300 K')
+    crs_axis.semilogy(biases, vcs_300[:,0], 'r-.-', label='$k\'$ - 300 K')
+    crs_axis.semilogy(biases, vcs_300[:,1], 'b-.-', label='$k$ - 300 K')  
+
     crs_axis.set_xlabel('Bias [V]')
     crs_axis.set_ylabel('Current [$e / \pi \hbar$]')
     crs_axis.legend()

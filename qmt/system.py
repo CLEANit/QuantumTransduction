@@ -737,7 +737,7 @@ class Structure:
                 data.append(smatrix.transmission(lead_out, lead_in))
             return energies, data
 
-    def getCurrent(self, lead_in, lead_out, bias=None, avg_chem_pot=0.0, kb_T=None):
+    def getCurrent(self, lead_in, lead_out, bias=None, kb_T=None, avg_chem_pot=0.0):
         """
         Compute the current between 2 leads.
 
@@ -984,11 +984,11 @@ class Structure:
                                   lead_start=0,
                                   lead_end=1,
                                   bias=None,
+                                  kb_T=None,
                                   K_prime_range=(-np.inf, -1e-8),
                                   K_range=(0, np.inf),
                                   velocities='out_going',
-                                  avg_chem_pot=0.0,
-                                  kb_T=None):
+                                  avg_chem_pot=0.0):
         """
         Get the valley-polarized currents between two leads. Note: This function only makes sense when
         the bandstructure has two valleys in it. An example is zig-zag edged graphene nanoribbons.
