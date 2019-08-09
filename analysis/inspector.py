@@ -117,9 +117,9 @@ def main():
     crs_axis.semilogy(biases, vcs_30[:,0], 'r--', label='$k\'$ - 30 K')
     crs_axis.semilogy(biases, vcs_30[:,1], 'b--', label='$k$ - 30 K')  
 
-    crs_axis.semilogy(biases, currents_300, 'k-.-', label='Total - 300 K')
-    crs_axis.semilogy(biases, vcs_300[:,0], 'r-.-', label='$k\'$ - 300 K')
-    crs_axis.semilogy(biases, vcs_300[:,1], 'b-.-', label='$k$ - 300 K')  
+    crs_axis.semilogy(biases, currents_300, 'k-.', label='Total - 300 K')
+    crs_axis.semilogy(biases, vcs_300[:,0], 'r-.', label='$k\'$ - 300 K')
+    crs_axis.semilogy(biases, vcs_300[:,1], 'b-.', label='$k$ - 300 K')  
 
     crs_axis.set_xlabel('Bias [V]')
     crs_axis.set_ylabel('Current [$e / \pi \hbar$]')
