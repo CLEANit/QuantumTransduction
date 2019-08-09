@@ -19,7 +19,7 @@ font = {'family' : 'serif',
         'size'   : 18}
 
 plt.rc('font', **font)
-plt.rc('text', usetex=False)
+plt.rc('text', usetex=True)
 
 
 # create logger
@@ -52,8 +52,8 @@ def main():
     s = structures[0]
 
 
-    s.visualizeSystem(args={'dpi': 600, 'file': 'system.png'})
-    fig, axes = plt.subplots(3, 2, figsize=(10,15))
+    # s.visualizeSystem(args={'dpi': 600, 'file': 'system.png'})
+    # fig, axes = plt.subplots(3, 2, figsize=(10,15))
     import matplotlib.gridspec as gridspec
 
     fig = plt.figure(figsize=(40,10))
