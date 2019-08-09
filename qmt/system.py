@@ -73,8 +73,11 @@ def onSiteFunction(self, pot, spin, phi, lead, site):
         ###################################################
         if pointInHull(site.pos, self.hull):
             np.fill_diagonal(pot , pot.diagonal() + pnj_config['p-potential'])
-        else:
+        elif self.body(site.pos):
             np.fill_diagonal(pot , pot.diagonal() + pnj_config['n-potential'])
+        else:
+            # keep the same
+            pass
         ###################################################
 
 
