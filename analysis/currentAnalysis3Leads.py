@@ -52,11 +52,17 @@ def getMaxCurrentsForFile(filename):
 
 file_list = subprocess.check_output('find . -name "all_cs.dat"', shell=True).split()
 all_cs, all_ps, all_objs = [], [], []
+max_dir = None
+max_obj = -np.inf
 for file in file_list:
     cs, ps, objs = getMaxCurrentsForFile(file.decode('utf-8'))
+    if np.max(objs) > max_obj:
+        max_obj = np.max(objs)
+        max_dir = file
     all_cs.append(cs)
     all_ps.append(ps)
     all_objs.append(objs)
+print('Max objective: %f, Came from file: %s' % (max_obj, max_dir))
 
 all_cs = np.array(all_cs)
 all_ps = np.array(all_ps)
@@ -129,12 +135,12 @@ fig.add_subplot(axes_middle_bottom)
 axes_right_0.plot(range(n_generations), currents[:,0], 'r', alpha=1.0, lw=5.0, label='lead 1: $k\'$')
 axes_right_0.fill_between(range(n_generations), currents[:,0] - currents_stds[:,0], currents[:,0] + currents_stds[:,0], color='r', alpha=0.2)
 # axes[2].plot(range(n_generations), expRunningAvg(currents[:,0]), 'r', lw =5.0, label='lead 1: $k\'$')
-axes_right_0.set_ylim([0.02, 0.12])
+# axes_right_0.set_ylim([0.02, 0.12])
 plt.setp(axes_right_0.get_xticklabels(), visible=False)
 
 # axes[2].plot(range(n_generations), expRunningAvg(currents[:,1]), 'b', lw=5.0, label='lead 1: $k$')
 axes_right_1.plot(range(n_generations), currents[:,1], 'r--', alpha=1.0, lw=5.0, label='lead 2: $k\'$')
-axes_right_1.set_ylim([0.0, 0.01])
+# axes_right_1.set_ylim([0.0, 0.01])
 axes_right_1.fill_between(range(n_generations), currents[:,1] - currents_stds[:,1], currents[:,1] + currents_stds[:,1], color='r', alpha=0.2)
 plt.setp(axes_right_1.get_xticklabels(), visible=False)
 
@@ -142,13 +148,13 @@ plt.setp(axes_right_1.get_xticklabels(), visible=False)
 axes_right_2.plot(range(n_generations), currents[:,3], 'b', alpha=1.0, lw=5.0, label='lead 1: $k$')
 axes_right_2.fill_between(range(n_generations), currents[:,3] - currents_stds[:,3], currents[:,3] + currents_stds[:,3], color='b', alpha=0.2)
 plt.setp(axes_right_2.get_xticklabels(), visible=False)
-axes_right_2.set_ylim([0.02, 0.12])
+# axes_right_2.set_ylim([0.02, 0.12])
 
 
 axes_right_3.plot(range(n_generations), currents[:,2], 'b--', alpha=1.0, lw=5.0, label='lead 2: $k$')
 axes_right_3.fill_between(range(n_generations), currents[:,2] - currents_stds[:,2], currents[:,2] + currents_stds[:,2], color='b', alpha=0.2)
 axes_right_3.set_xlabel('Generation')
-axes_right_3.set_ylim([0., 0.01])
+# axes_right_3.set_ylim([0., 0.01])
 
 fig.add_subplot(axes_right_0)
 fig.add_subplot(axes_right_1)
