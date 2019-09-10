@@ -28,5 +28,5 @@ for dirname in bar(dir_list):
                 if site not in site_distro:
                     site_distro[site] = []
                 site_distro[site].append(colours[site])
-    os.chdir('../..')
+    os.chdir('..')
 print(site_distro)
