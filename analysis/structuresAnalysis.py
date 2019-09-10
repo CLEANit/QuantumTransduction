@@ -14,10 +14,15 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 ###############################################
 # get the colormap and set the transparency
 ###############################################
-cmap = pltcm.get_cmap('jet')
-cmap._init()
-alphas = np.abs(np.ones(cmap.N) * 0.6)
-cmap._lut[:-3,-1] = alphas
+cmap_r = pltcm.get_cmap('Reds')
+cmap_r._init()
+alphas = np.abs(np.ones(cmap_r.N) * 0.6)
+cmap_r._lut[:-3,-1] = alphas
+
+cmap_b = pltcm.get_cmap('Blues')
+cmap_b._init()
+alphas = np.abs(np.ones(cmap_b.N) * 0.6)
+cmap_b._lut[:-3,-1] = alphas
 ###############################################
 
 ###############################################
@@ -31,7 +36,7 @@ best_structure = structures[0]
 print('Got best structure, now calculating currents...')
 
 energy_range = best_structure.getEnergyRange()
-energies = np.linspace(energy_range[0], energy_range[1], 32)
+energies = np.linspace(energy_range[0], energy_range[1], 128)
 
 J = kwant.operator.Current(best_structure.system)
 
@@ -60,10 +65,10 @@ current_K = np.sum(np.array(currents_k), axis=0)
 ###############################################
 
 fig, ax = plt.subplots(1,1, figsize=(20, 10))
-best_structure.visualizeSystem(args={'ax': ax, 'hop_lw' : 0.0})
+best_structure.visualizeSystem(args={'ax': ax})
 stuff_before = ax.get_children()
 
-im = kwant.plotter.current(best_structure.system, current_K_prime, cmap=cmap, ax=ax, linecolor='k', max_linewidth=8., min_linewidth=0.0)
+im = kwant.plotter.current(best_structure.system, current_K_prime, cmap=cmap_r, ax=ax, linecolor='r', max_linewidth=8., min_linewidth=0.0)
 
 for elem in stuff_before:
 	elem.set_zorder(-10)
@@ -75,10 +80,10 @@ fig.colorbar(im, ax=ax, cax=cax, orientation='vertical')
 plt.savefig('valley_current_K_prime.pdf')
 
 fig, ax = plt.subplots(1,1, figsize=(20, 10))
-best_structure.visualizeSystem(args={'ax': ax, 'hop_lw' : 0.0})
+best_structure.visualizeSystem(args={'ax': ax})
 stuff_before = ax.get_children()
 
-im = kwant.plotter.current(best_structure.system, current_K, cmap=cmap, ax=ax, linecolor='k', max_linewidth=8., min_linewidth=0.0)
+im = kwant.plotter.current(best_structure.system, current_K, cmap=cmap_b, ax=ax, linecolor='b', max_linewidth=8., min_linewidth=0.0)
 
 for elem in stuff_before:
 	elem.set_zorder(-10)

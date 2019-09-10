@@ -16,8 +16,11 @@ System:
   lattice_constant: 1.42
 
   # zig-zag leads
-  lattice_vectors: [[1.22975607, 2.13], [-1.22975607, 2.13]]
-  lattice_basis: [[0.0, 0.0], [0.0, -1.42]]
+  lattice_vectors: [[0.0, 4.26], [2.4595121467478056, 0.0]]
+  lattice_basis: [[1.2297560733739028, 0.       ],
+       [ 0.0, 0.7099999999999999],
+       [0.0, 2.13     ],
+       [1.2297560733739028, 2.84     ]]
 
   # number of orbitals
   n_orbitals: 1
@@ -32,7 +35,7 @@ System:
   bias: 0.5
 
   # Boltzmann constant times the temperature
-  kb_T: 0.027
+  kb_T: 0.025851991
 
   Junction:
     # the main body
@@ -55,10 +58,10 @@ System:
 
         # this is for drawing a polygon
         pn-junction: {
-          turn_on: true,
+          turn_on: false,
           n-potential: 0.2,
           p-potential: -0.2,
-          points: [[-16, 16], [16, 16], [15, 0], [-16, -16], [16, -16], [-15, 0]]
+          points: [[-16, 16], [16, 16], [-16, 0], [16, 0]]
         }
       }
     
@@ -72,14 +75,14 @@ System:
     # - {name: 'rectangle', args: {xcoords: [-8, 8], ycoords: [-8, 8]}}
 
   Leads:
-    - {range: [-16, 16], symmetry: [-1, 1], shift: [-0.75, -0.75], offset: [0, 0], potential: 0.0, hopping: -2.7, reverse: False, direction: [-1, 0]}
-    - {range: [-16, 16], symmetry: [1, -1], shift: [-0.75, -0.75], offset: [0, 0], potential: 0.0, hopping: -2.7, reverse: False, direction: [1, 0]}
+    - {range: [-16, 16], symmetry: [0, -1], shift: [-0.75, -0.75], offset: [0, 0], potential: 0.0, hopping: -2.7, reverse: False, direction: [-1, 0]}
+    - {range: [-16, 16], symmetry: [0, 1], shift: [-0.75, -0.75], offset: [0, 0], potential: 0.0, hopping: -2.7, reverse: False, direction: [1, 0]}
 
 # Genetic algorithm
 GA:
 
   Generator: {
-    turn_on: true,
+    turn_on: false,
     neurons: [100, 100],
     leads: 'undoped',
     filter: true
@@ -117,45 +120,28 @@ GA:
   # number of structures in the GA
   n_structures: 8
   # number of iterations to perform
-  n_iterations: 10
+  n_iterations: 100
 
   Genes:
       - {
         path: ['System', 'Junction', 'body', 'pn-junction', 'points', 0, 0],
-        range: [-32, 0]
+        range: [-16, -16]
       }
 
       - {
         path: ['System', 'Junction', 'body', 'pn-junction', 'points', 1, 0],
-        range: [0, 32]
+        range: [16, 16]
       }
 
-      - {
-        path: ['System', 'Junction', 'body', 'pn-junction', 'points', 2, 0],
-        range: [10, 50]
-      }
       
       - {
         path: ['System', 'Junction', 'body', 'pn-junction', 'points', 2, 1],
-        range: [-32, 32]
+        range: [0, 0]
       }
 
       - {
         path: ['System', 'Junction', 'body', 'pn-junction', 'points', 3, 0],
-        range: [-32, 0]
+        range: [16, 16]
       }
 
-      - {
-        path: ['System', 'Junction', 'body', 'pn-junction', 'points', 4, 0],
-        range: [0, 32]
-      }
-
-      - {
-        path: ['System', 'Junction', 'body', 'pn-junction', 'points', 5, 0],
-        range: [-50, -10]
-      }
       
-      - {
-        path: ['System', 'Junction', 'body', 'pn-junction', 'points', 5, 1],
-        range: [-32, 32]
-      }

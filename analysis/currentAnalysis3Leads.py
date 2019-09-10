@@ -8,7 +8,7 @@ import subprocess
 
 font = {'family' : 'CMU Serif',
 #         'weight' : 'light',
-        'size'   : 18}
+        'size'   : 24}
 
 plt.rc('font', **font)
 plt.rc('text', usetex=True)
@@ -106,7 +106,7 @@ axes_right_2 = plt.Subplot(fig, inner_right[2])
 axes_right_3 = plt.Subplot(fig, inner_right[3])
 
 
-axes_left.plot(range(n_generations), objectives, color='g', alpha=1.0, lw=5.0, label='Objective function')
+axes_left.plot(range(n_generations), objectives, color='g', alpha=1.0, lw=5.0, label='')
 # axes_left.plot(range(n_generations), expRunningAvg(objectives), color='g', alpha=0.9, label='Running Average', lw=5.0)
 # axes_left.errorbar(range(n_generations), objectives, objectives_stds, linestyle=None)
 axes_left.fill_between(range(n_generations), objectives - objectives_stds, objectives + objectives_stds, color='g', alpha=0.2)
@@ -145,14 +145,14 @@ axes_right_1.fill_between(range(n_generations), currents[:,1] - currents_stds[:,
 plt.setp(axes_right_1.get_xticklabels(), visible=False)
 
 # axes[2].plot(range(n_generations), expRunningAvg(currents[:,2]), 'r--', lw=5.0, label='lead 2: $k\'$')
-axes_right_2.plot(range(n_generations), currents[:,3], 'b', alpha=1.0, lw=5.0, label='lead 1: $k$')
-axes_right_2.fill_between(range(n_generations), currents[:,3] - currents_stds[:,3], currents[:,3] + currents_stds[:,3], color='b', alpha=0.2)
+axes_right_2.plot(range(n_generations), currents[:,2], 'b', alpha=1.0, lw=5.0, label='lead 1: $k$')
+axes_right_2.fill_between(range(n_generations), currents[:,2] - currents_stds[:,2], currents[:,2] + currents_stds[:,2], color='b', alpha=0.2)
 plt.setp(axes_right_2.get_xticklabels(), visible=False)
 # axes_right_2.set_ylim([0.02, 0.12])
 
 
-axes_right_3.plot(range(n_generations), currents[:,2], 'b--', alpha=1.0, lw=5.0, label='lead 2: $k$')
-axes_right_3.fill_between(range(n_generations), currents[:,2] - currents_stds[:,2], currents[:,2] + currents_stds[:,2], color='b', alpha=0.2)
+axes_right_3.plot(range(n_generations), currents[:,3], 'b--', alpha=1.0, lw=5.0, label='lead 2: $k$')
+axes_right_3.fill_between(range(n_generations), currents[:,3] - currents_stds[:,3], currents[:,3] + currents_stds[:,3], color='b', alpha=0.2)
 axes_right_3.set_xlabel('Generation')
 # axes_right_3.set_ylim([0., 0.01])
 
@@ -167,7 +167,7 @@ fig.add_subplot(axes_right_3)
 # axes[2].set_ylabel('Current [$e \pi^{-1} \hbar^{-1}$]')
 # axes[2].set_aspect('equal', adjustable='box')
 for axis in fig.get_axes():
-    axis.set_xlim([0, 64])
+    axis.set_xlim([0, 63])
     axis.grid(linestyle='--', linewidth=0.5)
     axis.legend()
 # axes[2].legend()
