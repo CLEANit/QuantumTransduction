@@ -22,7 +22,7 @@ for dirname in bar(dir_list):
     structures = ga.current_structures
 
     for s in structures:
-        colours = s.sytem_colours
+        colours = s.system_colours
         for site, value in system.site_value_pairs():
             if s.body(site.pos):
                 if site not in site_distro:
