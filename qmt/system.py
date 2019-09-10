@@ -680,7 +680,7 @@ class Structure:
                             return 'w'
 
 
-                return kwant.plot(self.pre_system, site_size=0.0, hop_lw=0.1, site_lw=0.0, lead_site_lw=0., colorbar=False, site_color=siteColours, show=False, **args)            
+                return kwant.plot(self.pre_system, site_size=0.1, hop_lw=0.1, site_lw=0.0, lead_site_lw=0., colorbar=False, site_color=siteColours, show=False, **args)            
             else:
                 return kwant.plot(self.pre_system, site_color='g', site_lw=0.1, colorbar=False, show=False, **args)
 

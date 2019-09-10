@@ -18,7 +18,7 @@ site_distro = {}
 bar = progressbar.ProgressBar()
 for dirname in bar(dir_list):
     os.chdir(dirname)
-    ga = dill.load(open('restart.dill', 'rb'))
+    ga = dill.load(open('ga.dill', 'rb'))
     structures = ga.current_structures
 
     for s in structures:
