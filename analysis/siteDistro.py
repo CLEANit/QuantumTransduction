@@ -29,4 +29,5 @@ for dirname in bar(dir_list):
                     site_distro[site] = []
                 site_distro[site].append(colours[site])
     os.chdir('..')
-print(site_distro)
+
+dill.dump(site_distro, open('site_distro.dill', 'wb'))
