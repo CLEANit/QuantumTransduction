@@ -10,14 +10,15 @@ from matplotlib.colors import to_rgba
 import matplotlib.patches as mpatches
 import matplotlib.cm as pltcm
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+import os
 
-
-file_list = subprocess.check_output('find . -name "ga.dill"', shell=True).split()
+dir_list = subprocess.check_output('find . -name output', shell=True).split()
 site_distro = {}
 bar = progressbar.ProgressBar()
-for filename in bar(file_list):
-    ga = dill.load(open(filename.decode('utf-8'), 'rb'))
-    structures = ga.rankGenerationWithSquare()
+for dirname in bar(dir_list):
+    os.chdir(dirname)
+    ga = dill.load(open('restart.dill', 'rb'))
+    structures = ga.current_structures
 
     for s in structures:
         colours = s.sytem_colours
@@ -26,4 +27,5 @@ for filename in bar(file_list):
                 if site not in site_distro:
                     site_distro[site] = []
                 site_distro[site].append(colours[site])
+    os.chdir('../..')
 print(site_distro)
