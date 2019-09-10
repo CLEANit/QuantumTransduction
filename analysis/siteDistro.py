@@ -23,7 +23,7 @@ for dirname in bar(dir_list):
 
     for s in structures:
         colours = s.system_colours
-        for site, value in system.site_value_pairs():
+        for site, value in s.site_value_pairs():
             if s.body(site.pos):
                 if site not in site_distro:
                     site_distro[site] = []
