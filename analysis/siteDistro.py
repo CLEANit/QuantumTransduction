@@ -11,6 +11,7 @@ import matplotlib.patches as mpatches
 import matplotlib.cm as pltcm
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import os
+import subprocess
 
 dir_list = subprocess.check_output('find . -name output', shell=True).split()
 site_distro = {}
