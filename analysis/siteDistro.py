@@ -13,12 +13,12 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import os
 import subprocess
 
-dir_list = subprocess.check_output('find . -name restart', shell=True).split()
+dir_list = subprocess.check_output('ls -d run*', shell=True).split()
 site_distro = {}
 bar = progressbar.ProgressBar()
 for dirname in bar(dir_list):
     os.chdir(dirname)
-    ga = dill.load(open('ga.dill', 'rb'))
+    ga = dill.load(open('restart/ga.dill', 'rb'))
     structures = ga.current_structures
 
     for s in structures:
