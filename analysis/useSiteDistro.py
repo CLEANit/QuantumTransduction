@@ -13,10 +13,15 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import os
 import subprocess
 
+
 ga = dill.load(open('restart/ga.dill', 'rb'))
 structures = ga.current_structures
 site_distro = dill.load(open('site_distro.dill', 'rb'))
 
 averages = {}
 for k, v in site_distro.items():
-    print(k, np.mean(v))
+    averages[k] = np.mean(v)
+
+s = structures[0]
+s.system_colours = averages
+s.visualizeSystem(cmap=pltcm.get_cmap('bwr'), args = {'file': 'siteHist.pdf'})

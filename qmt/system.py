@@ -16,6 +16,7 @@ import os
 from .helper import *
 import coloredlogs, verboselogs
 from skimage.morphology import binary_erosion, binary_dilation
+import matplotlib.cm as pltcm
 
 # create logger
 coloredlogs.install(level='INFO')
@@ -641,7 +642,7 @@ class Structure:
                     pass
             return image
 
-    def visualizeSystem(self, args={}):
+    def visualizeSystem(self, cmap=None, args={}):
         """
         Create a plot to visualize the constructed system.
 
@@ -667,10 +668,13 @@ class Structure:
                 def siteColours(site):
                     # print(list(self.pre_system.sites())[site])
                     try:
-                        if self.system_colours[site]:
-                            return 'b'
+                        if cmap is not None:
+                            return cmap(self.system_colours[site])
                         else:
-                            return 'r'
+                            if self.system_colours[site]:
+                                return 'b'
+                            else:
+                                return 'r'
                     except:
                         if self.parser.getGenerator()['leads'] == 'p-doped':
                             return 'w'
@@ -680,7 +684,7 @@ class Structure:
                             return 'w'
 
 
-                return kwant.plot(self.pre_system, site_size=0.1, hop_lw=0.1, site_lw=0.0, lead_site_lw=0., colorbar=False, site_color=siteColours, show=False, **args)            
+                return kwant.plot(self.pre_system, site_size=1.0, hop_lw=0.1, site_lw=0.0, lead_site_lw=0., colorbar=True, site_color=siteColours, show=False, **args)            
             else:
                 return kwant.plot(self.pre_system, site_color='g', site_lw=0.1, colorbar=False, show=False, **args)
 
