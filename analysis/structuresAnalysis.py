@@ -14,12 +14,14 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 ###############################################
 # get the colormap and set the transparency
 ###############################################
-cmap_r = pltcm.get_cmap('Reds')
+# cmap_r = pltcm.get_cmap('Reds')
+cmap_r = cmocean.cm.deep
 cmap_r._init()
 alphas = np.abs(np.ones(cmap_r.N) * 0.6)
 cmap_r._lut[:-3,-1] = alphas
 
-cmap_b = pltcm.get_cmap('Blues')
+# cmap_b = pltcm.get_cmap('Blues')
+cmap_b = cmocean.cm.deep
 cmap_b._init()
 alphas = np.abs(np.ones(cmap_b.N) * 0.6)
 cmap_b._lut[:-3,-1] = alphas
@@ -68,7 +70,7 @@ fig, ax = plt.subplots(1,1, figsize=(20, 10))
 best_structure.visualizeSystem(args={'ax': ax})
 stuff_before = ax.get_children()
 
-im = kwant.plotter.current(best_structure.system, current_K_prime, cmap=cmap_r, ax=ax, linecolor='r', max_linewidth=8., min_linewidth=0.0)
+im = kwant.plotter.current(best_structure.system, current_K_prime, cmap=cmap_r, ax=ax, linecolor=cmap_r(1.0), max_linewidth=8., min_linewidth=0.0)
 
 for elem in stuff_before:
 	elem.set_zorder(-10)
@@ -83,7 +85,7 @@ fig, ax = plt.subplots(1,1, figsize=(20, 10))
 best_structure.visualizeSystem(args={'ax': ax})
 stuff_before = ax.get_children()
 
-im = kwant.plotter.current(best_structure.system, current_K, cmap=cmap_b, ax=ax, linecolor='b', max_linewidth=8., min_linewidth=0.0)
+im = kwant.plotter.current(best_structure.system, current_K, cmap=cmap_b, ax=ax, linecolor=cmap_b(1.0), max_linewidth=8., min_linewidth=0.0)
 
 for elem in stuff_before:
 	elem.set_zorder(-10)
@@ -91,7 +93,6 @@ for elem in stuff_before:
 divider = make_axes_locatable(ax)
 cax = divider.append_axes('right', size='2.5%', pad=0.05)
 fig.colorbar(im, ax=ax, cax=cax, orientation='vertical')
-
 plt.savefig('valley_current_K.pdf')
 ###############################################
 # all done

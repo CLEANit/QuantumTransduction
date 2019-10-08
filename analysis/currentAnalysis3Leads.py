@@ -4,6 +4,7 @@ import numpy as np
 import sys
 import matplotlib.pyplot as plt
 import subprocess
+from cmocean import cm
 
 
 font = {'family' : 'CMU Serif',
@@ -106,21 +107,21 @@ axes_right_2 = plt.Subplot(fig, inner_right[2])
 axes_right_3 = plt.Subplot(fig, inner_right[3])
 
 
-axes_left.plot(range(n_generations), objectives, color='g', alpha=1.0, lw=5.0, label='')
+axes_left.plot(range(n_generations), objectives, color=cm.deep(0.5), alpha=1.0, lw=5.0, label='')
 # axes_left.plot(range(n_generations), expRunningAvg(objectives), color='g', alpha=0.9, label='Running Average', lw=5.0)
 # axes_left.errorbar(range(n_generations), objectives, objectives_stds, linestyle=None)
-axes_left.fill_between(range(n_generations), objectives - objectives_stds, objectives + objectives_stds, color='g', alpha=0.2)
+axes_left.fill_between(range(n_generations), objectives - objectives_stds, objectives + objectives_stds, color=cm.deep(0.5), alpha=0.2)
 axes_left.set_xlabel('Generation')
 # axes_left.set_ylabel('Objective Function')
 fig.add_subplot(axes_left)
 
-axes_middle_top.plot(range(n_generations), purities[:,0], color='r', alpha=1.0, lw=5.0, label='$k\'$')
-# axes_middle_top.errorbar(range(n_generations), purities[:,0], purities_stds[:,0], ecolor='r',linestyle=None, alpha=0.5, capsize=5, elinewidth=3, linewidth=0)
-axes_middle_top.fill_between(range(n_generations), purities[:, 0] - purities_stds[:, 0], purities[:,0] + purities_stds[:,0], color='r', alpha=0.2)
-# axes[1].plot(range(n_generations), expRunningAvg(purities[:, 0]), alpha=0.9, lw=5.0, color='r', label='$k\'$')
-axes_middle_bottom.plot(range(n_generations), purities[:,1], color='b', alpha=1.0, lw=5.0, label='$k$')
+axes_middle_top.plot(range(n_generations), purities[:,0], color=cm.deep(0.25), alpha=1.0, lw=5.0, label='$k\'$')
+# axes_middle_top.errorbar(range(n_generations), purities[:,0], purities_stds[:,0], ecolor=cm.deep(0.25),linestyle=None, alpha=0.5, capsize=5, elinewidth=3, linewidth=0)
+axes_middle_top.fill_between(range(n_generations), purities[:, 0] - purities_stds[:, 0], purities[:,0] + purities_stds[:,0], color=cm.deep(0.25), alpha=0.2)
+# axes[1].plot(range(n_generations), expRunningAvg(purities[:, 0]), alpha=0.9, lw=5.0, color=cm.deep(0.25), label='$k\'$')
+axes_middle_bottom.plot(range(n_generations), purities[:,1], color=cm.deep(0.75), alpha=1.0, lw=5.0, label='$k$')
 # axes_middle_bottom.errorbar(range(n_generations), purities[:,1], purities_stds[:,1], ecolor='b',linestyle=None, alpha=0.5, capsize=5, elinewidth=3, linewidth=0)
-axes_middle_bottom.fill_between(range(n_generations), purities[:, 1] - purities_stds[:, 1], purities[:,1] + purities_stds[:,1], color='b', alpha=0.2)
+axes_middle_bottom.fill_between(range(n_generations), purities[:, 1] - purities_stds[:, 1], purities[:,1] + purities_stds[:,1], color=cm.deep(0.75), alpha=0.2)
 # axes[1].plot(range(n_generations), expRunningAvg(purities[:, 1]), alpha=0.9, color='b', lw=5.0, label='$k$')
 plt.setp(axes_middle_top.get_xticklabels(), visible=False)
 
@@ -132,27 +133,27 @@ fig.add_subplot(axes_middle_bottom)
 # axes[1].set_facecolor('k', alpha=0.2)
 # axes[1].legend()
 
-axes_right_0.plot(range(n_generations), currents[:,0], 'r', alpha=1.0, lw=5.0, label='lead 1: $k\'$')
-axes_right_0.fill_between(range(n_generations), currents[:,0] - currents_stds[:,0], currents[:,0] + currents_stds[:,0], color='r', alpha=0.2)
-# axes[2].plot(range(n_generations), expRunningAvg(currents[:,0]), 'r', lw =5.0, label='lead 1: $k\'$')
+axes_right_0.plot(range(n_generations), currents[:,0], color=cm.deep(0.25), alpha=1.0, lw=5.0, label='lead 1: $k\'$')
+axes_right_0.fill_between(range(n_generations), currents[:,0] - currents_stds[:,0], currents[:,0] + currents_stds[:,0], color=cm.deep(0.25), alpha=0.2)
+# axes[2].plot(range(n_generations), expRunningAvg(currents[:,0]), cm.deep(0.25), lw =5.0, label='lead 1: $k\'$')
 # axes_right_0.set_ylim([0.02, 0.12])
 plt.setp(axes_right_0.get_xticklabels(), visible=False)
 
 # axes[2].plot(range(n_generations), expRunningAvg(currents[:,1]), 'b', lw=5.0, label='lead 1: $k$')
-axes_right_1.plot(range(n_generations), currents[:,1], 'r--', alpha=1.0, lw=5.0, label='lead 2: $k\'$')
+axes_right_1.plot(range(n_generations), currents[:,1], '--', color=cm.deep(0.25), alpha=1.0, lw=5.0, label='lead 2: $k\'$')
 # axes_right_1.set_ylim([0.0, 0.01])
-axes_right_1.fill_between(range(n_generations), currents[:,1] - currents_stds[:,1], currents[:,1] + currents_stds[:,1], color='r', alpha=0.2)
+axes_right_1.fill_between(range(n_generations), currents[:,1] - currents_stds[:,1], currents[:,1] + currents_stds[:,1], color=cm.deep(0.25), alpha=0.2)
 plt.setp(axes_right_1.get_xticklabels(), visible=False)
 
 # axes[2].plot(range(n_generations), expRunningAvg(currents[:,2]), 'r--', lw=5.0, label='lead 2: $k\'$')
-axes_right_2.plot(range(n_generations), currents[:,2], 'b', alpha=1.0, lw=5.0, label='lead 1: $k$')
-axes_right_2.fill_between(range(n_generations), currents[:,2] - currents_stds[:,2], currents[:,2] + currents_stds[:,2], color='b', alpha=0.2)
+axes_right_2.plot(range(n_generations), currents[:,2], color=cm.deep(0.75), alpha=1.0, lw=5.0, label='lead 1: $k$')
+axes_right_2.fill_between(range(n_generations), currents[:,2] - currents_stds[:,2], currents[:,2] + currents_stds[:,2], color=cm.deep(0.75), alpha=0.2)
 plt.setp(axes_right_2.get_xticklabels(), visible=False)
 # axes_right_2.set_ylim([0.02, 0.12])
 
 
-axes_right_3.plot(range(n_generations), currents[:,3], 'b--', alpha=1.0, lw=5.0, label='lead 2: $k$')
-axes_right_3.fill_between(range(n_generations), currents[:,3] - currents_stds[:,3], currents[:,3] + currents_stds[:,3], color='b', alpha=0.2)
+axes_right_3.plot(range(n_generations), currents[:,3], '--', color=cm.deep(0.75), alpha=1.0, lw=5.0, label='lead 2: $k$')
+axes_right_3.fill_between(range(n_generations), currents[:,3] - currents_stds[:,3], currents[:,3] + currents_stds[:,3], color=cm.deep(0.75), alpha=0.2)
 axes_right_3.set_xlabel('Generation')
 # axes_right_3.set_ylim([0., 0.01])
 

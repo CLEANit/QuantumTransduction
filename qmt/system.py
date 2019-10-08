@@ -455,11 +455,11 @@ class Structure:
             values[s] = choice
             self.system_colours[s] = choice
 
-            for nn in self.system.neighbors(s):
-                self.system_colours[nn] = choice
+            # for nn in self.system.neighbors(s):
+            #     self.system_colours[nn] = choice
 
-                for nnn in self.system.neighbors(nn):
-                    self.system_colours[nnn] = choice
+            #     for nnn in self.system.neighbors(nn):
+            #         self.system_colours[nnn] = choice
 
 
         # return system
@@ -684,7 +684,7 @@ class Structure:
                             return 'w'
 
 
-                return kwant.plot(self.pre_system, site_size=1.0, hop_lw=0.1, site_lw=0.0, lead_site_lw=0., colorbar=True, site_color=siteColours, show=False, **args)            
+                return kwant.plot(self.pre_system, site_size=0.5, hop_lw=0.0, site_lw=0.1, lead_site_lw=0., colorbar=False, site_color=siteColours, show=False, **args)            
             else:
                 return kwant.plot(self.pre_system, site_color='g', site_lw=0.1, colorbar=False, show=False, **args)
 
