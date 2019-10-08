@@ -642,6 +642,23 @@ class Structure:
                     pass
             return image
 
+    def bitFlips(self, pct):
+        system = self.pre_system
+        for s, v in system.site_value_pairs():
+            try:
+                pot = np.array(system[s](s))
+            except:
+                pot = np.array(system[s])
+
+            choice = np.random.uniform() < pct
+            if choice:
+                pot *= -1.0
+
+            system[s] = ta.array(pot)
+
+        self.system = system
+        self.finalize()
+
     def visualizeSystem(self, cmap=None, args={}):
         """
         Create a plot to visualize the constructed system.
