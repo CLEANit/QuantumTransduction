@@ -519,6 +519,21 @@ class Structure:
         # # plt.colorbar()
         # plt.show()
 
+    def resetSystemColours(self):
+        system = self.pre_system
+        for s, v in system.site_value_pairs():
+            if self.body(s.pos):
+                try:
+                    pot = np.array(system[s](s))
+                except:
+                    pot = np.array(system[s])
+
+                if (pot.diagonal() < 0.).all():
+                    # n-doped
+                    self.system_colours[s] = 1.0
+                else:
+                    self.system_colours[s] = 0.0
+
     def applyMask(self, mask, system):
         tags = []
         positions = []

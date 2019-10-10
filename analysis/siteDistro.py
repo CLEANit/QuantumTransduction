@@ -22,6 +22,7 @@ for dirname in bar(dir_list):
     structures = ga.current_structures
 
     for s in structures:
+        s.resetSystemColours()
         colours = s.system_colours
         for site, value in s.pre_system.site_value_pairs():
             if s.body(site.pos):
