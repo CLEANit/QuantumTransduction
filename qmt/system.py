@@ -657,19 +657,46 @@ class Structure:
                     pass
             return image
 
-    def bitFlips(self, pct):
+    def bitFlipsNeighbours(self, pct):
+        self.resetSystemColours()
         system = self.pre_system
         for s, v in system.site_value_pairs():
-            try:
-                pot = np.array(system[s](s))
-            except:
-                pot = np.array(system[s])
+            if self.body(s.pos):
+                site_val = self.system_colours[s]
+                neighbor_vals = []
+                for n in self.system.neighbors(s):
+                    if self.body(n.pos):
+                        neighbor_vals.append(self.system_colours[n])
+                if site_val != np.array(neighbor_vals).all()
+                    try:
+                        pot = np.array(system[s](s))
+                    except:
+                        pot = np.array(system[s])
 
-            choice = np.random.uniform() < pct
-            if choice:
-                pot *= -1.0
+                    choice = np.random.uniform() < pct
+                    if choice:
+                        pot *= -1.0
 
-            system[s] = ta.array(pot)
+                    system[s] = ta.array(pot)
+
+        self.system = system
+        self.finalize()
+
+    def bitFlips(self, pct):
+        self.resetSystemColours()
+        system = self.pre_system
+        for s, v in system.site_value_pairs():
+            if self.body(s.pos):
+                try:
+                    pot = np.array(system[s](s))
+                except:
+                    pot = np.array(system[s])
+
+                choice = np.random.uniform() < pct
+                if choice:
+                    pot *= -1.0
+
+                system[s] = ta.array(pot)
 
         self.system = system
         self.finalize()
