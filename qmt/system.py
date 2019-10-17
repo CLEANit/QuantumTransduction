@@ -470,18 +470,20 @@ class Structure:
         bin_rep = self.getBinaryRepresentation(system, policyMask=True)
         if self.parser.getGenerator()['filter']:
             # plt.imshow(bin_rep)
+            # plt.colorbar()
             # plt.show()
             bin_rep = gaussian_filter(bin_rep, 2)
-            bin_rep = np.where(bin_rep > 0.4, 1.0, 0.0)
+            bin_rep = np.where(bin_rep > 0.5, 1.0, 0.0)
             # # plt.imshow(bin_rep)
             # # plt.show()
             bin_rep = binary_erosion(bin_rep, selem=np.ones((3,3)))
-            for _ in range(3):
+            for _ in range(1):
                 if np.random.uniform() < 0.5:
                     bin_rep = binary_dilation(bin_rep, selem=np.ones((3,3)))
                 else:
                     bin_rep = binary_dilation(bin_rep)
         # plt.imshow(bin_rep)
+        # plt.colorbar()
         # plt.show()
 
         image_size = (max_tag_sx - min_tag_sx, max_tag_sy - min_tag_sy)
