@@ -48,9 +48,9 @@ for atoms in bar(traj_og):
         RDFobj.atoms = atoms  # Fool RDFobj to use the new atoms
     RDFobj.update()           # Collect data
 rdf_og = RDFobj.get_rdf()
-ax.plot(x, gf(rdf_PP + 1, 5) / gf(rdf_og + 1, 5), '-', linewidth=4, color='r', label='p-p doped')
-ax.plot(x, gf(rdf_PN + 1, 5) / gf(rdf_og + 1, 5), '--', linewidth=4, color='g', label='p-n doped')
-ax.plot(x, gf(rdf_NN + 1, 5) / gf(rdf_og + 1, 5), '-.', linewidth=4, color='b', label='n-n doped')
+ax.plot(x, gf(rdf_PP + 1, 5) / gf(rdf_og + 1, 5), '-', linewidth=4, color=cm.balance(0.75), label='p-p doped')
+ax.plot(x, gf(rdf_PN + 1, 5) / gf(rdf_og + 1, 5), '--', linewidth=4, color=cm.algae(0.45), label='p-n doped')
+ax.plot(x, gf(rdf_NN + 1, 5) / gf(rdf_og + 1, 5), '-.', linewidth=4, color=cm.balance(0.25), label='n-n doped')
 ax.legend()
 ax.grid(linestyle='--', linewidth=0.5)
 ax.set_xlabel('Distance [\\AA]')

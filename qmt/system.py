@@ -407,11 +407,14 @@ class Structure:
         max_pos_sx = np.max(poss[:,0])
         max_pos_sy = np.max(poss[:,1])
         
-        min_tag_sx = np.min(tags[:,0])
-        min_tag_sy = np.min(tags[:,1])
-        max_tag_sx = np.max(tags[:,0])
-        max_tag_sy = np.max(tags[:,1])
-
+        # min_tag_sx = np.min(tags[:,0])
+        # min_tag_sy = np.min(tags[:,1])
+        # max_tag_sx = np.max(tags[:,0])
+        # max_tag_sy = np.max(tags[:,1])
+        min_tag_sx = int(min_pos_sx) // 2
+        max_tag_sx = int(max_pos_sx) // 2
+        min_tag_sy = int(min_pos_sy) // 2
+        max_tag_sy = int(max_pos_sy) // 2
         # for s in values:
         #     val = (s.pos[1] - min_pos_sy) / (max_pos_sy - min_pos_sy)
         #     values[s] = 1 - val
@@ -636,49 +639,53 @@ class Structure:
             max_pos_sx = np.max(poss[:,0])
             max_pos_sy = np.max(poss[:,1])
             
-            min_tag_sx = np.min(tags[:,0])
-            min_tag_sy = np.min(tags[:,1])
-            max_tag_sx = np.max(tags[:,0])
-            max_tag_sy = np.max(tags[:,1])
-
+            # min_tag_sx = np.min(tags[:,0])
+            # min_tag_sy = np.min(tags[:,1])
+            # max_tag_sx = np.max(tags[:,0])
+            # max_tag_sy = np.max(tags[:,1])
+            min_tag_sx = int(min_pos_sx) // 2
+            max_tag_sx = int(max_pos_sx) // 2
+            min_tag_sy = int(min_pos_sy) // 2
+            max_tag_sy = int(max_pos_sy) // 2
             image_size = (max_tag_sx - min_tag_sx, max_tag_sy - min_tag_sy)
             dx = (max_pos_sx - min_pos_sx) / (image_size[0] - 1)
             dy = (max_pos_sy - min_pos_sy) / (image_size[1] - 1)
-
             image = np.zeros(image_size)
             for s, v in system.site_value_pairs():
-                try:
+                if self.body(s.pos):
                     index_x = int((s.pos[0] - min_pos_sx) / dx)
                     index_y = int((s.pos[1] - min_pos_sy) / dy)
                     image[index_x, index_y] = self.system_colours[s]
-                except KeyError:
-                    pass
-                except IndexError:
-                    pass
+                #except KeyError:
+                #    pass
+                # except IndexError:
+                #     pass
             return image
 
     def bitFlipsNeighbours(self, pct):
         self.resetSystemColours()
         system = self.pre_system
+        system_colours = {}
         for s, v in system.site_value_pairs():
             if self.body(s.pos):
                 site_val = self.system_colours[s]
                 neighbor_vals = []
-                for n in self.system.neighbors(s):
+                for n in system.neighbors(s):
                     if self.body(n.pos):
                         neighbor_vals.append(self.system_colours[n])
-                if site_val != np.array(neighbor_vals).all()
+                if site_val != np.array(neighbor_vals).all():
                     try:
                         pot = np.array(system[s](s))
                     except:
                         pot = np.array(system[s])
-
+                    system_colours[s] = 0.5
                     choice = np.random.uniform() < pct
                     if choice:
                         pot *= -1.0
-
                     system[s] = ta.array(pot)
-
+                else:
+                    system_colours[s] = self.system_colours[s]
+        self.system_colours = system_colours
         self.system = system
         self.finalize()
 
@@ -730,8 +737,10 @@ class Structure:
                         if cmap is not None:
                             return cmap(self.system_colours[site])
                         else:
-                            if self.system_colours[site]:
+                            if self.system_colours[site] == 1:
                                 return 'b'
+                            elif self.system_colours[site] == 0.5:
+                                return 'g'
                             else:
                                 return 'r'
                     except:

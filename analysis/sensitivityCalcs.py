@@ -20,19 +20,19 @@ best_structure = structures[0]
 print('Got best structure, now calculating currents...')
 
 N = 128
-data = open('currents_vs_flips.dat', 'w')
+data = open('currents_vs_flips_edges.dat', 'w')
 
 bar = progressbar.ProgressBar()
 
 pool = Pool()
 
 def calc(best_structure, pct):
-	best_structure.bitFlips(pct)
-
-	currents_0_1 = best_structure.getValleyPolarizedCurrent(0, 1)
-	currents_0_2 = best_structure.getValleyPolarizedCurrent(0, 2)
-	print('Finished with:', pct)
-	return currents_0_1[0], currents_0_1[1], currents_0_2[0], currents_0_2[1]
+	# best_structure.bitFlips(pct)
+    best_structure.bitFlipsNeighbours(pct)
+    currents_0_1 = best_structure.getValleyPolarizedCurrent(0, 1)
+    currents_0_2 = best_structure.getValleyPolarizedCurrent(0, 2)
+    print('Finished with:', pct)
+    return currents_0_1[0], currents_0_1[1], currents_0_2[0], currents_0_2[1]
 
 pcts = np.linspace(0, 1, N)
 stuff = pool.map(calc, [best_structure] * N, pcts)
