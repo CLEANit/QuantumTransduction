@@ -94,8 +94,8 @@ def main():
         except FileExistsError:
             pass
 
-        for i, s in enumerate(structures):
-            s.visualizeSystem(args={'dpi': 600, 'file': 'output/' + 'gen_' + str(ga.generationNumber()).zfill(3) + '/gen_%03i_struct_%03i.png' % (ga.generationNumber(), i)})
+        # write out the first structure that has been sorted from previous gen
+        structures[0].visualizeSystem(args={'dpi': 600, 'file': 'output/' + 'gen_' + str(ga.generationNumber()).zfill(3) + '/gen_%03i_best_structure.png' % (ga.generationNumber())})
 
         # calculate currents and write them out to disk
         currents_0_1 = pool.map(getConductances, structures, [0] * len(structures), [1] * len(structures))
@@ -116,7 +116,7 @@ def main():
         # write gene variables and objective function parameters to file
         ga.writePhaseSpace(structures)
 
-        ga.serializeStructures()
+        # ga.serializeStructures()
 
 
         short_timer.start()
