@@ -27,15 +27,14 @@ for k, v in site_distro.items():
 def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
     new_cmap = colors.LinearSegmentedColormap.from_list(
         'trunc({n},{a:.2f},{b:.2f})'.format(n=cmap.name, a=minval, b=maxval),
-          cmap(np.concatenate((np.ones(n//2)*0.5, np.linspace(minval, maxval, n//2)))))
+        cmap(np.concatenate((np.ones(n//2)*0.5, np.linspace(minval, maxval, n//2)))))
         #cmap(np.linspace(minval, maxval, n)))
     return new_cmap
 
 s = structures[0]
-# print(averages.values())
 s.system_colours = averages
 fig, ax = plt.subplots(1,1, figsize=(20, 10))
-cmap = truncate_colormap(cmocean.cm.balance, 0.5, 0.75)
+cmap = truncate_colormap(cmocean.cm.balance_r, 0.5, 0.75)
 # cmap = pltcm.get_cmap('bwr')
 s.visualizeSystem(cmap=cmap, args={'ax': ax})
 

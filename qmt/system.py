@@ -526,6 +526,7 @@ class Structure:
 
     def resetSystemColours(self):
         system = self.pre_system
+        self.system_colours = {}
         for s, v in system.site_value_pairs():
             if self.body(s.pos):
                 try:

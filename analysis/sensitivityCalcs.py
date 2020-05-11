@@ -24,10 +24,10 @@ data = open('currents_vs_flips_edges.dat', 'w')
 
 bar = progressbar.ProgressBar()
 
-pool = Pool()
+pool = Pool(40)
 
 def calc(best_structure, pct):
-	# best_structure.bitFlips(pct)
+    # best_structure.bitFlips(pct)
     best_structure.bitFlipsNeighbours(pct)
     currents_0_1 = best_structure.getValleyPolarizedCurrent(0, 1)
     currents_0_2 = best_structure.getValleyPolarizedCurrent(0, 2)

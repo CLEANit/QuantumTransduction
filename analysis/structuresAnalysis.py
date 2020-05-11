@@ -75,9 +75,9 @@ im = kwant.plotter.current(best_structure.system, current_K_prime, cmap=cmap_r, 
 for elem in stuff_before:
 	elem.set_zorder(-10)
 
-divider = make_axes_locatable(ax)
-cax = divider.append_axes('right', size='2.5%', pad=0.05)
-fig.colorbar(im, ax=ax, cax=cax, orientation='vertical')
+#divider = make_axes_locatable(ax)
+#cax = divider.append_axes('right', size='2.5%', pad=0.05)
+#fig.colorbar(im, ax=ax, cax=cax, orientation='vertical')
 
 plt.savefig('valley_current_K_prime.pdf')
 
@@ -90,9 +90,9 @@ im = kwant.plotter.current(best_structure.system, current_K, cmap=cmap_b, ax=ax,
 for elem in stuff_before:
 	elem.set_zorder(-10)
 
-divider = make_axes_locatable(ax)
-cax = divider.append_axes('right', size='2.5%', pad=0.05)
-fig.colorbar(im, ax=ax, cax=cax, orientation='vertical')
+#divider = make_axes_locatable(ax)
+#cax = divider.append_axes('right', size='2.5%', pad=0.05)
+#fig.colorbar(im, ax=ax, cax=cax, orientation='vertical')
 plt.savefig('valley_current_K.pdf')
 ###############################################
 # all done
