@@ -1,0 +1,129 @@
+n_cpus: 1
+GA:
+  Generator: {
+    turn_on: false,
+    neurons: [128, 128],
+    leads: 'undoped',
+    filter: false
+  }
+
+  Genes:
+  - path: [System, Junction, body, pn-junction, points, 0, 0]
+    range: [-32, 0]
+  - path: [System, Junction, body, pn-junction, points, 1, 0]
+    range: [0, 32]
+  - path: [System, Junction, body, pn-junction, points, 2, 0]
+    range: [10, 50]
+  - path: [System, Junction, body, pn-junction, points, 2, 1]
+    range: [-32, 32]
+  - path: [System, Junction, body, pn-junction, points, 3, 0]
+    range: [-32, 0]
+  - path: [System, Junction, body, pn-junction, points, 4, 0]
+    range: [0, 32]
+  - path: [System, Junction, body, pn-junction, points, 5, 0]
+    range: [-50, -10]
+  - path: [System, Junction, body, pn-junction, points, 5, 1]
+    range: [-32, 32]
+  ann: false
+  ann-params:
+    activation: logistic
+    neurons: [10, 10, 10]
+  crossing-fraction: 0.0
+  ignore-restart-warning: true
+  n_children: 40
+  n_iterations: 64
+  n_structures: 160
+  random-step: {fraction: 1.0, keep-best: 40, max-update-rate: 0.1}
+System:
+  Junction:
+    body:
+      args:
+        angle: 0.0
+        shift: [-0.75, -0.75]
+        xcoords: [-64, 64]
+        ycoords: [-32, 32]
+      hopping: -2.7
+      offset: [0, 0]
+      pn-junction:
+        n-potential: -0.2
+        p-potential: 0.2
+        points:
+        - [-32, 32]
+        - [32, 32]
+        - [50, 0]
+        - [-32, -32]
+        - [32, -32]
+        - [-50, 0]
+        turn_on: false
+      potential: 0.0
+      shape: rectangle
+    channels:
+    - args:
+        angle: 0.0
+        shift: [-0.75, -0.75]
+        xcoords: [-96, -64]
+        ycoords: [-16, 16]
+      direction: [-1, 0]
+      hopping: -2.7
+      offset: [-70, 0]
+      potential: 0.0
+      shape: rectangle
+    - args:
+        angle: 0.0
+        shift: [-0.75, -0.75]
+        xcoords: [64, 96]
+        ycoords: [16, 32]
+      direction: [1, 0]
+      hopping: -2.7
+      offset: [70, 30]
+      potential: 0.0
+      shape: rectangle
+    - args:
+        angle: 0.0
+        shift: [-0.75, -0.75]
+        xcoords: [64, 96]
+        ycoords: [-32, -16]
+      direction: [1, 0]
+      hopping: -2.7
+      offset: [70, -30]
+      potential: 0.0
+      shape: rectangle
+  Leads:
+  - direction: [-1, 0]
+    hopping: -2.7
+    offset: [0, 0]
+    potential: 0.0
+    range: [-16, 16]
+    reverse: false
+    shift: [-0.75, -0.75]
+    symmetry: [0, -1]
+  - direction: [1, 0]
+    hopping: -2.7
+    offset: [0, 26]
+    potential: 0.0
+    range: [16, 32]
+    reverse: false
+    shift: [-0.75, -0.75]
+    symmetry: [0, 1]
+  - direction: [1, 0]
+    hopping: -2.7
+    offset: [0, -26]
+    potential: 0.0
+    range: [-32, -16]
+    reverse: false
+    shift: [-0.75, -0.75]
+    symmetry: [0, 1]
+  Masks: null
+  bias: 0.5
+  kb_T: 0.025851991
+  lattice_basis: [[1.2297560733739028, 0.       ],
+       [ 0.0, 0.7099999999999999],
+       [0.0, 2.13     ],
+       [1.2297560733739028, 2.84     ]]
+  lattice_constant: 1.42
+  lattice_type: general
+  lattice_vectors: [[0.0, 4.26], [2.4595121467478056, 0.0]]
+  n_orbitals: 1
+  phi: 0.0
+  pre_defined: null
+  spin_dependent: false
