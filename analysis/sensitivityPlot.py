@@ -6,7 +6,7 @@ import cmocean.cm as cm
 
 font = {'family': 'CMU Serif',
         'weight' : 'light',
-        'size' : 36 }
+        'size' : 45 }
 plt.rc('font', **font)
 plt.rc('text', usetex=True)
 
@@ -23,7 +23,8 @@ plt.plot(sens_e[:, 0], sens_e[:, 4] / (sens_e[:, 3] + sens_e[:, 4]), '--', lw=5,
 
 plt.xlabel('Probability of Defect')
 plt.ylabel('Purity')
-
+plt.xlim([0.01, 1.0])
+plt.ylim([0.01, 1.0])
 plt.grid(linestyle='-.')
 plt.legend()
 plt.tight_layout()
