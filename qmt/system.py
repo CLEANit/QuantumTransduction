@@ -380,6 +380,7 @@ class Structure:
         self.system_colours = {}
         values = {}
         pnj_config = self.parser.getPNJunction()
+        gen_config = self.parser.getGenerator()
         tags = []
         poss = []
         for s, v in system.site_value_pairs():
@@ -388,8 +389,13 @@ class Structure:
                 poss.append(s.pos)
                 neighborhoods[s] = list()
                 neighborhoods[s].append(s)
-                self.system_colours[s] = 0.5
-                values[s] = 0.5
+                if gen_config['init']['kind'] == 'constant':
+                    self.system_colours[s] = gen_config['init']['val']
+                    values[s] = gen_config['init']['val']
+                elif gen_config['init']['kind'] == 'random':
+                    choice = np.random.choice([pnj_config['n-potential'], pnj_config['p-potential']])
+                    self.system_colours[s] = choice
+                    values[s] = choice
                 for n in self.system.neighbors(s):
                     if self.body(n.pos):
                         neighborhoods[s].append(n)

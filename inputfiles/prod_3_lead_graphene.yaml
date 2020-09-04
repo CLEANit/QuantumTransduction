@@ -4,7 +4,8 @@ GA:
     turn_on: false,
     neurons: [128, 128],
     leads: 'undoped',
-    filter: false
+    filter: false,
+    init: {kind: 'constant', val: 0.0}
   }
 
   Genes:
