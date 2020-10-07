@@ -474,11 +474,15 @@ class Structure:
         # return system
         # import scipy
         bin_rep = self.getBinaryRepresentation(system, policyMask=True)
+        if self.parser.getGenerator()['sigma'] is None:
+            sigma = 2
+        else:
+            sigma = self.parser.getGenerator()['sigma']
         if self.parser.getGenerator()['filter']:
             # plt.imshow(bin_rep)
             # plt.colorbar()
             # plt.show()
-            bin_rep = gaussian_filter(bin_rep, 2)
+            bin_rep = gaussian_filter(bin_rep, sigma)
             bin_rep = np.where(bin_rep > 0.5, 1.0, 0.0)
             # # plt.imshow(bin_rep)
             # # plt.show()
